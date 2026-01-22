@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jog File — Advance</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root {
+      --jog-bg: #1a1d21;
+      --jog-surface: #23272d;
+      --jog-surface-hover: #2d333b;
+      --jog-border: #373e47;
+      --jog-text: #e6edf3;
+      --jog-text-muted: #8b949e;
+      --jog-accent: #f0883e;
+      --jog-accent-soft: rgba(240, 136, 62, 0.15);
+      --jog-success: #3fb950;
+      --jog-warning: #d29922;
+      --jog-danger: #f85149;
+      --jog-habit: #a371f7;
+      --jog-recurring: #58a6ff;
+      --jog-tracker: #56d4dd;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      background: var(--jog-bg);
+      color: var(--jog-text);
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .advancement-container {
+      max-width: 520px;
+      width: 100%;
+      margin: 2rem;
+    }
+
+    /* Phase indicator */
+    .phase-indicator {
+      display: flex;
+      justify-content: center;
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+    }
+
+    .phase-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.375rem;
+    }
+
+    .phase-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--jog-border);
+      transition: all 0.2s ease;
+    }
+
+    .phase-step.completed .phase-dot {
+      background: var(--jog-success);
+    }
+
+    .phase-step.current .phase-dot {
+      background: var(--jog-accent);
+      transform: scale(1.3);
+    }
+
+    .phase-label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: var(--jog-text-muted);
+    }
+
+    .phase-step.current .phase-label {
+      color: var(--jog-accent);
+    }
+
+    .phase-step.completed .phase-label {
+      color: var(--jog-success);
+    }
+
+    /* Header */
+    .advancement-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .advancement-header h1 {
+      font-size: 1.25rem;
+      font-weight: 500;
+      color: var(--jog-text-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .advancement-header .item-count {
+      font-size: 0.875rem;
+      color: var(--jog-text-muted);
+    }
+
+    /* Card */
+    .item-card {
+      background: var(--jog-surface);
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid var(--jog-border);
+    }
+
+    .item-card .item-type {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.75rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+    }
+
+    .item-type.task {
+      color: var(--jog-accent);
+      background: var(--jog-accent-soft);
+    }
+
+    .item-type.recurring {
+      color: var(--jog-recurring);
+      background: rgba(88, 166, 255, 0.15);
+    }
+
+    .item-type.habit {
+      color: var(--jog-habit);
+      background: rgba(163, 113, 247, 0.15);
+    }
+
+    .item-type.tracker {
+      color: var(--jog-tracker);
+      background: rgba(86, 212, 221, 0.15);
+    }
+
+    .item-card h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      line-height: 1.3;
+    }
+
+    .item-card .item-description {
+      color: var(--jog-text-muted);
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin-bottom: 1rem;
+    }
+
+    .item-card .item-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--jog-border);
+      font-size: 0.8rem;
+      color: var(--jog-text-muted);
+    }
+
+    .item-card .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 0.375rem;
+    }
+
+    .staleness-badge {
+      color: var(--jog-warning);
+    }
+
+    .staleness-badge.very-stale {
+      color: var(--jog-danger);
+    }
+
+    /* Action Buttons */
+    .action-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.75rem;
+    }
+
+    .action-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 1.25rem 1rem;
+      background: var(--jog-surface);
+      border: 1px solid var(--jog-border);
+      border-radius: 10px;
+      color: var(--jog-text);
+      font-size: 0.9rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+
+    .action-btn:hover {
+      border-color: var(--jog-accent);
+      background: var(--jog-surface-hover);
+      transform: translateY(-2px);
+    }
+
+    .action-btn i {
+      font-size: 1.5rem;
+    }
+
+    .action-btn.primary {
+      background: var(--jog-success);
+      border-color: var(--jog-success);
+      color: #fff;
+    }
+
+    .action-btn.primary:hover {
+      background: #36a346;
+      border-color: #36a346;
+    }
+
+    .action-btn.today {
+      border-color: var(--jog-accent);
+      background: var(--jog-accent-soft);
+    }
+
+    .action-btn.today:hover {
+      background: rgba(240, 136, 62, 0.25);
+    }
+
+    .action-btn.today i {
+      color: var(--jog-accent);
+    }
+
+    .action-btn.skip {
+      border-color: var(--jog-border);
+    }
+
+    .action-btn.skip:hover {
+      border-color: var(--jog-text-muted);
+    }
+
+    .action-btn.danger {
+      border-color: rgba(248, 81, 73, 0.3);
+    }
+
+    .action-btn.danger:hover {
+      border-color: var(--jog-danger);
+      background: rgba(248, 81, 73, 0.1);
+    }
+
+    .action-btn.danger i {
+      color: var(--jog-danger);
+    }
+
+    .action-btn.full-width {
+      grid-column: span 2;
+    }
+
+    /* Binary response buttons (for habits/trackers) */
+    .response-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+    }
+
+    .response-btn {
+      flex: 1;
+      max-width: 150px;
+      padding: 1.5rem 2rem;
+      border-radius: 12px;
+      border: 2px solid var(--jog-border);
+      background: var(--jog-surface);
+      color: var(--jog-text);
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .response-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .response-btn.yes {
+      border-color: var(--jog-success);
+      background: rgba(63, 185, 80, 0.1);
+    }
+
+    .response-btn.yes:hover {
+      background: rgba(63, 185, 80, 0.2);
+    }
+
+    .response-btn.no {
+      border-color: var(--jog-text-muted);
+    }
+
+    .response-btn.no:hover {
+      border-color: var(--jog-text);
+      background: var(--jog-surface-hover);
+    }
+
+    /* Count response buttons */
+    .count-buttons {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .count-btn {
+      width: 60px;
+      height: 60px;
+      border-radius: 10px;
+      border: 2px solid var(--jog-border);
+      background: var(--jog-surface);
+      color: var(--jog-text);
+      font-size: 1.25rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .count-btn:hover {
+      border-color: var(--jog-tracker);
+      background: rgba(86, 212, 221, 0.1);
+      transform: translateY(-2px);
+    }
+
+    /* Scale response */
+    .scale-buttons {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+
+    .scale-btn {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border: 2px solid var(--jog-border);
+      background: var(--jog-surface);
+      color: var(--jog-text);
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .scale-btn:hover {
+      border-color: var(--jog-tracker);
+      background: rgba(86, 212, 221, 0.15);
+      transform: scale(1.1);
+    }
+
+    /* Date picker inline */
+    .date-picker-inline {
+      background: var(--jog-surface);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin-top: 1rem;
+    }
+
+    .quick-dates {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .quick-date-btn {
+      padding: 0.5rem 1rem;
+      background: var(--jog-surface-hover);
+      border: 1px solid var(--jog-border);
+      border-radius: 6px;
+      color: var(--jog-text);
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .quick-date-btn:hover {
+      border-color: var(--jog-accent);
+      background: var(--jog-accent-soft);
+    }
+
+    /* Escape hatches */
+    .escape-hatches {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--jog-border);
+    }
+
+    .escape-btn {
+      background: transparent;
+      border: 1px dashed var(--jog-border);
+      color: var(--jog-text-muted);
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .escape-btn:hover {
+      border-color: var(--jog-text-muted);
+      color: var(--jog-text);
+    }
+
+    .escape-btn.danger:hover {
+      border-color: var(--jog-danger);
+      color: var(--jog-danger);
+    }
+
+    /* Keyboard hints */
+    .keyboard-hints {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+      padding-top: 1rem;
+    }
+
+    .kbd-hint {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.75rem;
+      color: var(--jog-text-muted);
+    }
+
+    kbd {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 24px;
+      height: 24px;
+      padding: 0 0.5rem;
+      background: var(--jog-surface-hover);
+      border: 1px solid var(--jog-border);
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.75rem;
+    }
+
+    /* Completion State */
+    .completion-state {
+      text-align: center;
+      padding: 3rem 2rem;
+    }
+
+    .completion-state .success-icon {
+      width: 80px;
+      height: 80px;
+      background: rgba(63, 185, 80, 0.15);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+    }
+
+    .completion-state .success-icon i {
+      font-size: 2.5rem;
+      color: var(--jog-success);
+    }
+
+    .completion-state h2 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .completion-state p {
+      color: var(--jog-text-muted);
+      margin-bottom: 1.5rem;
+    }
+
+    .btn-to-today {
+      background: var(--jog-accent);
+      border: none;
+      color: #fff;
+      font-weight: 500;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.15s ease;
+    }
+
+    .btn-to-today:hover {
+      background: #e07a2f;
+      color: #fff;
+    }
+
+    /* View switcher for demo */
+    .demo-switcher {
+      position: fixed;
+      bottom: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 0.5rem;
+      background: var(--jog-surface);
+      padding: 0.5rem;
+      border-radius: 8px;
+      border: 1px solid var(--jog-border);
+    }
+
+    .demo-switcher button {
+      padding: 0.375rem 0.75rem;
+      background: transparent;
+      border: none;
+      color: var(--jog-text-muted);
+      font-size: 0.75rem;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .demo-switcher button:hover {
+      background: var(--jog-surface-hover);
+      color: var(--jog-text);
+    }
+
+    .demo-switcher button.active {
+      background: var(--jog-accent);
+      color: #fff;
+    }
+
+    .view { display: none; }
+    .view.active { display: block; }
+  </style>
+</head>
+<body>
+  <div class="advancement-container">
+    
+    <!-- VIEW 1: Rollover Task -->
+    <div class="view active" id="view-rollover">
+      <!-- Phase Indicator -->
+      <div class="phase-indicator">
+        <div class="phase-step current">
+          <div class="phase-dot"></div>
+          <span class="phase-label">Rollovers</span>
+        </div>
+        <div class="phase-step">
+          <div class="phase-dot"></div>
+          <span class="phase-label">Recurrences</span>
+        </div>
+        <div class="phase-step">
+          <div class="phase-dot"></div>
+          <span class="phase-label">Habits</span>
+        </div>
+        <div class="phase-step">
+          <div class="phase-dot"></div>
+          <span class="phase-label">Check-ins</span>
+        </div>
+      </div>
+
+      <!-- Header -->
+      <div class="advancement-header">
+        <h1>Unfinished Tasks</h1>
+        <div class="item-count">2 of 3 remaining</div>
+      </div>
+
+      <!-- Task Card -->
+      <div class="item-card">
+        <div class="item-type task">
+          <i class="bi bi-list-task"></i>
+          Task
+        </div>
+        <h2>Call dentist to reschedule</h2>
+        <p class="item-description">
+          Need to move Thursday's cleaning to next week.
+        </p>
+        <div class="item-meta">
+          <div class="meta-item">
+            <i class="bi bi-calendar3"></i>
+            Created Jan 17
+          </div>
+          <div class="meta-item staleness-badge">
+            <i class="bi bi-clock-history"></i>
+            5 active days
+          </div>
+          <div class="meta-item">
+            <i class="bi bi-arrow-repeat"></i>
+            Rolled over 2×
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="action-grid">
+        <button class="action-btn primary">
+          <i class="bi bi-check-lg"></i>
+          I Did That
+        </button>
+        <button class="action-btn today">
+          <i class="bi bi-sun"></i>
+          Move to Today
+        </button>
+        <button class="action-btn">
+          <i class="bi bi-calendar-plus"></i>
+          Another Day
+        </button>
+        <button class="action-btn">
+          <i class="bi bi-sticky"></i>
+          Scratch Pad
+        </button>
+        <button class="action-btn danger full-width">
+          <i class="bi bi-archive"></i>
+          Archive
+        </button>
+      </div>
+
+      <!-- Escape hatches -->
+      <div class="escape-hatches">
+        <button class="escape-btn">Best Guess</button>
+        <button class="escape-btn danger">Declare Bankruptcy</button>
+      </div>
+    </div>
+
+    <!-- VIEW 2: Recurrence Prompt -->
+    <div class="view" id="view-recurrence">
+      <!-- Phase Indicator -->
+      <div class="phase-indicator">
+        <div class="phase-step completed">
+          <div class="phase-dot"></div>
+          <span class="phase-label">Rollovers</span>
+        </div>
+        <div class="phase-step current">
+          <div class="phase-dot"></div>
+          <span class="phase-label">Recurrences</span>
+        </div>
+        <div class="phase-step">
+          <div class="phase-dot"></div>
+          <span class="phase-label">Habits</span>
+        </div>
+        <div class="phase-step">
+          <div class="phase-dot"></div>
+          <span class="phase-label">Check-ins</span>
+        </div>
+      </div>
+
+      <!-- Header -->
+      <div class="advancement-header">
+        <h1>Today's Recurrences</h1>
+        <div class="item-count">1 of 2</div>
+      </div>
+
+      <!-- Recurrence Card -->
+      <div class="item-card">
+        <div class="item-type recurring">
+          <i class="bi bi-arrow-repeat"></i>
+          Daily
+        </div>
+        <h2>Review inbox</h2>
+        <p class="item-description">
+          Add this to today's list?
+        </p>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="action-grid">
+        <button class="action-btn primary">
+          <i class="bi bi-plus-lg"></i>
+          Add to Today
+        </button>
+        <button class="action-btn">
+          <i class="bi bi-calendar-plus"></i>
+          Schedule Later
+        </button>
+        <button class="action-btn skip full-width">
+          <i class="bi bi-skip-forward"></i>
+          Skip
+        </button>
+      </div>
+
+      <div class="keyboard-hints">
+        <div class="kbd-hint"><kbd>A</kbd> Add</div>
+        <div class="kbd-hint"><kbd>S</kbd> Skip</div>
+      </div>
+    </div>
+
+    <!-- VIEW 3: Habit Check-in -->
+    <div class="view" id="view-habit">
+      <!-- Phase Indicator -->
+      <div class="phase-indicator">
+        <div class="phase-step completed">
+          <div class="phase-dot"></div>
+          <span class="phase-label">Rollovers</span>
+        </div>
+        <div class="phase-step completed">
+          <div class="phase-dot"></div>
+          <span class="phase-label">Recurrences</span>
+        </div>
+        <div class="phase-step current">
+          <div class="phase-dot"></div>
+          <span class="phase-label">Habits</span>
+        </div>
+        <div class="phase-step">
+          <div class="phase-dot"></div>
+          <span class="phase-label">Check-ins</span>
+        </div>
+      </div>
+
+      <!-- Header -->
+      <div class="advancement-header">
+        <h1>Yesterday's Habits</h1>
+        <div class="item-count">1 of 2</div>
+      </div>
+
+      <!-- Habit Card -->
+      <div class="item-card" style="text-align: center;">
+        <div class="item-type habit">
+          <i class="bi bi-lightning"></i>
+          3× per week
+        </div>
+        <h2>Did you run yesterday?</h2>
+        <p class="item-description">
+          You've done this 2 times this week so far.
+        </p>
+      </div>
+
+      <!-- Binary Response -->
+      <div class="response-buttons">
+        <button class="response-btn yes">Yes</button>
+        <button class="response-btn no">No</button>
+      </div>
+
+      <div class="keyboard-hints">
+        <div class="kbd-hint"><kbd>Y</kbd> Yes</div>
+        <div class="kbd-hint"><kbd>N</kbd> No</div>
+      </div>
+    </div>
+
+    <!-- VIEW 4: Tracker Check-in (count) -->
+    <div class="view" id="view-tracker">
+      <!-- Phase Indicator -->
+      <div class="phase-indicator">
+        <div class="phase-step completed">
+          <div class="phase-dot"></div>
+          <span class="phase-label">Rollovers</span>
+        </div>
+        <div class="phase-step completed">
+          <div class="phase-dot"></div>
+          <span class="phase-label">Recurrences</span>
+        </div>
+        <div class="phase-step completed">
+          <div class="phase-dot"></div>
+          <span class="phase-label">Habits</span>
+        </div>
+        <div class="phase-step current">
+          <div class="phase-dot"></div>
+          <span class="phase-label">Check-ins</span>
+        </div>
+      </div>
+
+      <!-- Header -->
+      <div class="advancement-header">
+        <h1>Daily Check-ins</h1>
+        <div class="item-count">1 of 2</div>
+      </div>
+
+      <!-- Tracker Card -->
+      <div class="item-card" style="text-align: center;">
+        <div class="item-type tracker">
+          <i class="bi bi-clipboard-data"></i>
+          Tracker
+        </div>
+        <h2>Alcohol yesterday?</h2>
+        <p class="item-description">
+          How many drinks did you have?
+        </p>
+      </div>
+
+      <!-- Count Response -->
+      <div class="count-buttons">
+        <button class="count-btn">0</button>
+        <button class="count-btn">1</button>
+        <button class="count-btn">2</button>
+        <button class="count-btn">3+</button>
+      </div>
+
+      <div class="keyboard-hints">
+        <div class="kbd-hint"><kbd>0</kbd>-<kbd>3</kbd> Select</div>
+      </div>
+    </div>
+
+    <!-- VIEW 5: Complete -->
+    <div class="view" id="view-complete">
+      <div class="completion-state">
+        <div class="success-icon">
+          <i class="bi bi-check-lg"></i>
+        </div>
+        <h2>Ready for today!</h2>
+        <p>You've processed everything. Time to get to work.</p>
+        <a href="today.html" class="btn-to-today">
+          <i class="bi bi-sun"></i>
+          Go to Today
+        </a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Demo Switcher -->
+  <div class="demo-switcher">
+    <button class="active" onclick="showView('rollover')">Rollover</button>
+    <button onclick="showView('recurrence')">Recurrence</button>
+    <button onclick="showView('habit')">Habit</button>
+    <button onclick="showView('tracker')">Tracker</button>
+    <button onclick="showView('complete')">Done</button>
+  </div>
+
+  <script>
+    function showView(id) {
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.querySelectorAll('.demo-switcher button').forEach(b => b.classList.remove('active'));
+      document.getElementById('view-' + id).classList.add('active');
+      event.target.classList.add('active');
+    }
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
