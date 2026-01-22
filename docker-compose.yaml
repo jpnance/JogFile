@@ -1,0 +1,29 @@
+services:
+  web:
+    container_name: jogfile-web
+    restart: unless-stopped
+    depends_on:
+      - mongo
+    image: node:22-alpine
+    volumes:
+      - .:/app
+    working_dir: /app
+    ports:
+      - $PORT:$PORT
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - PORT=${PORT}
+      - MONGODB_URI=mongodb://mongo:27017/jogfile
+      - JOG_FILE_PASSWORD=${JOG_FILE_PASSWORD}
+    command: node index.js
+
+  mongo:
+    container_name: jogfile-mongo
+    restart: unless-stopped
+    image: mongo:8.0.4
+    volumes:
+      - jogfile-data:/data/db
+
+volumes:
+  jogfile-data:
+    name: jogfile-data
