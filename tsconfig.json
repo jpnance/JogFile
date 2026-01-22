@@ -9,7 +9,7 @@
     "moduleResolution": "NodeNext",
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "types": ["node"]
+    "types": ["node", "mocha"]
   },
   "include": ["**/*.js"],
   "exclude": ["node_modules"]
