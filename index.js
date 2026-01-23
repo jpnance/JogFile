@@ -1,8 +1,11 @@
 import 'dotenv/config';
 
+import fs from 'fs';
+import https from 'https';
 import express from 'express';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
+import mongoose from 'mongoose';
 
 import { attachSession, requireLogin } from './auth/middleware.js';
 import Task from './models/Task.js';
@@ -80,11 +83,50 @@ app.post('/tasks', requireLogin, async (req, res) => {
 
 const port = process.env.PORT || 3000;
 
+/** @type {import('http').Server | import('https').Server | null} */
+let server = null;
+
 // Only start the server if this file is run directly (not imported by tests)
 if (process.argv[1].includes('index.js')) {
-	app.listen(port, () => {
-		console.log(`JogFile listening on port ${port}`);
-	});
+	if (!process.env.MONGODB_URI) {
+		throw new Error('MONGODB_URI environment variable is required');
+	}
+
+	mongoose.connect(process.env.MONGODB_URI);
+
+	if (process.env.NODE_ENV === 'dev') {
+		const options = {
+			key: fs.readFileSync('./ssl/jogfile-key.pem'),
+			cert: fs.readFileSync('./ssl/jogfile.pem'),
+			requestCert: false
+		};
+
+		server = https.createServer(options, app);
+		server.listen(port, () => {
+			console.log(`JogFile listening on https://localhost:${port}`);
+		});
+	}
+	else {
+		server = app.listen(port, () => {
+			console.log(`JogFile listening on port ${port}`);
+		});
+	}
 }
+
+process.on('SIGTERM', () => {
+	console.log('SIGTERM received, shutting down...');
+
+	if (server) {
+		server.close(() => {
+			mongoose.connection.close(false).then(() => {
+				console.log('Closed out remaining connections');
+				process.exit(0);
+			});
+		});
+	}
+	else {
+		process.exit(0);
+	}
+});
 
 export default app;

@@ -1,0 +1,18 @@
+#!/bin/bash
+
+cd "$(dirname "$0")/../ssl"
+
+if ! command -v mkcert &> /dev/null; then
+	echo "mkcert not found."
+	if [[ "$OSTYPE" == "darwin"* ]]; then
+		echo "Install with: brew install mkcert nss && mkcert -install"
+	elif [[ -f /etc/arch-release ]]; then
+		echo "Install with: sudo pacman -S mkcert nss && mkcert -install"
+	else
+		echo "See https://github.com/FiloSottile/mkcert for installation instructions."
+	fi
+	exit 1
+fi
+
+mkcert -install
+mkcert -key-file jogfile-key.pem -cert-file jogfile.pem jogfile.local
