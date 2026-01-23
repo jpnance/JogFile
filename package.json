@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node index.js",
     "typecheck": "tsc --noEmit",
-    "test": "npm run typecheck && mocha --recursive test/**/*.test.js"
+    "test": "npm run typecheck && mocha -R dot --recursive test/**/*.test.js"
   },
   "author": "",
   "license": "ISC",
