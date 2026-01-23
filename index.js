@@ -5,6 +5,7 @@ import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 
 import { attachSession, requireLogin } from './auth/middleware.js';
+import Task from './models/Task.js';
 
 const app = express();
 
@@ -49,6 +50,24 @@ app.post('/logout', (req, res) => {
 
 app.get('/', requireLogin, (req, res) => {
 	res.send('JogFile - You are logged in!');
+});
+
+app.post('/tasks', requireLogin, async (req, res) => {
+	const { title, description, scheduledFor } = req.body;
+
+	if (!title || title.trim() === '') {
+		return res.status(400).send('Title is required');
+	}
+
+	const task = new Task({
+		title: title.trim(),
+		description: description?.trim() || '',
+		scheduledFor: scheduledFor ? new Date(scheduledFor) : null
+	});
+
+	await task.save();
+
+	res.status(201).render('task', { task });
 });
 
 const port = process.env.PORT || 3000;
