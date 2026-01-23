@@ -4,6 +4,11 @@ block content
 	main.container.mt-4
 		h1 Today
 
+		form.mb-4(method="POST" action="/tasks")
+			.input-group
+				input.form-control(type="text" name="title" placeholder="Add a task..." required)
+				button.btn.btn-primary(type="submit") Add
+
 		if tasks.length === 0
 			p.text-muted No tasks for today.
 		else

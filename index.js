@@ -70,15 +70,19 @@ app.post('/tasks', requireLogin, async (req, res) => {
 		return res.status(400).send('Title is required');
 	}
 
+	// Default to middle of today if no date specified
+	const { start, end } = getTodayRange();
+	const defaultDate = new Date(start.getTime() + (end.getTime() - start.getTime()) / 2);
+
 	const task = new Task({
 		title: title.trim(),
 		description: description?.trim() || '',
-		scheduledFor: scheduledFor ? new Date(scheduledFor) : null
+		scheduledFor: scheduledFor ? new Date(scheduledFor) : defaultDate
 	});
 
 	await task.save();
 
-	res.status(201).render('task', { task });
+	res.redirect('/');
 });
 
 const port = process.env.PORT || 3000;

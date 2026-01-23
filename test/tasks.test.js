@@ -19,24 +19,30 @@ describe('Tasks', () => {
 	});
 
 	describe('POST /tasks', () => {
-		it('creates a task and returns HTML containing the task', async () => {
+		it('creates a task and redirects to home', async () => {
 			const res = await request(app)
 				.post('/tasks')
 				.set('Cookie', `session=${process.env.JOG_FILE_PASSWORD}`)
 				.send({ title: 'Buy milk' })
-				.expect(201);
+				.expect(302);
 
-			expect(res.text).to.include('Buy milk');
+			expect(res.headers.location).to.equal('/');
+
+			const task = await Task.findOne({ title: 'Buy milk' });
+			expect(task).to.not.be.null;
 		});
 
 		it('creates a task with a scheduled date', async () => {
-			const res = await request(app)
+			await request(app)
 				.post('/tasks')
 				.set('Cookie', `session=${process.env.JOG_FILE_PASSWORD}`)
 				.send({ title: 'Call dentist', scheduledFor: '2026-01-25' })
-				.expect(201);
+				.expect(302);
 
-			expect(res.text).to.include('Call dentist');
+			const task = await Task.findOne({ title: 'Call dentist' });
+			expect(task).to.not.be.null;
+			if (!task) throw new Error('Task not found');
+			expect(task.scheduledFor?.toISOString()).to.include('2026-01-25');
 		});
 
 		it('redirects to login when not authenticated', async () => {
@@ -99,6 +105,51 @@ describe('Tasks', () => {
 				.expect(200);
 
 			expect(res.text).to.not.include('Someday task');
+		});
+
+		it('has a form for adding tasks', async () => {
+			const res = await request(app)
+				.get('/')
+				.set('Cookie', `session=${process.env.JOG_FILE_PASSWORD}`)
+				.expect(200);
+
+			expect(res.text).to.include('<form');
+			expect(res.text).to.include('name="title"');
+		});
+	});
+
+	describe('POST /tasks (from UI)', () => {
+		it('creates a task scheduled for today and redirects', async () => {
+			const res = await request(app)
+				.post('/tasks')
+				.set('Cookie', `session=${process.env.JOG_FILE_PASSWORD}`)
+				.type('form')
+				.send({ title: 'New task from form' })
+				.expect(302);
+
+			expect(res.headers.location).to.equal('/');
+
+			// Verify task was created with today's date
+			const task = await Task.findOne({ title: 'New task from form' });
+			expect(task).to.not.be.null;
+
+			if (!task) throw new Error('Task not found'); // Type narrowing
+			expect(task.scheduledFor).to.not.be.null;
+		});
+
+		it('new task appears on today view after redirect', async () => {
+			await request(app)
+				.post('/tasks')
+				.set('Cookie', `session=${process.env.JOG_FILE_PASSWORD}`)
+				.type('form')
+				.send({ title: 'Visible task' });
+
+			const res = await request(app)
+				.get('/')
+				.set('Cookie', `session=${process.env.JOG_FILE_PASSWORD}`)
+				.expect(200);
+
+			expect(res.text).to.include('Visible task');
 		});
 	});
 });
