@@ -1,8 +1,21 @@
 import { expect } from 'chai';
 import request from 'supertest';
 import app from '../index.js';
+import { connectTestDb, disconnectTestDb, clearTestDb } from './setup.js';
 
 describe('App', () => {
+	before(async () => {
+		await connectTestDb();
+	});
+
+	beforeEach(async () => {
+		await clearTestDb();
+	});
+
+	after(async () => {
+		await disconnectTestDb();
+	});
+
 	describe('GET /', () => {
 		it('redirects to /login when not authenticated', async () => {
 			const res = await request(app)
@@ -18,7 +31,7 @@ describe('App', () => {
 				.set('Cookie', `session=${process.env.JOG_FILE_PASSWORD}`)
 				.expect(200);
 
-			expect(res.text).to.include('logged in');
+			expect(res.text).to.include('Today');
 		});
 	});
 

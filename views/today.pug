@@ -1,0 +1,12 @@
+extends layout
+
+block content
+	main.container.mt-4
+		h1 Today
+
+		if tasks.length === 0
+			p.text-muted No tasks for today.
+		else
+			.task-list
+				each task in tasks
+					include task

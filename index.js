@@ -6,6 +6,7 @@ import cookieParser from 'cookie-parser';
 
 import { attachSession, requireLogin } from './auth/middleware.js';
 import Task from './models/Task.js';
+import { getTodayRange } from './lib/dates.js';
 
 const app = express();
 
@@ -48,8 +49,15 @@ app.post('/logout', (req, res) => {
 	res.redirect('/login');
 });
 
-app.get('/', requireLogin, (req, res) => {
-	res.send('JogFile - You are logged in!');
+app.get('/', requireLogin, async (req, res) => {
+	const { start, end } = getTodayRange();
+
+	const tasks = await Task.find({
+		scheduledFor: { $gte: start, $lt: end },
+		status: 'pending'
+	}).sort({ position: 1 });
+
+	res.render('today', { tasks });
 });
 
 app.post('/tasks', requireLogin, async (req, res) => {
