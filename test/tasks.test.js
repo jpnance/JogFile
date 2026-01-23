@@ -152,4 +152,59 @@ describe('Tasks', () => {
 			expect(res.text).to.include('Visible task');
 		});
 	});
+
+	describe('POST /tasks/:id/complete', () => {
+		it('marks task as completed and redirects', async () => {
+			const { start, end } = getTodayRange();
+			const middleOfToday = new Date(start.getTime() + (end.getTime() - start.getTime()) / 2);
+
+			const task = await Task.create({ title: 'Task to complete', scheduledFor: middleOfToday });
+
+			const res = await request(app)
+				.post(`/tasks/${task._id}/complete`)
+				.set('Cookie', `session=${process.env.JOG_FILE_PASSWORD}`)
+				.expect(302);
+
+			expect(res.headers.location).to.equal('/');
+
+			const updated = await Task.findById(task._id);
+			expect(updated?.status).to.equal('completed');
+			expect(updated?.completedAt).to.not.be.null;
+		});
+
+		it('completed task no longer shows on today view', async () => {
+			const { start, end } = getTodayRange();
+			const middleOfToday = new Date(start.getTime() + (end.getTime() - start.getTime()) / 2);
+
+			const task = await Task.create({ title: 'Disappearing task', scheduledFor: middleOfToday });
+
+			await request(app)
+				.post(`/tasks/${task._id}/complete`)
+				.set('Cookie', `session=${process.env.JOG_FILE_PASSWORD}`);
+
+			const res = await request(app)
+				.get('/')
+				.set('Cookie', `session=${process.env.JOG_FILE_PASSWORD}`)
+				.expect(200);
+
+			expect(res.text).to.not.include('Disappearing task');
+		});
+
+		it('redirects to login when not authenticated', async () => {
+			const task = await Task.create({ title: 'Some task', scheduledFor: new Date() });
+
+			const res = await request(app)
+				.post(`/tasks/${task._id}/complete`)
+				.expect(302);
+
+			expect(res.headers.location).to.equal('/login');
+		});
+
+		it('returns 404 for invalid task ID', async () => {
+			await request(app)
+				.post('/tasks/000000000000000000000000/complete')
+				.set('Cookie', `session=${process.env.JOG_FILE_PASSWORD}`)
+				.expect(404);
+		});
+	});
 });

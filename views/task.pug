@@ -1,4 +1,6 @@
-.task-item(data-id=task._id)
+.task-item.d-flex.align-items-center.mb-2(data-id=task._id)
+	form.me-2(method="POST" action=`/tasks/${task._id}/complete`)
+		button.btn.btn-sm.btn-outline-success(type="submit") ✓
 	.task-title= task.title
 	if task.description
-		.task-description= task.description
+		.task-description.text-muted.ms-2= task.description

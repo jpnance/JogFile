@@ -85,6 +85,20 @@ app.post('/tasks', requireLogin, async (req, res) => {
 	res.redirect('/');
 });
 
+app.post('/tasks/:id/complete', requireLogin, async (req, res) => {
+	const task = await Task.findById(req.params.id);
+
+	if (!task) {
+		return res.status(404).send('Task not found');
+	}
+
+	task.status = 'completed';
+	task.completedAt = new Date();
+	await task.save();
+
+	res.redirect('/');
+});
+
 const port = process.env.PORT || 3000;
 
 /** @type {import('http').Server | import('https').Server | null} */
