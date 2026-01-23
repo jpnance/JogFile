@@ -1,0 +1,14 @@
+extends layout
+
+block content
+	main.container.mt-5
+		.row.justify-content-center
+			.col-md-4
+				h1.mb-4 JogFile
+				if error
+					.alert.alert-danger= error
+				form(method="POST" action="/login")
+					.mb-3
+						label.form-label(for="password") Password
+						input.form-control#password(type="password" name="password" autofocus)
+					button.btn.btn-primary(type="submit") Log in
