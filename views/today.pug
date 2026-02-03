@@ -115,3 +115,20 @@ block content
 								each task in scratchPadTasks
 									.task-preview.d-flex.align-items-center
 										a(href=`/tasks/${task._id}/edit`)= task.title
+
+				//- Completed section
+				.mb-2
+					.section-header(data-bs-toggle="collapse" data-bs-target="#completedSection" aria-expanded="false")
+						span.chevron ▶
+						span.section-title Completed
+						span.section-count= completedTasks.length
+					#completedSection.collapse
+						.ps-4.py-2
+							if completedTasks.length === 0
+								p.text-muted.small.mb-0 Nothing completed recently
+							else
+								each task in completedTasks
+									.task-preview.d-flex.align-items-center.justify-content-between
+										span.text-muted= task.title
+										form(method="POST" action=`/tasks/${task._id}/restore` style="margin: 0")
+											button.btn.btn-sm.btn-outline-secondary(type="submit") Restore

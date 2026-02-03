@@ -206,7 +206,9 @@ describe('Tasks', () => {
 				.set('Cookie', `session=${process.env.JOG_FILE_PASSWORD}`)
 				.expect(200);
 
-			expect(res.text).to.not.include('Disappearing task');
+			// Task should not be in main task list, but should be in Completed section
+			expect(res.text).to.include('Completed');
+			expect(res.text).to.include('Disappearing task');
 		});
 
 		it('redirects to login when not authenticated', async () => {

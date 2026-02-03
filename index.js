@@ -337,12 +337,21 @@ app.get('/', requireLogin, async (req, res) => {
 		status: 'pending'
 	}).sort({ position: 1 });
 
+	// Recently completed tasks (last 7 days, max 20)
+	const sevenDaysAgo = new Date(todayStart);
+	sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+	const completedTasks = await Task.find({
+		status: 'completed',
+		completedAt: { $ne: null, $gte: sevenDaysAgo }
+	}).sort({ completedAt: -1 }).limit(20);
+
 	res.render('today', {
 		tasks,
 		tomorrowTasks,
 		upcomingTasks,
 		laterTasks,
 		scratchPadTasks,
+		completedTasks,
 		formatDate,
 		todayFormatted: formatToday()
 	});
@@ -447,6 +456,21 @@ app.post('/tasks/:id/archive', requireLogin, async (req, res) => {
 	}
 
 	task.status = 'archived';
+	await task.save();
+
+	res.redirect('/');
+});
+
+app.post('/tasks/:id/restore', requireLogin, async (req, res) => {
+	const task = await Task.findById(req.params.id);
+	if (!task) {
+		return res.status(404).send('Task not found');
+	}
+
+	task.status = 'pending';
+	// Put it back on today's list
+	const { start, end } = getTodayRange();
+	task.scheduledFor = new Date(start.getTime() + (end.getTime() - start.getTime()) / 2);
 	await task.save();
 
 	res.redirect('/');
