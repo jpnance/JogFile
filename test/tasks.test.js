@@ -81,8 +81,25 @@ describe('Tasks', () => {
 			expect(res.text).to.include('Today task');
 		});
 
-		it('does not show tasks scheduled for other days', async () => {
-			// Create a task scheduled well outside today's range (a week ago)
+		it('does not show tasks scheduled for other days in today section', async () => {
+			// Create a task scheduled for a week from now (future task, not rollover)
+			const { start } = getTodayRange();
+			const weekAhead = new Date(start.getTime() + 14 * 24 * 60 * 60 * 1000);
+
+			await Task.create({ title: 'Future task', scheduledFor: weekAhead });
+
+			const res = await request(app)
+				.get('/')
+				.set('Cookie', `session=${process.env.JOG_FILE_PASSWORD}`)
+				.expect(200);
+
+			// The task should appear in the "Later" section, not in the main today task list
+			expect(res.text).to.include('Future task');
+			expect(res.text).to.include('Later');
+		});
+
+		it('redirects to advancement when there are rollover tasks', async () => {
+			// Create a task scheduled for a week ago (rollover task)
 			const { start } = getTodayRange();
 			const weekAgo = new Date(start.getTime() - 7 * 24 * 60 * 60 * 1000);
 
@@ -91,12 +108,12 @@ describe('Tasks', () => {
 			const res = await request(app)
 				.get('/')
 				.set('Cookie', `session=${process.env.JOG_FILE_PASSWORD}`)
-				.expect(200);
+				.expect(302);
 
-			expect(res.text).to.not.include('Old task');
+			expect(res.headers.location).to.equal('/advance');
 		});
 
-		it('does not show someday tasks (no scheduled date)', async () => {
+		it('shows scratch pad tasks in collapsed section', async () => {
 			await Task.create({ title: 'Someday task', scheduledFor: null });
 
 			const res = await request(app)
@@ -104,7 +121,9 @@ describe('Tasks', () => {
 				.set('Cookie', `session=${process.env.JOG_FILE_PASSWORD}`)
 				.expect(200);
 
-			expect(res.text).to.not.include('Someday task');
+			// Scratch pad tasks now appear in a collapsed section
+			expect(res.text).to.include('Someday task');
+			expect(res.text).to.include('Scratch Pad');
 		});
 
 		it('has a form for adding tasks', async () => {

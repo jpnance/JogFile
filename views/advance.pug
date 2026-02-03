@@ -1,0 +1,95 @@
+extends layout
+
+block content
+	main.container.py-4
+		- const totalItems = rolloverTasks.length + recurringPrompts.length
+
+		if totalItems === 0
+			.advance-card.card
+				.card-body.text-center.py-5
+					.empty-state-icon.mb-3 ✨
+					h4 All caught up!
+					p.text-muted.mb-4 No items to process
+					a.btn.btn-primary(href="/") Go to Today
+		else
+			//- Progress indicator
+			.advance-progress.mb-4
+				strong #{totalItems}
+				|  item#{totalItems === 1 ? '' : 's'} to process
+
+			//- Escape hatches for large backlogs
+			if rolloverTasks.length > 5
+				.escape-hatches
+					form(method="POST" action="/advance/bankruptcy")
+						button.btn.btn-sm.btn-outline-danger(type="submit" onclick="return confirm('Archive all rollover tasks?')") Declare Bankruptcy
+					form(method="POST" action="/advance/best-guess")
+						button.btn.btn-sm.btn-outline-secondary(type="submit" onclick="return confirm('Move all tasks to today?')") Move All to Today
+
+			//- Process rollover tasks first
+			if rolloverTasks.length > 0
+				- const task = rolloverTasks[currentIndex]
+				.advance-card.card
+					.card-header.advance-header-rollover
+						span Rollover
+						span.badge.bg-white.bg-opacity-25 #{rolloverTasks.length} left
+					.card-body
+						h4.mb-2= task.title
+						if task.description
+							p.text-muted.mb-3= task.description
+						if task.scheduledFor
+							.mb-3
+								small.text-muted
+									| Was scheduled for #{formatDate(task.scheduledFor)}
+									if task.rollovers > 0
+										|  · Deferred #{task.rollovers}×
+
+						.advance-actions
+							form(method="POST" action=`/advance/${task._id}/complete`)
+								button.btn.btn-success(type="submit") I Did That
+
+							form(method="POST" action=`/advance/${task._id}/today`)
+								button.btn.btn-primary(type="submit") Move to Today
+
+							form(method="POST" action=`/advance/${task._id}/defer`)
+								input(type="hidden" name="date" value=tomorrowDateStr)
+								button.btn.btn-outline-secondary(type="submit") Tomorrow
+
+							form.d-flex.gap-2.schedule-form(method="POST" action=`/advance/${task._id}/defer`)
+								input.form-control.form-control-sm.schedule-date(type="date" name="date" required style="width: auto")
+								button.btn.btn-outline-secondary(type="submit") Schedule
+
+							form(method="POST" action=`/advance/${task._id}/scratch`)
+								button.btn.btn-outline-secondary(type="submit") Scratch Pad
+
+							form(method="POST" action=`/advance/${task._id}/archive`)
+								button.btn.btn-outline-danger(type="submit") Archive
+
+			//- Then process recurring prompts
+			else if recurringPrompts.length > 0
+				- const recurring = recurringPrompts[0]
+				.advance-card.card
+					.card-header.advance-header-recurring
+						span Recurring
+						span.badge.bg-white.bg-opacity-25 #{recurringPrompts.length} left
+					.card-body
+						h4.mb-2= recurring.title
+						if recurring.description
+							p.text-muted.mb-2= recurring.description
+						.mb-3
+							small.text-muted= recurring.getPatternDescription()
+
+						.advance-actions
+							form(method="POST" action=`/advance/recurring/${recurring._id}/today`)
+								button.btn.btn-primary(type="submit") Add to Today
+
+							form(method="POST" action=`/advance/recurring/${recurring._id}/defer`)
+								input(type="hidden" name="date" value=tomorrowDateStr)
+								button.btn.btn-outline-secondary(type="submit") Tomorrow
+
+							form.d-flex.gap-2.schedule-form(method="POST" action=`/advance/recurring/${recurring._id}/defer`)
+								input.form-control.form-control-sm.schedule-date(type="date" name="date" required style="width: auto")
+								button.btn.btn-outline-secondary(type="submit") Schedule
+
+							form(method="POST" action=`/advance/recurring/${recurring._id}/skip`)
+								button.btn.btn-outline-secondary(type="submit") Skip
+

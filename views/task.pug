@@ -1,6 +1,41 @@
-.task-item.d-flex.align-items-center.mb-2(data-id=task._id)
-	form.me-2(method="POST" action=`/tasks/${task._id}/complete`)
-		button.btn.btn-sm.btn-outline-success(type="submit") ✓
-	.task-title= task.title
-	if task.description
-		.task-description.text-muted.ms-2= task.description
+.task-item.d-flex.align-items-center(data-id=task._id data-position=task.position)
+	.reorder-buttons.me-3.d-flex.flex-column.align-items-center
+		form(method="POST" action=`/tasks/${task._id}/move-up`)
+			button.btn.btn-link(type="submit" title="Move up") ▲
+		form(method="POST" action=`/tasks/${task._id}/move-down`)
+			button.btn.btn-link(type="submit" title="Move down") ▼
+	form.me-3(method="POST" action=`/tasks/${task._id}/complete`)
+		button.btn.btn-outline-success(type="submit" title="Complete") ✓
+	.flex-grow-1
+		.task-title= task.title
+		if task.description
+			.task-description= task.description
+		if task.rollovers > 0
+			.stale-indicator
+				span ⏱
+				span Deferred #{task.rollovers}×
+	.task-actions.ms-3
+		.dropdown
+			button.dropdown-toggle(type="button" data-bs-toggle="dropdown" aria-expanded="false") •••
+			ul.dropdown-menu.dropdown-menu-end
+				li
+					a.dropdown-item(href=`/tasks/${task._id}/edit`) Edit Task
+				if task.generatedFrom
+					li
+						a.dropdown-item(href=`/recurring/${task.generatedFrom}/edit`) Edit Recurring
+				li
+					hr.dropdown-divider
+				li
+					form(method="POST" action=`/tasks/${task._id}/today`)
+						button.dropdown-item(type="submit") Move to Today
+				li
+					form(method="POST" action=`/tasks/${task._id}/tomorrow`)
+						button.dropdown-item(type="submit") Defer to Tomorrow
+				li
+					form(method="POST" action=`/tasks/${task._id}/scratch`)
+						button.dropdown-item(type="submit") Send to Scratch Pad
+				li
+					hr.dropdown-divider
+				li
+					form(method="POST" action=`/tasks/${task._id}/archive`)
+						button.dropdown-item.text-danger(type="submit") Archive

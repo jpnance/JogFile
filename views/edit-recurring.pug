@@ -1,0 +1,146 @@
+extends layout
+
+block content
+	main.container.py-4
+		.row.justify-content-center
+			.col-12.col-lg-10.col-xl-8
+				a.nav-link-secondary.mb-3(href="/recurring")
+					span ←
+					| Back to Recurring
+
+				.card
+					.card-body
+						h4.mb-4= recurring ? 'Edit Recurring' : 'New Recurring'
+
+						form(method="POST" action=recurring ? `/recurring/${recurring._id}/edit` : '/recurring')
+							.mb-3
+								label.form-label(for="title") Title
+								input.form-control#title(type="text" name="title" value=(recurring ? recurring.title : '') required placeholder="e.g., Review inbox")
+
+							.mb-4
+								label.form-label(for="description") Description
+								textarea.form-control#description(name="description" rows="2" placeholder="Optional notes...")= recurring ? recurring.description : ''
+
+							.mb-4
+								label.form-label.d-block Pattern
+								- const patternType = recurring && recurring.pattern ? recurring.pattern.type : 'daily'
+								.d-flex.flex-wrap.gap-3
+									label.destination-option
+										input.form-check-input(type="radio" name="patternType" value="daily" checked=(patternType === 'daily'))
+										span Daily
+									label.destination-option
+										input.form-check-input(type="radio" name="patternType" value="weekly" checked=(patternType === 'weekly'))
+										span Weekly
+									label.destination-option
+										input.form-check-input(type="radio" name="patternType" value="monthly" checked=(patternType === 'monthly'))
+										span Monthly
+									label.destination-option
+										input.form-check-input(type="radio" name="patternType" value="yearly" checked=(patternType === 'yearly'))
+										span Yearly
+									label.destination-option
+										input.form-check-input(type="radio" name="patternType" value="interval" checked=(patternType === 'interval'))
+										span Every N days
+
+							//- Weekly options
+							- const daysOfWeek = recurring && recurring.pattern && recurring.pattern.daysOfWeek ? recurring.pattern.daysOfWeek : []
+							- const weeklyInterval = recurring && recurring.pattern && recurring.pattern.weeklyInterval ? recurring.pattern.weeklyInterval : 1
+							- const weeklyAnchor = recurring && recurring.pattern && recurring.pattern.weeklyAnchor ? recurring.pattern.weeklyAnchor : null
+							.mb-4.pattern-options#weeklyOptions(style=(patternType === 'weekly' ? '' : 'display: none'))
+								.mb-3
+									label.form-label Days of Week
+									.d-flex.flex-wrap.gap-2
+										- const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+										each dayName, i in dayNames
+											label.btn.btn-sm.btn-outline-secondary.day-toggle(style="min-width: 50px")
+												input.d-none(type="checkbox" name="daysOfWeek" value=i checked=daysOfWeek.includes(i))
+												span= dayName
+								.mb-3
+									label.form-label Frequency
+									select.form-select.w-auto#weeklyInterval(name="weeklyInterval")
+										option(value="1" selected=(weeklyInterval === 1)) Every week
+										option(value="2" selected=(weeklyInterval === 2)) Every other week
+										option(value="3" selected=(weeklyInterval === 3)) Every 3 weeks
+										option(value="4" selected=(weeklyInterval === 4)) Every 4 weeks
+								#weeklyAnchorGroup.mb-0(style=(weeklyInterval > 1 ? '' : 'display: none'))
+									label.form-label Starting from
+									input.form-control.w-auto#weeklyAnchor(type="date" name="weeklyAnchor" value=(weeklyAnchor ? weeklyAnchor.toISOString().split('T')[0] : ''))
+									.form-text Pick a date when this recurrence should occur (e.g. a specific Monday)
+
+							//- Monthly options
+							- const dayOfMonth = recurring && recurring.pattern ? recurring.pattern.dayOfMonth : 1
+							.mb-4.pattern-options#monthlyOptions(style=(patternType === 'monthly' ? '' : 'display: none'))
+								label.form-label(for="dayOfMonth") Day of Month
+								select.form-select.w-auto#dayOfMonth(name="dayOfMonth")
+									each day in Array.from({length: 31}, (_, i) => i + 1)
+										option(value=day selected=(dayOfMonth === day))= day
+									option(value="-1" selected=(dayOfMonth === -1)) Last day
+
+							//- Yearly options
+							- const yearlyMonth = recurring && recurring.pattern ? recurring.pattern.yearlyMonth : 1
+							- const yearlyDay = recurring && recurring.pattern ? recurring.pattern.yearlyDay : 1
+							- const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+							.mb-4.pattern-options#yearlyOptions(style=(patternType === 'yearly' ? '' : 'display: none'))
+								label.form-label Date
+								.d-flex.gap-2
+									select.form-select.w-auto#yearlyMonth(name="yearlyMonth")
+										each monthName, i in monthNames
+											option(value=(i + 1) selected=(yearlyMonth === i + 1))= monthName
+									select.form-select.w-auto#yearlyDay(name="yearlyDay")
+										each day in Array.from({length: 31}, (_, i) => i + 1)
+											option(value=day selected=(yearlyDay === day))= day
+
+							//- Interval options
+							- const intervalDays = recurring && recurring.pattern && recurring.pattern.intervalDays ? recurring.pattern.intervalDays : 7
+							.mb-4.pattern-options#intervalOptions(style=(patternType === 'interval' ? '' : 'display: none'))
+								label.form-label(for="intervalDays") Repeat every
+								.d-flex.align-items-center.gap-2
+									input.form-control#intervalDays(type="number" name="intervalDays" min="1" value=intervalDays style="width: 5rem")
+									span.text-muted days
+
+							if recurring
+								.section-divider
+
+								.mb-3
+									.form-check.form-switch
+										input.form-check-input#isActive(type="checkbox" name="isActive" checked=recurring.isActive role="switch")
+										label.form-check-label(for="isActive") Active
+
+								.mb-4
+									label.form-label(for="pausedUntil") Pause until
+									input.form-control.w-auto#pausedUntil(type="date" name="pausedUntil" value=recurring.pausedUntil ? recurring.pausedUntil.toISOString().split('T')[0] : '')
+									.form-text For vacations or temporary breaks
+
+							.d-flex.gap-2
+								button.btn.btn-primary(type="submit")= recurring ? 'Save Changes' : 'Create'
+								a.btn.btn-outline-secondary(href="/recurring") Cancel
+
+				script.
+					// Show/hide pattern options based on selected type
+					document.querySelectorAll('input[name="patternType"]').forEach(radio => {
+						radio.addEventListener('change', function() {
+							document.querySelectorAll('.pattern-options').forEach(el => el.style.display = 'none');
+							const optionsId = this.value + 'Options';
+							const options = document.getElementById(optionsId);
+							if (options) options.style.display = '';
+						});
+					});
+
+					// Toggle day buttons
+					document.querySelectorAll('.day-toggle').forEach(btn => {
+						const checkbox = btn.querySelector('input[type="checkbox"]');
+						if (checkbox.checked) btn.classList.add('active');
+						btn.addEventListener('click', function(e) {
+							e.preventDefault();
+							checkbox.checked = !checkbox.checked;
+							this.classList.toggle('active', checkbox.checked);
+						});
+					});
+
+					// Show/hide weekly anchor based on interval
+					const weeklyIntervalSelect = document.getElementById('weeklyInterval');
+					const weeklyAnchorGroup = document.getElementById('weeklyAnchorGroup');
+					if (weeklyIntervalSelect && weeklyAnchorGroup) {
+						weeklyIntervalSelect.addEventListener('change', function() {
+							weeklyAnchorGroup.style.display = this.value > 1 ? '' : 'none';
+						});
+					}

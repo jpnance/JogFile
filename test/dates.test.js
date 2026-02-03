@@ -18,7 +18,7 @@ describe('dates', () => {
 			expect(end.getHours()).to.equal(DAY_START_HOUR);
 		});
 
-		it('at 2am, today started at 3am yesterday (late night buffer)', () => {
+		it('at 2am, today started at 4am yesterday (late night buffer)', () => {
 			// January 22, 2026 at 2:00am Pacific — still "January 21" day
 			const now = new Date('2026-01-22T02:00:00-08:00');
 			const { start, end } = getTodayRange(now);
@@ -30,9 +30,9 @@ describe('dates', () => {
 			expect(end.getHours()).to.equal(DAY_START_HOUR);
 		});
 
-		it('at exactly 3am, today started at 3am same day', () => {
-			// January 22, 2026 at 3:00am Pacific — new day just started
-			const now = new Date('2026-01-22T03:00:00-08:00');
+		it('at exactly 4am, today started at 4am same day', () => {
+			// January 22, 2026 at 4:00am Pacific — new day just started
+			const now = new Date('2026-01-22T04:00:00-08:00');
 			const { start, end } = getTodayRange(now);
 
 			expect(start.getDate()).to.equal(22);
@@ -41,9 +41,9 @@ describe('dates', () => {
 			expect(end.getDate()).to.equal(23);
 		});
 
-		it('at 2:59am, still in previous day', () => {
-			// January 22, 2026 at 2:59am Pacific — still "January 21" day
-			const now = new Date('2026-01-22T02:59:00-08:00');
+		it('at 3:59am, still in previous day', () => {
+			// January 22, 2026 at 3:59am Pacific — still "January 21" day
+			const now = new Date('2026-01-22T03:59:00-08:00');
 			const { start, end } = getTodayRange(now);
 
 			expect(start.getDate()).to.equal(21);

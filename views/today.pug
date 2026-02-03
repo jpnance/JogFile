@@ -1,17 +1,117 @@
 extends layout
 
 block content
-	main.container.mt-4
-		h1 Today
+	main.container.py-4
+		.row.justify-content-center
+			.col-12.col-lg-10.col-xl-8
+				//- Page header
+				.page-header
+					div
+						h1 Today
+						.date= todayFormatted
+					a.nav-link-secondary(href="/recurring")
+						span ↻
+						| Recurring
 
-		form.mb-4(method="POST" action="/tasks")
-			.input-group
-				input.form-control(type="text" name="title" placeholder="Add a task..." required)
-				button.btn.btn-primary(type="submit") Add
+				//- Add task form
+				.add-task-card.mb-4
+					form(method="POST" action="/tasks")
+						.d-flex.gap-2
+							input.form-control.flex-grow-1(type="text" name="title" placeholder="What needs to be done?" required autocomplete="off")
+							button.btn.btn-primary(type="submit") Add
+						.destination-selector
+							label.destination-option
+								input(type="radio" name="destination" value="today" checked)
+								span Today
+							label.destination-option
+								input#destDate(type="radio" name="destination" value="date")
+								span Schedule:
+								input#scheduledForDate.form-control.form-control-sm(type="date" name="scheduledFor" style="width: auto; margin-left: 0.25rem")
+							label.destination-option
+								input(type="radio" name="destination" value="scratch")
+								span Scratch Pad
 
-		if tasks.length === 0
-			p.text-muted No tasks for today.
-		else
-			.task-list
-				each task in tasks
-					include task
+				script.
+					// Auto-select "Schedule" radio when date picker is interacted with
+					const dateInput = document.getElementById('scheduledForDate');
+					const dateRadio = document.getElementById('destDate');
+					if (dateInput && dateRadio) {
+						dateInput.addEventListener('focus', () => dateRadio.checked = true);
+						dateInput.addEventListener('click', () => dateRadio.checked = true);
+					}
+
+				//- Today's tasks
+				if tasks.length === 0
+					.empty-state
+						.empty-state-icon ✓
+						p All clear for today
+				else
+					.task-list.mb-4
+						each task in tasks
+							include task
+
+				.section-divider
+
+				//- Tomorrow section
+				.mb-2
+					.section-header(data-bs-toggle="collapse" data-bs-target="#tomorrowSection" aria-expanded="false")
+						span.chevron ▶
+						span.section-title Tomorrow
+						span.section-count= tomorrowTasks.length
+					#tomorrowSection.collapse
+						.ps-4.py-2
+							if tomorrowTasks.length === 0
+								p.text-muted.small.mb-0 Nothing scheduled
+							else
+								each task in tomorrowTasks
+									.task-preview.d-flex.align-items-center
+										a(href=`/tasks/${task._id}/edit`)= task.title
+
+				//- Next 7 days section
+				.mb-2
+					.section-header(data-bs-toggle="collapse" data-bs-target="#upcomingSection" aria-expanded="false")
+						span.chevron ▶
+						span.section-title Next 7 Days
+						span.section-count= upcomingTasks.length
+					#upcomingSection.collapse
+						.ps-4.py-2
+							if upcomingTasks.length === 0
+								p.text-muted.small.mb-0 Nothing scheduled
+							else
+								each task in upcomingTasks
+									.task-preview.d-flex.align-items-center.justify-content-between
+										a(href=`/tasks/${task._id}/edit`)= task.title
+										span.date= formatDate(task.scheduledFor)
+
+				//- Later section
+				.mb-2
+					.section-header(data-bs-toggle="collapse" data-bs-target="#laterSection" aria-expanded="false")
+						span.chevron ▶
+						span.section-title Later
+						span.section-count= laterTasks.length
+					#laterSection.collapse
+						.ps-4.py-2
+							if laterTasks.length === 0
+								p.text-muted.small.mb-0 Nothing scheduled
+							else
+								each task in laterTasks
+									.task-preview.d-flex.align-items-center.justify-content-between
+										a(href=`/tasks/${task._id}/edit`)= task.title
+										span.date= formatDate(task.scheduledFor)
+
+				.section-divider
+
+				//- Scratch Pad section
+				.mb-2
+					.section-header(data-bs-toggle="collapse" data-bs-target="#scratchSection" aria-expanded="false")
+						span.chevron ▶
+						span.section-title Scratch Pad
+						span.section-count= scratchPadTasks.length
+					#scratchSection.collapse
+						.ps-4.py-2
+							if scratchPadTasks.length === 0
+								p.text-muted.small.mb-0 No items
+							else
+								each task in scratchPadTasks
+									.task-preview.d-flex.align-items-center
+										a(href=`/tasks/${task._id}/edit`)= task.title

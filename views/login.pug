@@ -1,14 +1,13 @@
 extends layout
 
 block content
-	main.container.mt-5
-		.row.justify-content-center
-			.col-md-4
-				h1.mb-4 JogFile
-				if error
-					.alert.alert-danger= error
-				form(method="POST" action="/login")
-					.mb-3
-						label.form-label(for="password") Password
-						input.form-control#password(type="password" name="password" autofocus)
-					button.btn.btn-primary(type="submit") Log in
+	main.login-container
+		.login-card
+			h1 JogFile
+			if error
+				.alert.alert-danger.py-2= error
+			form(method="POST" action="/login")
+				.mb-4
+					label.form-label(for="password") Password
+					input.form-control#password(type="password" name="password" autofocus placeholder="Enter password")
+				button.btn.btn-primary.w-100(type="submit") Log in
