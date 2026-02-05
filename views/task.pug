@@ -1,4 +1,6 @@
-.task-item.d-flex.align-items-center(data-id=task._id data-position=task.position)
+- var staleClass = task.rollovers >= 5 ? 'task-stale-3' : task.rollovers >= 3 ? 'task-stale-2' : task.rollovers >= 1 ? 'task-stale-1' : ''
+- var recurringClass = task.generatedFrom ? 'task-recurring' : ''
+.task-item.d-flex.align-items-center(data-id=task._id data-position=task.position class=`${staleClass} ${recurringClass}`)
 	.reorder-buttons.me-3.d-flex.flex-column.align-items-center
 		form(method="POST" action=`/tasks/${task._id}/move-up`)
 			button.btn.btn-link(type="submit" title="Move up") ▲
@@ -7,7 +9,10 @@
 	form.me-3(method="POST" action=`/tasks/${task._id}/complete`)
 		button.btn.btn-outline-success(type="submit" title="Complete") ✓
 	.flex-grow-1
-		.task-title= task.title
+		.task-title
+			= task.title
+			if task.generatedFrom
+				span.task-source-indicator ↻
 		if task.description
 			.task-description= task.description
 		if task.rollovers > 0

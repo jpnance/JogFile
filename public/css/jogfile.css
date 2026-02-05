@@ -1,20 +1,36 @@
 /* JogFile custom styles */
 
 :root {
-	--jf-bg: #f5f5f7;
+	--jf-bg: #f0f4f8;
 	--jf-card-bg: #ffffff;
-	--jf-border: #e5e5e7;
-	--jf-text: #1d1d1f;
-	--jf-text-secondary: #86868b;
-	--jf-accent: #0071e3;
-	--jf-accent-hover: #0077ed;
-	--jf-success: #34c759;
-	--jf-warning: #ff9f0a;
-	--jf-danger: #ff3b30;
+	--jf-border: #e2e8f0;
+	--jf-text: #1a202c;
+	--jf-text-secondary: #718096;
+	--jf-accent: #3182ce;
+	--jf-accent-hover: #2b6cb0;
+	--jf-success: #38a169;
+	--jf-warning: #dd6b20;
+	--jf-danger: #e53e3e;
 	--jf-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
 	--jf-shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.1);
 	--jf-radius: 12px;
 	--jf-radius-sm: 8px;
+	
+	/* Accent colors for different contexts */
+	--jf-today: #3182ce;
+	--jf-today-light: #ebf4ff;
+	--jf-tomorrow: #805ad5;
+	--jf-tomorrow-light: #f3e8ff;
+	--jf-upcoming: #319795;
+	--jf-upcoming-light: #e6fffa;
+	--jf-later: #718096;
+	--jf-later-light: #f7fafc;
+	--jf-scratch: #d69e2e;
+	--jf-scratch-light: #fefcbf;
+	--jf-recurring: #dd6b20;
+	--jf-recurring-light: #feebc8;
+	--jf-completed: #38a169;
+	--jf-completed-light: #f0fff4;
 }
 
 * {
@@ -89,14 +105,15 @@ h1 { font-size: 2rem; }
 }
 
 .btn-primary {
-	background: var(--jf-accent);
-	border-color: var(--jf-accent);
+	background: linear-gradient(135deg, var(--jf-today) 0%, var(--jf-tomorrow) 100%);
+	border: none;
+	box-shadow: 0 2px 4px rgba(49, 130, 206, 0.3);
 }
 
 .btn-primary:hover {
-	background: var(--jf-accent-hover);
-	border-color: var(--jf-accent-hover);
+	background: linear-gradient(135deg, var(--jf-accent-hover) 0%, #6b46c1 100%);
 	transform: translateY(-1px);
+	box-shadow: 0 4px 8px rgba(49, 130, 206, 0.4);
 }
 
 .btn-success {
@@ -134,6 +151,7 @@ h1 { font-size: 2rem; }
 .task-item {
 	background: var(--jf-card-bg);
 	border: 1px solid var(--jf-border);
+	border-left: 3px solid var(--jf-today);
 	border-radius: var(--jf-radius-sm);
 	padding: 0.875rem 1rem !important;
 	margin-bottom: 0.5rem !important;
@@ -141,8 +159,54 @@ h1 { font-size: 2rem; }
 }
 
 .task-item:hover {
-	border-color: #d1d1d6;
+	border-color: var(--jf-border);
+	border-left-color: var(--jf-today);
 	box-shadow: var(--jf-shadow);
+	background: var(--jf-today-light);
+}
+
+/* Recurring-generated tasks */
+.task-item.task-recurring {
+	border-left-color: var(--jf-recurring);
+}
+.task-item.task-recurring:hover {
+	border-left-color: var(--jf-recurring);
+	background: var(--jf-recurring-light);
+}
+
+/* Staleness levels - override source color when stale */
+.task-item.task-stale-1 {
+	border-left-color: #ecc94b;
+	background: linear-gradient(90deg, #fefcbf 0%, var(--jf-card-bg) 8%);
+}
+.task-item.task-stale-1:hover {
+	border-left-color: #ecc94b;
+	background: #fefcbf;
+}
+
+.task-item.task-stale-2 {
+	border-left-color: #dd6b20;
+	background: linear-gradient(90deg, #feebc8 0%, var(--jf-card-bg) 8%);
+}
+.task-item.task-stale-2:hover {
+	border-left-color: #dd6b20;
+	background: #feebc8;
+}
+
+.task-item.task-stale-3 {
+	border-left-color: #e53e3e;
+	background: linear-gradient(90deg, #fed7d7 0%, var(--jf-card-bg) 8%);
+}
+.task-item.task-stale-3:hover {
+	border-left-color: #e53e3e;
+	background: #fed7d7;
+}
+
+/* Recurring source indicator */
+.task-source-indicator {
+	font-size: 0.75rem;
+	color: var(--jf-recurring);
+	margin-left: 0.5rem;
 }
 
 .task-title {
@@ -272,7 +336,6 @@ h1 { font-size: 2rem; }
 
 .section-header .chevron {
 	transition: transform 0.2s;
-	color: var(--jf-text-secondary);
 	font-size: 0.75rem;
 	margin-right: 0.75rem;
 }
@@ -284,12 +347,47 @@ h1 { font-size: 2rem; }
 .section-title {
 	font-weight: 600;
 	font-size: 0.875rem;
-	color: var(--jf-text-secondary);
 	text-transform: uppercase;
 	letter-spacing: 0.03em;
 }
 
 .section-count {
+	font-size: 0.75rem;
+	font-weight: 600;
+	padding: 0.125rem 0.5rem;
+	border-radius: 10px;
+	margin-left: auto;
+}
+
+/* Section color variants */
+#tomorrowSection + .section-header .chevron,
+.section-header[data-bs-target="#tomorrowSection"] .chevron,
+.section-header[data-bs-target="#tomorrowSection"] .section-title { color: var(--jf-tomorrow); }
+.section-header[data-bs-target="#tomorrowSection"] .section-count { background: var(--jf-tomorrow-light); color: var(--jf-tomorrow); }
+.section-header[data-bs-target="#tomorrowSection"]:hover { background: var(--jf-tomorrow-light); }
+
+.section-header[data-bs-target="#upcomingSection"] .chevron,
+.section-header[data-bs-target="#upcomingSection"] .section-title { color: var(--jf-upcoming); }
+.section-header[data-bs-target="#upcomingSection"] .section-count { background: var(--jf-upcoming-light); color: var(--jf-upcoming); }
+.section-header[data-bs-target="#upcomingSection"]:hover { background: var(--jf-upcoming-light); }
+
+.section-header[data-bs-target="#laterSection"] .chevron,
+.section-header[data-bs-target="#laterSection"] .section-title { color: var(--jf-later); }
+.section-header[data-bs-target="#laterSection"] .section-count { background: var(--jf-later-light); color: var(--jf-later); }
+.section-header[data-bs-target="#laterSection"]:hover { background: var(--jf-later-light); }
+
+.section-header[data-bs-target="#scratchSection"] .chevron,
+.section-header[data-bs-target="#scratchSection"] .section-title { color: var(--jf-scratch); }
+.section-header[data-bs-target="#scratchSection"] .section-count { background: var(--jf-scratch-light); color: var(--jf-scratch); }
+.section-header[data-bs-target="#scratchSection"]:hover { background: var(--jf-scratch-light); }
+
+.section-header[data-bs-target="#completedSection"] .chevron,
+.section-header[data-bs-target="#completedSection"] .section-title { color: var(--jf-completed); }
+.section-header[data-bs-target="#completedSection"] .section-count { background: var(--jf-completed-light); color: var(--jf-completed); }
+.section-header[data-bs-target="#completedSection"]:hover { background: var(--jf-completed-light); }
+
+/* Legacy section count style for non-colored contexts */
+.section-count-muted {
 	background: var(--jf-bg);
 	color: var(--jf-text-secondary);
 	font-size: 0.75rem;
@@ -328,6 +426,7 @@ h1 { font-size: 2rem; }
 .add-task-card {
 	background: var(--jf-card-bg);
 	border: 1px solid var(--jf-border);
+	border-top: 3px solid var(--jf-today);
 	border-radius: var(--jf-radius);
 	padding: 1rem;
 }
@@ -446,8 +545,16 @@ h1 { font-size: 2rem; }
 }
 
 .page-header .date {
-	color: var(--jf-text-secondary);
+	color: var(--jf-today);
 	font-size: 0.9375rem;
+	font-weight: 500;
+}
+
+.page-header h1 {
+	background: linear-gradient(135deg, var(--jf-today) 0%, var(--jf-tomorrow) 100%);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
 }
 
 /* Navigation link */
@@ -505,6 +612,7 @@ h1 { font-size: 2rem; }
 .recurring-item {
 	background: var(--jf-card-bg);
 	border: 1px solid var(--jf-border);
+	border-left: 3px solid var(--jf-recurring);
 	border-radius: var(--jf-radius-sm);
 	padding: 1rem;
 	margin-bottom: 0.75rem;
@@ -512,6 +620,7 @@ h1 { font-size: 2rem; }
 
 .recurring-item:hover {
 	box-shadow: var(--jf-shadow);
+	background: var(--jf-recurring-light);
 }
 
 .recurring-title {
@@ -521,7 +630,8 @@ h1 { font-size: 2rem; }
 
 .recurring-pattern {
 	font-size: 0.8125rem;
-	color: var(--jf-text-secondary);
+	color: var(--jf-recurring);
+	font-weight: 500;
 	margin-top: 0.25rem;
 }
 
