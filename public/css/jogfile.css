@@ -27,8 +27,8 @@
 	--jf-later-light: #f7fafc;
 	--jf-scratch: #d69e2e;
 	--jf-scratch-light: #fefcbf;
-	--jf-recurring: #dd6b20;
-	--jf-recurring-light: #feebc8;
+	--jf-recurring: #805ad5;
+	--jf-recurring-light: #f3e8ff;
 	--jf-completed: #38a169;
 	--jf-completed-light: #f0fff4;
 }
@@ -105,15 +105,13 @@ h1 { font-size: 2rem; }
 }
 
 .btn-primary {
-	background: linear-gradient(135deg, var(--jf-today) 0%, var(--jf-tomorrow) 100%);
-	border: none;
-	box-shadow: 0 2px 4px rgba(49, 130, 206, 0.3);
+	background: var(--jf-accent);
+	border-color: var(--jf-accent);
 }
 
 .btn-primary:hover {
-	background: linear-gradient(135deg, var(--jf-accent-hover) 0%, #6b46c1 100%);
-	transform: translateY(-1px);
-	box-shadow: 0 4px 8px rgba(49, 130, 206, 0.4);
+	background: var(--jf-accent-hover);
+	border-color: var(--jf-accent-hover);
 }
 
 .btn-success {
@@ -149,7 +147,7 @@ h1 { font-size: 2rem; }
 
 /* Task items */
 .task-item {
-	background: var(--jf-card-bg);
+	background: var(--jf-today-light);
 	border: 1px solid var(--jf-border);
 	border-left: 3px solid var(--jf-today);
 	border-radius: var(--jf-radius-sm);
@@ -159,47 +157,29 @@ h1 { font-size: 2rem; }
 }
 
 .task-item:hover {
-	border-color: var(--jf-border);
-	border-left-color: var(--jf-today);
 	box-shadow: var(--jf-shadow);
-	background: var(--jf-today-light);
 }
 
 /* Recurring-generated tasks */
 .task-item.task-recurring {
-	border-left-color: var(--jf-recurring);
-}
-.task-item.task-recurring:hover {
-	border-left-color: var(--jf-recurring);
 	background: var(--jf-recurring-light);
+	border-left-color: var(--jf-recurring);
 }
 
 /* Staleness levels - override source color when stale */
 .task-item.task-stale-1 {
-	border-left-color: #ecc94b;
-	background: linear-gradient(90deg, #fefcbf 0%, var(--jf-card-bg) 8%);
-}
-.task-item.task-stale-1:hover {
-	border-left-color: #ecc94b;
 	background: #fefcbf;
+	border-left-color: #d69e2e;
 }
 
 .task-item.task-stale-2 {
-	border-left-color: #dd6b20;
-	background: linear-gradient(90deg, #feebc8 0%, var(--jf-card-bg) 8%);
-}
-.task-item.task-stale-2:hover {
-	border-left-color: #dd6b20;
 	background: #feebc8;
+	border-left-color: #dd6b20;
 }
 
 .task-item.task-stale-3 {
-	border-left-color: #e53e3e;
-	background: linear-gradient(90deg, #fed7d7 0%, var(--jf-card-bg) 8%);
-}
-.task-item.task-stale-3:hover {
-	border-left-color: #e53e3e;
 	background: #fed7d7;
+	border-left-color: #c53030;
 }
 
 /* Recurring source indicator */
@@ -548,13 +528,6 @@ h1 { font-size: 2rem; }
 	color: var(--jf-today);
 	font-size: 0.9375rem;
 	font-weight: 500;
-}
-
-.page-header h1 {
-	background: linear-gradient(135deg, var(--jf-today) 0%, var(--jf-tomorrow) 100%);
-	-webkit-background-clip: text;
-	-webkit-text-fill-color: transparent;
-	background-clip: text;
 }
 
 /* Navigation link */
