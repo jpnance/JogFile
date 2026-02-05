@@ -49,7 +49,7 @@ block content
 								.mb-3
 									label.form-label Days of Week
 									.d-flex.flex-wrap.gap-2
-										- const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+										- const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 										each dayName, i in dayNames
 											label.btn.btn-sm.btn-outline-secondary.day-toggle(style="min-width: 50px")
 												input.d-none(type="checkbox" name="daysOfWeek" value=i checked=daysOfWeek.includes(i))
@@ -100,10 +100,10 @@ block content
 							if recurring
 								.section-divider
 
-								.mb-3
-									.form-check.form-switch
-										input.form-check-input#isActive(type="checkbox" name="isActive" checked=recurring.isActive role="switch")
-										label.form-check-label(for="isActive") Active
+							.mb-3
+								.form-check.form-switch
+									input.form-check-input#isActive(type="checkbox" name="isActive" checked=recurring.isActive role="switch")
+									label.form-check-label.ms-2(for="isActive") Active
 
 								.mb-4
 									label.form-label(for="pausedUntil") Pause until

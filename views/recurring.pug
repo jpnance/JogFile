@@ -12,29 +12,41 @@ block content
 					h1 Recurring
 					a.btn.btn-recurring.btn-sm(href="/recurring/new") + New
 
-				if recurring.length === 0
+				if totalCount === 0
 					.empty-state
 						.empty-state-icon ↻
 						p No recurring tasks yet
 						a.btn.btn-recurring(href="/recurring/new") Create your first
 				else
-					each rec in recurring
-						.recurring-item
-							.d-flex.justify-content-between.align-items-start
-								div
-									.recurring-title= rec.title
-									.recurring-pattern= rec.getPatternDescription()
-									if rec.description
-										.text-muted.small.mt-1= rec.description
-									.mt-2
-										if !rec.isActive
-											span.badge.bg-secondary Inactive
-										if rec.pausedUntil
-											span.badge.bg-warning Paused until #{rec.pausedUntil.toLocaleDateString()}
-								.d-flex.gap-2
-									a.btn.btn-sm.btn-outline-secondary(href=`/recurring/${rec._id}/edit`) Edit
-									if rec.pausedUntil
-										form(method="POST" action=`/recurring/${rec._id}/resume`)
-											button.btn.btn-sm.btn-outline-secondary(type="submit") Resume
-									form(method="POST" action=`/recurring/${rec._id}/delete` onsubmit="return confirm('Delete this recurring task?')")
-										button.btn.btn-sm.btn-outline-danger(type="submit") Delete
+					each group in groups
+						if group.items.length > 0
+							.mb-3
+								.section-header.recurring-section-header(data-bs-toggle="collapse" data-bs-target=`#section-${group.type}` aria-expanded=(group.type !== 'yearly' ? 'true' : 'false'))
+									span.chevron ▶
+									span.section-title= group.name
+									span.section-count= group.items.length
+								.collapse(id=`section-${group.type}` class=(group.type !== 'yearly' ? 'show' : ''))
+									.pt-2
+										each rec in group.items
+											- var nextOccurrence = rec.getNextOccurrence()
+											.recurring-item
+												.recurring-item-content
+													.recurring-title= rec.title
+													.recurring-pattern= rec.getPatternDescription()
+													if nextOccurrence
+														.recurring-next-date Next: #{nextOccurrence.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+													if rec.description
+														.text-muted.small.mt-1= rec.description
+													if !rec.isActive || rec.pausedUntil
+														.mt-2
+															if !rec.isActive
+																span.badge.bg-secondary Inactive
+															if rec.pausedUntil
+																span.badge.bg-warning Paused until #{rec.pausedUntil.toLocaleDateString()}
+												.recurring-item-actions
+													a.btn.btn-sm.btn-outline-secondary(href=`/recurring/${rec._id}/edit`) Edit
+													if rec.pausedUntil
+														form(method="POST" action=`/recurring/${rec._id}/resume`)
+															button.btn.btn-sm.btn-outline-secondary(type="submit") Resume
+													form(method="POST" action=`/recurring/${rec._id}/delete` onsubmit="return confirm('Delete this recurring task?')")
+														button.btn.btn-sm.btn-outline-danger(type="submit") Delete

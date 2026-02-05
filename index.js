@@ -600,8 +600,25 @@ app.post('/tasks/:id/move-down', requireLogin, async (req, res) => {
 
 // Recurring template management routes
 app.get('/recurring', requireLogin, async (req, res) => {
-	const recurring = await Recurring.find().sort({ createdAt: -1 });
-	res.render('recurring', { recurring });
+	const allRecurring = await Recurring.find().sort({ title: 1 });
+	
+	// Group by pattern type
+	const daily = allRecurring.filter(r => r.pattern?.type === 'daily');
+	const weekly = allRecurring.filter(r => r.pattern?.type === 'weekly');
+	const monthly = allRecurring.filter(r => r.pattern?.type === 'monthly');
+	const yearly = allRecurring.filter(r => r.pattern?.type === 'yearly');
+	const interval = allRecurring.filter(r => r.pattern?.type === 'interval');
+	
+	res.render('recurring', { 
+		groups: [
+			{ name: 'Daily', type: 'daily', items: daily },
+			{ name: 'Weekly', type: 'weekly', items: weekly },
+			{ name: 'Monthly', type: 'monthly', items: monthly },
+			{ name: 'Yearly', type: 'yearly', items: yearly },
+			{ name: 'Every N Days', type: 'interval', items: interval }
+		],
+		totalCount: allRecurring.length
+	});
 });
 
 app.get('/recurring/new', requireLogin, (req, res) => {

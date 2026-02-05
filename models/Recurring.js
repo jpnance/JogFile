@@ -103,7 +103,7 @@ recurringSchema.methods.isScheduledFor = function(date) {
  * @returns {string}
  */
 recurringSchema.methods.getPatternDescription = function() {
-	const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+	const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 	
 	switch (this.pattern.type) {
 		case 'daily':
@@ -137,6 +137,34 @@ recurringSchema.methods.getPatternDescription = function() {
 		default:
 			return 'Unknown pattern';
 	}
+};
+
+/**
+ * Get the next occurrence date for this recurring template.
+ * @returns {Date|null}
+ */
+recurringSchema.methods.getNextOccurrence = function() {
+	if (!this.isActive) return null;
+	
+	const today = new Date();
+	today.setHours(0, 0, 0, 0);
+	
+	// Start from today or pausedUntil, whichever is later
+	let checkDate = new Date(today);
+	if (this.pausedUntil && this.pausedUntil > today) {
+		checkDate = new Date(this.pausedUntil);
+		checkDate.setHours(0, 0, 0, 0);
+	}
+	
+	// Check up to 400 days out (covers yearly + some buffer)
+	for (let i = 0; i < 400; i++) {
+		if (this.isScheduledFor(checkDate)) {
+			return new Date(checkDate);
+		}
+		checkDate.setDate(checkDate.getDate() + 1);
+	}
+	
+	return null;
 };
 
 const Recurring = mongoose.model('Recurring', recurringSchema);
