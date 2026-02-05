@@ -10,13 +10,13 @@ block content
 
 				.page-header
 					h1 Recurring
-					a.btn.btn-primary(href="/recurring/new") + New
+					a.btn.btn-recurring.btn-sm(href="/recurring/new") + New
 
 				if recurring.length === 0
 					.empty-state
 						.empty-state-icon ↻
 						p No recurring tasks yet
-						a.btn.btn-primary(href="/recurring/new") Create your first
+						a.btn.btn-recurring(href="/recurring/new") Create your first
 				else
 					each rec in recurring
 						.recurring-item

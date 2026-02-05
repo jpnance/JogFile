@@ -114,6 +114,18 @@ h1 { font-size: 2rem; }
 	border-color: var(--jf-accent-hover);
 }
 
+.btn-recurring {
+	background: var(--jf-recurring);
+	border-color: var(--jf-recurring);
+	color: white;
+}
+
+.btn-recurring:hover {
+	background: #6b46c1;
+	border-color: #6b46c1;
+	color: white;
+}
+
 .btn-success {
 	background: var(--jf-success);
 	border-color: var(--jf-success);
