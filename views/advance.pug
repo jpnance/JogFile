@@ -52,14 +52,14 @@ block content
 
 							form(method="POST" action=`/advance/${task._id}/defer`)
 								input(type="hidden" name="date" value=tomorrowDateStr)
-								button.btn.btn-outline-secondary(type="submit") Tomorrow
+								button.btn.btn-tomorrow(type="submit") Tomorrow
 
 							form.d-flex.gap-2.schedule-form(method="POST" action=`/advance/${task._id}/defer`)
 								input.form-control.form-control-sm.schedule-date(type="date" name="date" required style="width: auto")
-								button.btn.btn-outline-secondary(type="submit") Schedule
+								button.btn.btn-tomorrow(type="submit") Schedule
 
 							form(method="POST" action=`/advance/${task._id}/scratch`)
-								button.btn.btn-outline-secondary(type="submit") Scratch Pad
+								button.btn.btn-scratch(type="submit") Scratch Pad
 
 							form(method="POST" action=`/advance/${task._id}/archive`)
 								button.btn.btn-outline-danger(type="submit") Archive
@@ -84,11 +84,11 @@ block content
 
 							form(method="POST" action=`/advance/recurring/${recurring._id}/defer`)
 								input(type="hidden" name="date" value=tomorrowDateStr)
-								button.btn.btn-outline-secondary(type="submit") Tomorrow
+								button.btn.btn-tomorrow(type="submit") Tomorrow
 
 							form.d-flex.gap-2.schedule-form(method="POST" action=`/advance/recurring/${recurring._id}/defer`)
 								input.form-control.form-control-sm.schedule-date(type="date" name="date" required style="width: auto")
-								button.btn.btn-outline-secondary(type="submit") Schedule
+								button.btn.btn-tomorrow(type="submit") Schedule
 
 							form(method="POST" action=`/advance/recurring/${recurring._id}/skip`)
 								button.btn.btn-outline-secondary(type="submit") Skip

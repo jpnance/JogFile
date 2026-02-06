@@ -1,11 +1,6 @@
 - var staleClass = task.rollovers >= 5 ? 'task-stale-3' : task.rollovers >= 3 ? 'task-stale-2' : task.rollovers >= 1 ? 'task-stale-1' : ''
 - var recurringClass = task.generatedFrom ? 'task-recurring' : ''
 .task-item.d-flex.align-items-center(data-id=task._id data-position=task.position class=`${staleClass} ${recurringClass}`)
-	.reorder-buttons.me-3.d-flex.flex-column.align-items-center
-		form(method="POST" action=`/tasks/${task._id}/move-up`)
-			button.btn.btn-link(type="submit" title="Move up") ▲
-		form(method="POST" action=`/tasks/${task._id}/move-down`)
-			button.btn.btn-link(type="submit" title="Move down") ▼
 	form.me-3(method="POST" action=`/tasks/${task._id}/complete`)
 		button.btn.btn-outline-success(type="submit" title="Complete") ✓
 	.flex-grow-1
@@ -28,6 +23,14 @@
 				if task.generatedFrom
 					li
 						a.dropdown-item(href=`/recurring/${task.generatedFrom}/edit`) Edit Recurring
+				li
+					hr.dropdown-divider
+				li
+					form(method="POST" action=`/tasks/${task._id}/move-up`)
+						button.dropdown-item(type="submit") Move Up
+				li
+					form(method="POST" action=`/tasks/${task._id}/move-down`)
+						button.dropdown-item(type="submit") Move Down
 				li
 					hr.dropdown-divider
 				li

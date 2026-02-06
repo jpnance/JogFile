@@ -126,6 +126,30 @@ h1 { font-size: 2rem; }
 	color: white;
 }
 
+.btn-tomorrow {
+	background: var(--jf-tomorrow);
+	border-color: var(--jf-tomorrow);
+	color: white;
+}
+
+.btn-tomorrow:hover {
+	background: #6b46c1;
+	border-color: #6b46c1;
+	color: white;
+}
+
+.btn-scratch {
+	background: var(--jf-scratch);
+	border-color: var(--jf-scratch);
+	color: white;
+}
+
+.btn-scratch:hover {
+	background: #b7791f;
+	border-color: #b7791f;
+	color: white;
+}
+
 .btn-success {
 	background: var(--jf-success);
 	border-color: var(--jf-success);
@@ -210,28 +234,6 @@ h1 { font-size: 2rem; }
 	color: var(--jf-text-secondary);
 	font-size: 0.8125rem;
 	margin-top: 0.25rem;
-}
-
-/* Reorder buttons */
-.reorder-buttons {
-	opacity: 0.4;
-	transition: opacity 0.2s;
-}
-
-.task-item:hover .reorder-buttons {
-	opacity: 1;
-}
-
-.reorder-buttons .btn-link {
-	color: var(--jf-text-secondary);
-	text-decoration: none;
-	line-height: 1;
-	font-size: 0.75rem;
-	padding: 0.125rem !important;
-}
-
-.reorder-buttons .btn-link:hover {
-	color: var(--jf-accent);
 }
 
 /* Complete button */
@@ -488,13 +490,33 @@ h1 { font-size: 2rem; }
 }
 
 .advance-actions {
-	display: flex;
-	flex-wrap: wrap;
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
 	gap: 0.5rem;
 }
 
+.advance-actions form {
+	display: contents;
+}
+
 .advance-actions .btn {
+	width: 100%;
+}
+
+.advance-actions .schedule-form {
+	display: flex;
+	grid-column: span 3;
+	gap: 0.5rem;
+}
+
+.advance-actions .schedule-form .schedule-date {
+	flex: 1;
+	min-width: 0;
+}
+
+.advance-actions .schedule-form .btn {
 	flex-shrink: 0;
+	width: auto;
 }
 
 /* Progress indicator */
@@ -737,11 +759,11 @@ h1 { font-size: 2rem; }
 	}
 	
 	.advance-actions {
-		flex-direction: column;
+		grid-template-columns: 1fr;
 	}
 	
-	.advance-actions .btn {
-		width: 100%;
+	.advance-actions .schedule-form {
+		grid-column: span 1;
 	}
 	
 	.destination-selector {
