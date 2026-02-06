@@ -46,13 +46,14 @@ block content
 
 							.mb-3
 								label.form-label(for="birthYear") Year (optional)
-								input.form-control#birthYear.w-auto(
+								input.form-control#birthYear(
 									type="number"
 									name="birthYear"
 									value=(person && person.birthYear ? person.birthYear : '')
 									placeholder="e.g., 1985"
 									min="1900"
 									max="2030"
+									style="width: 8rem"
 								)
 								.form-text If you add a year, we'll show their age.
 

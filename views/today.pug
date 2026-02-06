@@ -10,14 +10,15 @@ block content
 						h1 Today
 						.date= todayFormatted
 					.d-flex.align-items-center.gap-2
-						button.btn.btn-primary.btn-sm(type="button" data-bs-toggle="collapse" data-bs-target="#addTaskForm" aria-expanded="false" aria-controls="addTaskForm")
-							span + Add
 						a.btn.btn-birthday.btn-sm(href="/birthdays")
 							span 🎂
-							|  Birthdays
+							span.d-none.d-sm-inline  Birthdays
 						a.btn.btn-recurring.btn-sm(href="/recurring")
 							span ↻
-							|  Recurring
+							span.d-none.d-sm-inline  Recurring
+						button.btn.btn-primary.btn-sm(type="button" data-bs-toggle="collapse" data-bs-target="#addTaskForm" aria-expanded="false" aria-controls="addTaskForm")
+							span +
+							span.d-none.d-sm-inline  Add
 
 				//- Upcoming birthdays widget
 				if upcomingBirthdays && upcomingBirthdays.length > 0

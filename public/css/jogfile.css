@@ -319,7 +319,6 @@ h1 { font-size: 2rem; }
 	display: flex;
 	align-items: center;
 	padding: 0.75rem 1rem;
-	margin: 0 -1rem;
 	cursor: pointer;
 	user-select: none;
 	border-radius: var(--jf-radius-sm);
@@ -781,6 +780,10 @@ h1 { font-size: 2rem; }
 .birthday-section-header {
 	border-left: 3px solid var(--jf-birthday);
 	background: var(--jf-birthday-light);
+}
+
+.birthday-section-header:hover {
+	background: #fed7d7;
 }
 
 .birthday-section-header .section-title {
