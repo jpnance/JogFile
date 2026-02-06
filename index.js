@@ -10,6 +10,7 @@ import mongoose from 'mongoose';
 import { attachSession, requireLogin } from './auth/middleware.js';
 import Task from './models/Task.js';
 import Recurring from './models/Recurring.js';
+import Person from './models/Person.js';
 import { getTodayRange, getTomorrowRange, getScheduleDate, formatDate, formatToday, getLogicalToday } from './lib/dates.js';
 
 /**
@@ -87,8 +88,18 @@ app.post('/logout', (req, res) => {
 app.get('/advance', requireLogin, async (req, res) => {
 	const rolloverTasks = await getRolloverTasks();
 	const recurringPrompts = await getTodaysRecurringPrompts();
+	
+	// Check for today's birthdays that haven't been acknowledged this year
+	const allPeople = await Person.find();
+	const logicalTodayStr = getLogicalToday();
+	const logicalTodayDate = new Date(logicalTodayStr + 'T12:00:00');
+	const currentYear = logicalTodayDate.getFullYear();
+	const todaysBirthdays = allPeople.filter(person => {
+		// @ts-ignore - Mongoose custom method
+		return person.isBirthdayOn(logicalTodayDate) && person.lastAcknowledgedYear !== currentYear;
+	});
 
-	if (rolloverTasks.length === 0 && recurringPrompts.length === 0) {
+	if (rolloverTasks.length === 0 && recurringPrompts.length === 0 && todaysBirthdays.length === 0) {
 		return res.redirect('/');
 	}
 
@@ -99,6 +110,7 @@ app.get('/advance', requireLogin, async (req, res) => {
 	res.render('advance', {
 		rolloverTasks,
 		recurringPrompts,
+		todaysBirthdays,
 		currentIndex: 0,
 		formatDate,
 		tomorrowDateStr
@@ -292,6 +304,21 @@ app.post('/advance/recurring/:id/skip', requireLogin, async (req, res) => {
 	res.redirect('/advance');
 });
 
+// Birthday advancement - acknowledge
+app.post('/advance/birthday/:id/acknowledge', requireLogin, async (req, res) => {
+	const person = await Person.findById(req.params.id);
+	if (!person) {
+		return res.status(404).send('Person not found');
+	}
+
+	const logicalTodayStr = getLogicalToday();
+	const logicalTodayDate = new Date(logicalTodayStr + 'T12:00:00');
+	person.lastAcknowledgedYear = logicalTodayDate.getFullYear();
+	await person.save();
+
+	res.redirect('/advance');
+});
+
 app.get('/', requireLogin, async (req, res) => {
 	// Check for rollover tasks and recurring prompts first
 	const rolloverTasks = await getRolloverTasks();
@@ -345,6 +372,32 @@ app.get('/', requireLogin, async (req, res) => {
 		completedAt: { $ne: null, $gte: sevenDaysAgo }
 	}).sort({ completedAt: -1 }).limit(20);
 
+	// Upcoming birthdays (next 14 days)
+	const allPeople = await Person.find();
+	const upcomingBirthdays = [];
+	const logicalTodayStr = getLogicalToday();
+	const logicalTodayDate = new Date(logicalTodayStr + 'T12:00:00');
+	
+	for (const person of allPeople) {
+		// @ts-ignore - Mongoose custom method
+		const nextBirthday = person.getNextBirthday();
+		const diffTime = nextBirthday.getTime() - logicalTodayDate.getTime();
+		const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+		
+		if (diffDays >= 0 && diffDays <= 14) {
+			upcomingBirthdays.push({
+				person,
+				daysUntil: diffDays,
+				isToday: diffDays === 0,
+				// @ts-ignore - Mongoose custom method
+				turningAge: person.getTurningAge(nextBirthday)
+			});
+		}
+	}
+	
+	// Sort by days until birthday
+	upcomingBirthdays.sort((a, b) => a.daysUntil - b.daysUntil);
+
 	res.render('today', {
 		tasks,
 		tomorrowTasks,
@@ -352,6 +405,7 @@ app.get('/', requireLogin, async (req, res) => {
 		laterTasks,
 		scratchPadTasks,
 		completedTasks,
+		upcomingBirthdays,
 		formatDate,
 		todayFormatted: formatToday()
 	});
@@ -766,6 +820,77 @@ app.post('/recurring/:id/resume', requireLogin, async (req, res) => {
 	await recurring.save();
 
 	res.redirect('/recurring');
+});
+
+// ============================================
+// Birthday / People Routes
+// ============================================
+
+app.get('/birthdays', requireLogin, async (req, res) => {
+	const people = await Person.find().sort({ birthMonth: 1, birthDay: 1, name: 1 });
+	
+	// Group by month
+	const monthNames = ['', 'January', 'February', 'March', 'April', 'May', 'June',
+		'July', 'August', 'September', 'October', 'November', 'December'];
+	
+	const byMonth = [];
+	for (let m = 1; m <= 12; m++) {
+		const monthPeople = people.filter(p => p.birthMonth === m);
+		if (monthPeople.length > 0) {
+			byMonth.push({ month: m, name: monthNames[m], people: monthPeople });
+		}
+	}
+	
+	res.render('birthdays', { byMonth, totalCount: people.length });
+});
+
+app.get('/birthdays/new', requireLogin, (req, res) => {
+	res.render('edit-birthday', { person: null });
+});
+
+app.post('/birthdays', requireLogin, async (req, res) => {
+	const { name, birthMonth, birthDay, birthYear, notes } = req.body;
+	
+	await Person.create({
+		name: name.trim(),
+		birthMonth: parseInt(birthMonth, 10),
+		birthDay: parseInt(birthDay, 10),
+		birthYear: birthYear ? parseInt(birthYear, 10) : null,
+		notes: notes || ''
+	});
+	
+	res.redirect('/birthdays');
+});
+
+app.get('/birthdays/:id/edit', requireLogin, async (req, res) => {
+	const person = await Person.findById(req.params.id);
+	if (!person) {
+		return res.status(404).send('Person not found');
+	}
+	res.render('edit-birthday', { person });
+});
+
+app.post('/birthdays/:id/edit', requireLogin, async (req, res) => {
+	const person = await Person.findById(req.params.id);
+	if (!person) {
+		return res.status(404).send('Person not found');
+	}
+	
+	const { name, birthMonth, birthDay, birthYear, notes } = req.body;
+	
+	person.name = name.trim();
+	person.birthMonth = parseInt(birthMonth, 10);
+	person.birthDay = parseInt(birthDay, 10);
+	person.birthYear = birthYear ? parseInt(birthYear, 10) : null;
+	person.notes = notes || '';
+	
+	await person.save();
+	res.redirect('/birthdays');
+});
+
+app.post('/birthdays/:id/delete', requireLogin, async (req, res) => {
+	await Person.findByIdAndDelete(req.params.id);
+	res.redirect('/birthdays');
 });
 
 const port = process.env.PORT || 3000;

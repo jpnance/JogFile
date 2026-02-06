@@ -2,7 +2,8 @@ extends layout
 
 block content
 	main.container.py-4
-		- const totalItems = rolloverTasks.length + recurringPrompts.length
+		- const birthdayCount = todaysBirthdays ? todaysBirthdays.length : 0
+		- const totalItems = rolloverTasks.length + recurringPrompts.length + birthdayCount
 
 		if totalItems === 0
 			.advance-card.card
@@ -92,4 +93,23 @@ block content
 
 							form(method="POST" action=`/advance/recurring/${recurring._id}/skip`)
 								button.btn.btn-outline-secondary(type="submit") Skip
+
+			//- Then process today's birthdays
+			else if birthdayCount > 0
+				- const person = todaysBirthdays[0]
+				- const turningAge = person.getTurningAge(new Date())
+				.advance-card.card
+					.card-header.advance-header-birthday
+						span Birthday
+						span.badge.bg-white.bg-opacity-25 #{birthdayCount} left
+					.card-body.text-center
+						.birthday-emoji.mb-3 🎂
+						h3.mb-2 #{person.name}'s Birthday!
+						if turningAge
+							p.lead.mb-2 Turning #{turningAge} today
+						if person.notes
+							p.text-muted= person.notes
+						.mt-4
+							form(method="POST" action=`/advance/birthday/${person._id}/acknowledge`)
+								button.btn.btn-birthday(type="submit") Got It
 

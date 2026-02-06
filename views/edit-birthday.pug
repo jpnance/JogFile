@@ -1,0 +1,73 @@
+extends layout
+
+block content
+	main.container.py-4
+		.row.justify-content-center
+			.col-12.col-lg-10.col-xl-8
+				a.nav-link-secondary.mb-3(href="/birthdays")
+					span ←
+					| Back to Birthdays
+
+				.page-header
+					if person
+						h1 Edit Birthday
+					else
+						h1 Add Birthday
+
+				.card
+					.card-body
+						form(method="POST" action=person ? `/birthdays/${person._id}/edit` : '/birthdays')
+							.mb-3
+								label.form-label(for="name") Name
+								input.form-control#name(
+									type="text"
+									name="name"
+									value=(person ? person.name : '')
+									placeholder="e.g., Mom, David, Jane"
+									required
+									autofocus
+								)
+
+							.row.mb-3
+								.col-6
+									label.form-label(for="birthMonth") Month
+									select.form-select#birthMonth(name="birthMonth" required)
+										option(value="" disabled selected=!person) Select month
+										- var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+										each month, i in months
+											option(value=i+1 selected=(person && person.birthMonth === i+1))= month
+
+								.col-6
+									label.form-label(for="birthDay") Day
+									select.form-select#birthDay(name="birthDay" required)
+										option(value="" disabled selected=!person) Day
+										- for (var d = 1; d <= 31; d++)
+											option(value=d selected=(person && person.birthDay === d))= d
+
+							.mb-3
+								label.form-label(for="birthYear") Year (optional)
+								input.form-control#birthYear.w-auto(
+									type="number"
+									name="birthYear"
+									value=(person && person.birthYear ? person.birthYear : '')
+									placeholder="e.g., 1985"
+									min="1900"
+									max="2030"
+								)
+								.form-text If you add a year, we'll show their age.
+
+							.mb-3
+								label.form-label(for="notes") Notes (optional)
+								textarea.form-control#notes(
+									name="notes"
+									rows="2"
+									placeholder="Gift ideas, etc."
+								)= person ? person.notes : ''
+
+							.d-flex.gap-2
+								button.btn.btn-birthday(type="submit")
+									if person
+										| Save Changes
+									else
+										| Add Birthday
+								a.btn.btn-outline-secondary(href="/birthdays") Cancel

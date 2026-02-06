@@ -31,6 +31,8 @@
 	--jf-recurring-light: #f3e8ff;
 	--jf-completed: #38a169;
 	--jf-completed-light: #f0fff4;
+	--jf-birthday: #e53e3e;
+	--jf-birthday-light: #fff5f5;
 }
 
 * {
@@ -489,6 +491,18 @@ h1 { font-size: 2rem; }
 	border-radius: var(--jf-radius) var(--jf-radius) 0 0;
 }
 
+.advance-header-birthday {
+	background: var(--jf-birthday);
+	color: white;
+	border-bottom: none;
+	border-radius: var(--jf-radius) var(--jf-radius) 0 0;
+}
+
+.birthday-emoji {
+	font-size: 4rem;
+	line-height: 1;
+}
+
 .advance-actions {
 	display: grid;
 	grid-template-columns: repeat(3, 1fr);
@@ -751,6 +765,104 @@ h1 { font-size: 2rem; }
 	border-radius: var(--jf-radius-sm);
 }
 
+/* Birthday styles */
+.btn-birthday {
+	background-color: var(--jf-birthday);
+	border-color: var(--jf-birthday);
+	color: white;
+}
+
+.btn-birthday:hover {
+	background-color: #c53030;
+	border-color: #c53030;
+	color: white;
+}
+
+.birthday-section-header {
+	border-left: 3px solid var(--jf-birthday);
+	background: var(--jf-birthday-light);
+}
+
+.birthday-section-header .section-title {
+	color: var(--jf-birthday);
+}
+
+.birthday-section-header .section-count {
+	background: var(--jf-birthday);
+	color: white;
+}
+
+.birthday-item {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 1rem;
+	padding: 0.75rem 1rem;
+	background: var(--jf-card-bg);
+	border: 1px solid var(--jf-border);
+	border-left: 3px solid var(--jf-birthday);
+	border-radius: var(--jf-radius-sm);
+	margin-bottom: 0.5rem;
+}
+
+.birthday-item-content {
+	flex: 1;
+	min-width: 0;
+}
+
+.birthday-name {
+	font-weight: 500;
+	color: var(--jf-text);
+}
+
+.birthday-date {
+	font-size: 0.875rem;
+	color: var(--jf-text-secondary);
+}
+
+.birthday-age {
+	color: var(--jf-birthday);
+	font-weight: 500;
+}
+
+.birthday-item-actions {
+	display: flex;
+	gap: 0.5rem;
+	flex-shrink: 0;
+}
+
+/* Upcoming birthdays widget */
+.upcoming-birthdays {
+	background: var(--jf-birthday-light);
+	border: 1px solid var(--jf-birthday);
+	border-radius: var(--jf-radius);
+	padding: 1rem;
+	margin-bottom: 1rem;
+}
+
+.upcoming-birthdays-header {
+	font-weight: 600;
+	color: var(--jf-birthday);
+	margin-bottom: 0.5rem;
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.upcoming-birthday-item {
+	padding: 0.5rem 0;
+	border-bottom: 1px solid rgba(229, 62, 62, 0.2);
+}
+
+.upcoming-birthday-item:last-child {
+	border-bottom: none;
+	padding-bottom: 0;
+}
+
+.upcoming-birthday-today {
+	font-weight: 600;
+}
+
 /* Mobile optimizations */
 @media (max-width: 576px) {
 	.container {
@@ -769,5 +881,15 @@ h1 { font-size: 2rem; }
 	.destination-selector {
 		flex-direction: column;
 		gap: 0.5rem;
+	}
+	
+	.birthday-item {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+	
+	.birthday-item-actions {
+		width: auto;
+		margin-top: 0.5rem;
 	}
 }

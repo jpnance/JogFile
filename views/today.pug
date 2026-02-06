@@ -12,9 +12,34 @@ block content
 					.d-flex.align-items-center.gap-2
 						button.btn.btn-primary.btn-sm(type="button" data-bs-toggle="collapse" data-bs-target="#addTaskForm" aria-expanded="false" aria-controls="addTaskForm")
 							span + Add
+						a.btn.btn-birthday.btn-sm(href="/birthdays")
+							span 🎂
+							|  Birthdays
 						a.btn.btn-recurring.btn-sm(href="/recurring")
 							span ↻
 							|  Recurring
+
+				//- Upcoming birthdays widget
+				if upcomingBirthdays && upcomingBirthdays.length > 0
+					.upcoming-birthdays.mb-4
+						.upcoming-birthdays-header
+							span 🎂
+							span Upcoming Birthdays
+						each item in upcomingBirthdays
+							.upcoming-birthday-item(class=item.isToday ? 'upcoming-birthday-today' : '')
+								if item.isToday
+									span.text-danger Today: #{item.person.name}
+									if item.turningAge
+										span.birthday-age  (#{item.turningAge})
+								else if item.daysUntil === 1
+									span Tomorrow: #{item.person.name}
+									if item.turningAge
+										span.text-muted  (turning #{item.turningAge})
+								else
+									span= item.person.name
+									span.text-muted  in #{item.daysUntil} days
+									if item.turningAge
+										span.text-muted  (turning #{item.turningAge})
 
 				//- Add task form (collapsible)
 				#addTaskForm.collapse.mb-4

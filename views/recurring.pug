@@ -42,7 +42,7 @@ block content
 															if !rec.isActive
 																span.badge.bg-secondary Inactive
 															if rec.pausedUntil
-																span.badge.bg-warning Paused until #{rec.pausedUntil.toLocaleDateString()}
+																span.badge.bg-warning Paused until #{rec.pausedUntil.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
 												.recurring-item-actions
 													a.btn.btn-sm.btn-outline-secondary(href=`/recurring/${rec._id}/edit`) Edit
 													if rec.pausedUntil
