@@ -232,6 +232,22 @@ h1 { font-size: 2rem; }
 	font-size: 0.9375rem;
 }
 
+.task-link {
+	color: inherit;
+	text-decoration: none;
+}
+
+.task-link:hover {
+	color: var(--jf-accent);
+	text-decoration: underline;
+}
+
+.task-url-indicator {
+	margin-left: 0.25rem;
+	font-size: 0.75rem;
+	opacity: 0.6;
+}
+
 .task-description {
 	color: var(--jf-text-secondary);
 	font-size: 0.8125rem;

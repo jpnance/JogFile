@@ -234,6 +234,7 @@ app.post('/advance/recurring/:id/today', requireLogin, async (req, res) => {
 	const task = new Task({
 		title: recurring.title,
 		description: recurring.description,
+		url: recurring.url || '',
 		scheduledFor: todayMiddle,
 		position: newPosition,
 		generatedFrom: recurring._id
@@ -276,6 +277,7 @@ app.post('/advance/recurring/:id/defer', requireLogin, async (req, res) => {
 	const task = new Task({
 		title: recurring.title,
 		description: recurring.description,
+		url: recurring.url || '',
 		scheduledFor: scheduledDate,
 		position: newPosition,
 		generatedFrom: recurring._id
@@ -545,7 +547,7 @@ app.post('/tasks/:id/edit', requireLogin, async (req, res) => {
 		return res.status(404).send('Task not found');
 	}
 
-	const { title, description, scheduledFor } = req.body;
+	const { title, description, url, scheduledFor } = req.body;
 
 	if (!title || title.trim() === '') {
 		return res.status(400).send('Title is required');
@@ -553,6 +555,7 @@ app.post('/tasks/:id/edit', requireLogin, async (req, res) => {
 
 	task.title = title.trim();
 	task.description = description?.trim() || '';
+	task.url = url?.trim() || '';
 
 	if (scheduledFor === '') {
 		task.scheduledFor = null;
@@ -680,7 +683,7 @@ app.get('/recurring/new', requireLogin, (req, res) => {
 });
 
 app.post('/recurring', requireLogin, async (req, res) => {
-	const { title, description, patternType, daysOfWeek, weeklyInterval, weeklyAnchor, dayOfMonth, yearlyMonth, yearlyDay, intervalDays } = req.body;
+	const { title, description, url, patternType, daysOfWeek, weeklyInterval, weeklyAnchor, dayOfMonth, yearlyMonth, yearlyDay, intervalDays } = req.body;
 
 	if (!title || title.trim() === '') {
 		return res.status(400).send('Title is required');
@@ -716,6 +719,7 @@ app.post('/recurring', requireLogin, async (req, res) => {
 	const recurring = new Recurring({
 		title: title.trim(),
 		description: description?.trim() || '',
+		url: url?.trim() || '',
 		pattern
 	});
 
@@ -738,7 +742,7 @@ app.post('/recurring/:id/edit', requireLogin, async (req, res) => {
 		return res.status(404).send('Recurring template not found');
 	}
 
-	const { title, description, patternType, daysOfWeek, weeklyInterval, weeklyAnchor, dayOfMonth, yearlyMonth, yearlyDay, intervalDays, isActive, pausedUntil } = req.body;
+	const { title, description, url, patternType, daysOfWeek, weeklyInterval, weeklyAnchor, dayOfMonth, yearlyMonth, yearlyDay, intervalDays, isActive, pausedUntil } = req.body;
 
 	if (!title || title.trim() === '') {
 		return res.status(400).send('Title is required');
@@ -746,6 +750,7 @@ app.post('/recurring/:id/edit', requireLogin, async (req, res) => {
 
 	recurring.title = title.trim();
 	recurring.description = description?.trim() || '';
+	recurring.url = url?.trim() || '';
 	recurring.isActive = isActive === 'on' || isActive === 'true';
 
 	if (pausedUntil) {

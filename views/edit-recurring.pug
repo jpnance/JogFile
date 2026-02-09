@@ -22,6 +22,11 @@ block content
 								textarea.form-control#description(name="description" rows="2" placeholder="Optional notes...")= recurring ? recurring.description : ''
 
 							.mb-4
+								label.form-label(for="url") Quick Action URL
+								input.form-control#url(type="url" name="url" value=(recurring ? recurring.url : '') placeholder="https://...")
+								.form-text Generated tasks will inherit this URL
+
+							.mb-4
 								label.form-label.d-block Pattern
 								- const patternType = recurring && recurring.pattern ? recurring.pattern.type : 'daily'
 								.d-flex.flex-wrap.gap-3

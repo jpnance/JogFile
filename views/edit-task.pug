@@ -21,9 +21,15 @@ block content
 								label.form-label(for="description") Description
 								textarea.form-control#description(name="description" rows="3" placeholder="Optional notes...")= task.description
 
+							.mb-3
+								label.form-label(for="url") Quick Action URL
+								input.form-control#url(type="url" name="url" value=task.url placeholder="https://...")
+								.form-text Clicking the task will open this URL
+
 							.mb-4
 								label.form-label(for="scheduledFor") Scheduled For
-								input.form-control.w-auto#scheduledFor(type="date" name="scheduledFor" value=task.scheduledFor ? task.scheduledFor.toISOString().split('T')[0] : '')
+								- var dateValue = task.scheduledFor ? task.scheduledFor.toLocaleDateString('en-CA', { timeZone: 'America/Los_Angeles' }) : ''
+								input.form-control.w-auto#scheduledFor(type="date" name="scheduledFor" value=dateValue)
 								.form-text Leave blank for scratch pad
 
 							.d-flex.gap-2

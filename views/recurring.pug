@@ -21,11 +21,11 @@ block content
 					each group in groups
 						if group.items.length > 0
 							.mb-3
-								.section-header.recurring-section-header(data-bs-toggle="collapse" data-bs-target=`#section-${group.type}` aria-expanded=(group.type !== 'yearly' ? 'true' : 'false'))
+								.section-header.recurring-section-header(data-bs-toggle="collapse" data-bs-target=`#section-${group.type}` aria-expanded="true")
 									span.chevron ▶
 									span.section-title= group.name
 									span.section-count= group.items.length
-								.collapse(id=`section-${group.type}` class=(group.type !== 'yearly' ? 'show' : ''))
+								.collapse.show(id=`section-${group.type}`)
 									.pt-2
 										each rec in group.items
 											- var nextOccurrence = rec.getNextOccurrence()

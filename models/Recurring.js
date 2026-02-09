@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 const recurringSchema = new mongoose.Schema({
 	title: { type: String, required: true },
 	description: { type: String, default: '' },
+	url: { type: String, default: '' },  // Quick-action URL inherited by generated tasks
 	pattern: {
 		type: { 
 			type: String, 

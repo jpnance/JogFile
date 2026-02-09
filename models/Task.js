@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 const taskSchema = new mongoose.Schema({
 	title: { type: String, required: true },
 	description: { type: String, default: '' },
+	url: { type: String, default: '' },  // Quick-action URL for this task
 	checklist: [{
 		text: { type: String, required: true },
 		done: { type: Boolean, default: false }

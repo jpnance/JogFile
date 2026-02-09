@@ -5,9 +5,14 @@
 		button.btn.btn-outline-success(type="submit" title="Complete") ✓
 	.flex-grow-1
 		.task-title
-			= task.title
+			if task.url
+				a.task-link(href=task.url target="_blank" rel="noopener")= task.title
+			else
+				span= task.title
 			if task.generatedFrom
 				span.task-source-indicator ↻
+			if task.url
+				span.task-url-indicator 🔗
 		if task.description
 			.task-description= task.description
 		if task.rollovers > 0
