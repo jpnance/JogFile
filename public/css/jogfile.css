@@ -433,6 +433,14 @@ h1 { font-size: 2rem; }
 	color: var(--jf-text-secondary);
 }
 
+.task-preview-recurring a {
+	color: var(--jf-recurring);
+}
+
+.task-preview-recurring a:hover {
+	color: var(--jf-accent);
+}
+
 /* Add task card */
 .add-task-card {
 	background: var(--jf-card-bg);

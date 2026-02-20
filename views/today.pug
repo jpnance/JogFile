@@ -89,35 +89,50 @@ block content
 				.section-divider
 
 				//- Tomorrow section
+				- var tomorrowTotal = tomorrowTasks.length + (tomorrowRecurring ? tomorrowRecurring.length : 0)
 				.mb-2
 					.section-header(data-bs-toggle="collapse" data-bs-target="#tomorrowSection" aria-expanded="false")
 						span.chevron ▶
 						span.section-title Tomorrow
-						span.section-count= tomorrowTasks.length
+						span.section-count= tomorrowTotal
 					#tomorrowSection.collapse
 						.ps-4.py-2
-							if tomorrowTasks.length === 0
+							if tomorrowTotal === 0
 								p.text-muted.small.mb-0 Nothing scheduled
 							else
 								each task in tomorrowTasks
 									.task-preview.d-flex.align-items-center
 										a(href=`/tasks/${task._id}/edit`)= task.title
+								if tomorrowRecurring && tomorrowRecurring.length > 0
+									each rec in tomorrowRecurring
+										.task-preview.d-flex.align-items-center.task-preview-recurring
+											a(href=`/recurring/${rec._id}/edit`)
+												= rec.title
+												span.task-source-indicator  ↻
 
 				//- Next 7 days section
+				- var upcomingTotal = upcomingTasks.length + (upcomingRecurring ? upcomingRecurring.length : 0)
 				.mb-2
 					.section-header(data-bs-toggle="collapse" data-bs-target="#upcomingSection" aria-expanded="false")
 						span.chevron ▶
 						span.section-title Next 7 Days
-						span.section-count= upcomingTasks.length
+						span.section-count= upcomingTotal
 					#upcomingSection.collapse
 						.ps-4.py-2
-							if upcomingTasks.length === 0
+							if upcomingTotal === 0
 								p.text-muted.small.mb-0 Nothing scheduled
 							else
 								each task in upcomingTasks
 									.task-preview.d-flex.align-items-center.justify-content-between
 										a(href=`/tasks/${task._id}/edit`)= task.title
 										span.date= formatDate(task.scheduledFor)
+								if upcomingRecurring && upcomingRecurring.length > 0
+									each rec in upcomingRecurring
+										.task-preview.d-flex.align-items-center.justify-content-between.task-preview-recurring
+											a(href=`/recurring/${rec._id}/edit`)
+												= rec.title
+												span.task-source-indicator  ↻
+											span.date= formatDate(rec.scheduledFor)
 
 				//- Later section
 				.mb-2

@@ -19,7 +19,7 @@ block content
 
 							.mb-3
 								label.form-label(for="description") Description
-								textarea.form-control#description(name="description" rows="3" placeholder="Optional notes...")= task.description
+								input.form-control#description(type="text" name="description" value=task.description placeholder="Optional notes...")
 
 							.mb-3
 								label.form-label(for="url") Quick Action URL

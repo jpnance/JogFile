@@ -19,7 +19,7 @@ block content
 
 							.mb-4
 								label.form-label(for="description") Description
-								textarea.form-control#description(name="description" rows="2" placeholder="Optional notes...")= recurring ? recurring.description : ''
+								input.form-control#description(type="text" name="description" value=(recurring ? recurring.description : '') placeholder="Optional notes...")
 
 							.mb-4
 								label.form-label(for="url") Quick Action URL

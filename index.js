@@ -400,10 +400,48 @@ app.get('/', requireLogin, async (req, res) => {
 	// Sort by days until birthday
 	upcomingBirthdays.sort((a, b) => a.daysUntil - b.daysUntil);
 
+	// Find upcoming recurring items for each date range
+	const allRecurring = await Recurring.find({ isActive: true });
+	
+	// Helper to check recurring for a specific date
+	const getRecurringForDate = (/** @type {Date} */ date) => {
+		return allRecurring.filter(rec => {
+			// @ts-ignore - Mongoose custom method
+			return rec.isScheduledFor(date);
+		}).map(rec => ({
+			_id: rec._id,
+			title: rec.title,
+			description: rec.description,
+			// @ts-ignore - Mongoose custom method
+			patternDescription: rec.getPatternDescription(),
+			isRecurring: true
+		}));
+	};
+	
+	// Tomorrow's recurring
+	const tomorrowRecurring = getRecurringForDate(tomorrowStart);
+	
+	// Next 7 days recurring (check each day)
+	const upcomingRecurring = [];
+	const seenRecurringIds = new Set();
+	for (let d = 2; d <= 7; d++) {
+		const checkDate = new Date(todayStart);
+		checkDate.setDate(checkDate.getDate() + d);
+		const dayRecurring = getRecurringForDate(checkDate);
+		for (const rec of dayRecurring) {
+			if (!seenRecurringIds.has(rec._id.toString())) {
+				seenRecurringIds.add(rec._id.toString());
+				upcomingRecurring.push({ ...rec, scheduledFor: new Date(checkDate) });
+			}
+		}
+	}
+
 	res.render('today', {
 		tasks,
 		tomorrowTasks,
+		tomorrowRecurring,
 		upcomingTasks,
+		upcomingRecurring,
 		laterTasks,
 		scratchPadTasks,
 		completedTasks,
