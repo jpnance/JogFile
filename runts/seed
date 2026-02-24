@@ -1,0 +1,27 @@
+#!/bin/bash
+
+db="jogfile"
+base_command="docker compose exec -i mongo mongorestore --drop --archive"
+
+docker compose up -d mongo
+
+until docker compose exec -T mongo mongosh --eval "db.adminCommand('ping')" > /dev/null 2>&1; do
+  echo "Waiting for mongo..."
+  sleep 1
+done
+
+if [ -z "$1" ]; then
+	echo "Usage: runt seed --prod"
+	echo "       runt seed <path-to-dump-file>"
+elif [ "$1" == "--prod" ]; then
+	echo "Fetching latest dump from production..."
+	ssh coinflipper.org cat "~/backups/${db}/${db}.gz" | \
+		${base_command} --gzip 2>&1 | mrpretty
+else
+	echo "Restoring from $1..."
+	if [[ "$1" == *.gz ]]; then
+		${base_command} --gzip 2>&1 < "$1" | mrpretty
+	else
+		${base_command} 2>&1 < "$1" | mrpretty
+	fi
+fi

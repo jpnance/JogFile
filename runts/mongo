@@ -1,0 +1,6 @@
+#!/bin/bash
+
+container="jogfile-mongo"
+db="jogfile"
+
+docker exec -it ${container} mongosh ${db}
