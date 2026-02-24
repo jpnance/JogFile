@@ -1,0 +1,21 @@
+{
+  "slug": "jogfile",
+  "domain": "jogfile.com",
+  "port": 4836,
+  "type": "node",
+
+  "#": "For auto-deploy (omit to skip auto-deploy)",
+  "deploy_cmd": "docker compose run --rm --no-deps web npm ci && docker compose down && docker compose up -d",
+
+  "#": "For up.sh — bring containers up if they're down (omit if nothing to bring up)",
+  "up_cmd": "docker compose up -d",
+
+  "#": "For backups (omit to skip backups)",
+  "backup_cmd": "docker exec jogfile-mongo mongodump --archive --gzip > ~/backups/jogfile/jogfile.gz",
+
+  "#": "For metadata generation (used with monotonic alerting)",
+  "mongo_container": "jogfile-mongo",
+
+  "#": "Mongo-specific: collections that should never shrink (for alerting)",
+  "monotonic": ["tasks"]
+}
