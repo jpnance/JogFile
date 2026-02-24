@@ -1,0 +1,3 @@
+# Block everyone playing nicely
+User-agent: *
+Disallow: /
