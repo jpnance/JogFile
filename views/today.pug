@@ -96,7 +96,7 @@ block content
 						span.section-title Tomorrow
 						span.section-count= tomorrowTotal
 					#tomorrowSection.collapse
-						.ps-4.py-2
+						.px-4.py-2
 							if tomorrowTotal === 0
 								p.text-muted.small.mb-0 Nothing scheduled
 							else
@@ -118,21 +118,21 @@ block content
 						span.section-title Next 7 Days
 						span.section-count= upcomingTotal
 					#upcomingSection.collapse
-						.ps-4.py-2
+						.px-4.py-2
 							if upcomingTotal === 0
 								p.text-muted.small.mb-0 Nothing scheduled
 							else
 								each task in upcomingTasks
-									.task-preview.d-flex.align-items-center.justify-content-between
+									.task-preview
 										a(href=`/tasks/${task._id}/edit`)= task.title
-										span.date= formatDate(task.scheduledFor)
+										.task-preview-date= formatDate(task.scheduledFor)
 								if upcomingRecurring && upcomingRecurring.length > 0
 									each rec in upcomingRecurring
-										.task-preview.d-flex.align-items-center.justify-content-between.task-preview-recurring
+										.task-preview.task-preview-recurring
 											a(href=`/recurring/${rec._id}/edit`)
 												= rec.title
 												span.task-source-indicator  ↻
-											span.date= formatDate(rec.scheduledFor)
+											.task-preview-date= formatDate(rec.scheduledFor)
 
 				//- Later section
 				.mb-2
@@ -141,14 +141,14 @@ block content
 						span.section-title Later
 						span.section-count= laterTasks.length
 					#laterSection.collapse
-						.ps-4.py-2
+						.px-4.py-2
 							if laterTasks.length === 0
 								p.text-muted.small.mb-0 Nothing scheduled
 							else
 								each task in laterTasks
-									.task-preview.d-flex.align-items-center.justify-content-between
+									.task-preview
 										a(href=`/tasks/${task._id}/edit`)= task.title
-										span.date= formatDate(task.scheduledFor)
+										.task-preview-date= formatDate(task.scheduledFor)
 
 				.section-divider
 
@@ -159,7 +159,7 @@ block content
 						span.section-title Scratch Pad
 						span.section-count= scratchPadTasks.length
 					#scratchSection.collapse
-						.ps-4.py-2
+						.px-4.py-2
 							if scratchPadTasks.length === 0
 								p.text-muted.small.mb-0 No items
 							else
@@ -174,7 +174,7 @@ block content
 						span.section-title Completed
 						span.section-count= completedTasks.length
 					#completedSection.collapse
-						.ps-4.py-2
+						.px-4.py-2
 							if completedTasks.length === 0
 								p.text-muted.small.mb-0 Nothing completed recently
 							else

@@ -428,9 +428,12 @@ h1 { font-size: 2rem; }
 	color: var(--jf-accent);
 }
 
-.task-preview .date {
+.task-preview .date,
+.task-preview-date {
+	display: block;
 	font-size: 0.75rem;
 	color: var(--jf-text-secondary);
+	margin-top: 0.125rem;
 }
 
 .task-preview-recurring a {
