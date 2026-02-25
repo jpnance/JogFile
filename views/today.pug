@@ -54,22 +54,30 @@ block content
 									input(type="radio" name="destination" value="today" checked)
 									span Today
 								label.destination-option
+									input(type="radio" name="destination" value="tomorrow")
+									span Tomorrow
+								label.destination-option
 									input#destDate(type="radio" name="destination" value="date")
-									span Schedule:
-									input#scheduledForDate.form-control.form-control-sm(type="date" name="scheduledFor" style="width: auto; margin-left: 0.25rem")
+									span Schedule
 								label.destination-option
 									input(type="radio" name="destination" value="scratch")
 									span Scratch Pad
+							#scheduleDateWrap.schedule-date-wrap.d-none.mt-2
+								label.small.text-muted.mb-1.d-block(for="scheduledForDate") Date
+								input#scheduledForDate.form-control.form-control-sm(type="date" name="scheduledFor" style="max-width: 10rem")
 
 				script.
-					// Auto-select "Schedule" radio when date picker is interacted with
-					const dateInput = document.getElementById('scheduledForDate');
+					// Show/hide date input when Schedule is selected
+					const scheduleDateWrap = document.getElementById('scheduleDateWrap');
 					const dateRadio = document.getElementById('destDate');
-					if (dateInput && dateRadio) {
-						dateInput.addEventListener('focus', () => dateRadio.checked = true);
-						dateInput.addEventListener('click', () => dateRadio.checked = true);
+					const destinationRadios = document.querySelectorAll('input[name="destination"]');
+					function updateScheduleDateVisibility() {
+						if (dateRadio && scheduleDateWrap) {
+							scheduleDateWrap.classList.toggle('d-none', !dateRadio.checked);
+						}
 					}
-					// Focus the input when the form is shown
+					destinationRadios.forEach(radio => radio.addEventListener('change', updateScheduleDateVisibility));
+					// Focus the title input when the form is shown
 					const addTaskForm = document.getElementById('addTaskForm');
 					const addTaskInput = document.getElementById('addTaskInput');
 					if (addTaskForm && addTaskInput) {

@@ -461,20 +461,31 @@ app.post('/tasks', requireLogin, async (req, res) => {
 
 	// Determine the scheduled date
 	let taskDate = null;
+	let positionStart, positionEnd;
 	const { start, end } = getTodayRange();
 	const defaultDate = new Date(start.getTime() + (end.getTime() - start.getTime()) / 2);
 
 	if (destination === 'scratch') {
 		taskDate = null;
+		positionStart = positionEnd = null;
+	} else if (destination === 'tomorrow') {
+		const { start: tomorrowStart, end: tomorrowEnd } = getTomorrowRange();
+		taskDate = new Date(tomorrowStart.getTime() + (tomorrowEnd.getTime() - tomorrowStart.getTime()) / 2);
+		positionStart = tomorrowStart;
+		positionEnd = tomorrowEnd;
 	} else if (scheduledFor) {
 		taskDate = getScheduleDate(scheduledFor);
+		positionStart = start;
+		positionEnd = end;
 	} else {
 		taskDate = defaultDate;
+		positionStart = start;
+		positionEnd = end;
 	}
 
 	// Get the highest position for this day/scratch pad
 	const positionQuery = taskDate
-		? { scheduledFor: { $gte: start, $lt: end }, status: 'pending' }
+		? { scheduledFor: { $gte: positionStart, $lt: positionEnd }, status: 'pending' }
 		: { scheduledFor: null, status: 'pending' };
 
 	const lastTask = await Task.findOne(positionQuery).sort({ position: -1 });
