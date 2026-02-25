@@ -15,7 +15,7 @@ if [ -z "$1" ]; then
 	echo "       runt seed <path-to-dump-file>"
 elif [ "$1" == "--prod" ]; then
 	echo "Fetching latest dump from production..."
-	ssh coinflipper.org cat "~/backups/${db}/${db}.gz" | \
+	ssh jogfile.com cat "~/backups/${db}/${db}.gz" | \
 		${base_command} --gzip 2>&1 | mrpretty
 else
 	echo "Restoring from $1..."
