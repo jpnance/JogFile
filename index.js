@@ -374,7 +374,7 @@ app.get('/', requireLogin, async (req, res) => {
 		completedAt: { $ne: null, $gte: sevenDaysAgo }
 	}).sort({ completedAt: -1 }).limit(20);
 
-	// Upcoming birthdays (next 14 days)
+	// Upcoming birthdays (next 14 days) — only for people with notes (heuristic for "special" / advance notice)
 	const allPeople = await Person.find();
 	const upcomingBirthdays = [];
 	const logicalTodayStr = getLogicalToday();
@@ -385,8 +385,9 @@ app.get('/', requireLogin, async (req, res) => {
 		const nextBirthday = person.getNextBirthday();
 		const diffTime = nextBirthday.getTime() - logicalTodayDate.getTime();
 		const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+		const hasNotes = person.notes && String(person.notes).trim() !== '';
 		
-		if (diffDays >= 0 && diffDays <= 14) {
+		if (diffDays >= 0 && diffDays <= 14 && hasNotes) {
 			upcomingBirthdays.push({
 				person,
 				daysUntil: diffDays,
