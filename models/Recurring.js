@@ -26,6 +26,18 @@ const recurringSchema = new mongoose.Schema({
 });
 
 /**
+ * Check if this recurring template is currently paused.
+ * @param {Date} asOf - The date to check against (defaults to now)
+ * @returns {boolean}
+ */
+recurringSchema.methods.isPaused = function(asOf = new Date()) {
+	if (!this.pausedUntil) return false;
+	const checkDate = new Date(asOf);
+	checkDate.setHours(0, 0, 0, 0);
+	return this.pausedUntil > checkDate;
+};
+
+/**
  * Check if this recurring template is scheduled for a given date.
  * @param {Date} date - The date to check
  * @returns {boolean}
@@ -33,8 +45,7 @@ const recurringSchema = new mongoose.Schema({
 recurringSchema.methods.isScheduledFor = function(date) {
 	if (!this.isActive) return false;
 	
-	// Check if paused
-	if (this.pausedUntil && date < this.pausedUntil) return false;
+	if (this.isPaused(date)) return false;
 
 	const dayOfWeek = date.getDay();  // 0-6
 	const dayOfMonth = date.getDate();  // 1-31
@@ -152,7 +163,7 @@ recurringSchema.methods.getNextOccurrence = function() {
 	
 	// Start from today or pausedUntil, whichever is later
 	let checkDate = new Date(today);
-	if (this.pausedUntil && this.pausedUntil > today) {
+	if (this.isPaused()) {
 		checkDate = new Date(this.pausedUntil);
 		checkDate.setHours(0, 0, 0, 0);
 	}

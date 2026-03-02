@@ -37,15 +37,15 @@ block content
 														.recurring-next-date Next: #{nextOccurrence.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
 													if rec.description
 														.text-muted.small.mt-1= rec.description
-													if !rec.isActive || rec.pausedUntil
+													if !rec.isActive || rec.isPaused()
 														.mt-2
 															if !rec.isActive
 																span.badge.bg-secondary Inactive
-															if rec.pausedUntil
+															if rec.isPaused()
 																span.badge.bg-warning Paused until #{rec.pausedUntil.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
 												.recurring-item-actions
 													a.btn.btn-sm.btn-outline-secondary(href=`/recurring/${rec._id}/edit`) Edit
-													if rec.pausedUntil
+													if rec.isPaused()
 														form(method="POST" action=`/recurring/${rec._id}/resume`)
 															button.btn.btn-sm.btn-outline-secondary(type="submit") Resume
 													form(method="POST" action=`/recurring/${rec._id}/delete` onsubmit="return confirm('Delete this recurring task?')")
