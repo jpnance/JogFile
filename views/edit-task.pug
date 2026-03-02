@@ -12,6 +12,12 @@ block content
 					.card-body
 						h4.mb-4 Edit Task
 
+						if task.generatedFrom
+							.alert.alert-light.mb-4
+								i.bi.bi-arrow-repeat.me-2
+								| Generated from 
+								a(href=`/recurring/${task.generatedFrom._id}/edit`)= task.generatedFrom.title
+
 						form(method="POST" action=`/tasks/${task._id}/edit`)
 							.mb-3
 								label.form-label(for="title") Title

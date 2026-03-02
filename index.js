@@ -588,7 +588,7 @@ app.post('/tasks/:id/restore', requireLogin, async (req, res) => {
 });
 
 app.get('/tasks/:id/edit', requireLogin, async (req, res) => {
-	const task = await Task.findById(req.params.id);
+	const task = await Task.findById(req.params.id).populate('generatedFrom');
 	if (!task) {
 		return res.status(404).send('Task not found');
 	}
