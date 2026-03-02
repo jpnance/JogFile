@@ -2,7 +2,8 @@
 - var recurringClass = task.generatedFrom ? 'task-recurring' : ''
 .task-item.d-flex.align-items-center(data-id=task._id data-position=task.position class=`${staleClass} ${recurringClass}`)
 	form.me-3(method="POST" action=`/tasks/${task._id}/complete`)
-		button.btn.btn-outline-success(type="submit" title="Complete") ✓
+		button.btn.btn-outline-success(type="submit" title="Complete")
+			i.bi.bi-check-lg
 	.flex-grow-1
 		.task-title
 			if task.url
@@ -10,14 +11,16 @@
 			else
 				span= task.title
 			if task.generatedFrom
-				span.task-source-indicator ↻
+				span.task-source-indicator
+					i.bi.bi-arrow-repeat
 			if task.url
-				span.task-url-indicator 🔗
+				span.task-url-indicator
+					i.bi.bi-link-45deg
 		if task.description
 			.task-description= task.description
 		if task.rollovers > 0
 			.stale-indicator
-				span ⏱
+				i.bi.bi-hourglass-split
 				span Deferred #{task.rollovers}×
 	.task-actions.ms-3
 		.dropdown

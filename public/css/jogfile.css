@@ -224,7 +224,6 @@ h1 { font-size: 2rem; }
 
 /* Recurring source indicator */
 .task-source-indicator {
-	font-size: 0.75rem;
 	color: var(--jf-recurring);
 	margin-left: 0.5rem;
 }
@@ -246,7 +245,6 @@ h1 { font-size: 2rem; }
 
 .task-url-indicator {
 	margin-left: 0.25rem;
-	font-size: 0.75rem;
 	opacity: 0.6;
 }
 

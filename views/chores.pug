@@ -5,7 +5,7 @@ block content
 		.row.justify-content-center
 			.col-12.col-lg-10.col-xl-8
 				a.nav-link-secondary.mb-3(href="/")
-					span ←
+					i.bi.bi-arrow-left.me-1
 					| Back to Today
 
 				.page-header
@@ -14,7 +14,8 @@ block content
 
 				if chores.length === 0
 					.empty-state
-						.empty-state-icon 🔧
+						.empty-state-icon
+							i.bi.bi-wrench
 						p No chores yet
 						a.btn.btn-chore(href="/chores/new") Add your first
 				else

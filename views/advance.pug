@@ -8,7 +8,8 @@ block content
 		if totalItems === 0
 			.advance-card.card
 				.card-body.text-center.py-5
-					.empty-state-icon.mb-3 ✨
+					.empty-state-icon.mb-3
+						i.bi.bi-stars
 					h4 All caught up!
 					p.text-muted.mb-4 No items to process
 					a.btn.btn-primary(href="/") Go to Today
@@ -103,7 +104,8 @@ block content
 						span Birthday
 						span.badge.bg-white.bg-opacity-25 #{birthdayCount} left
 					.card-body.text-center
-						.birthday-emoji.mb-3 🎂
+						.birthday-emoji.mb-3
+							i.bi.bi-cake2
 						h3.mb-2 #{person.name}'s Birthday!
 						if turningAge
 							p.lead.mb-2 Turning #{turningAge} today
