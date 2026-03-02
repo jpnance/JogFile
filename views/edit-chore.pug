@@ -1,0 +1,55 @@
+extends layout
+
+block content
+	main.container.py-4
+		.row.justify-content-center
+			.col-12.col-lg-10.col-xl-8
+				a.nav-link-secondary.mb-3(href="/chores")
+					span ←
+					| Back to Chores
+
+				.page-header
+					if chore
+						h1 Edit Chore
+					else
+						h1 Add Chore
+
+				.card
+					.card-body
+						form(method="POST" action=chore ? `/chores/${chore._id}/edit` : '/chores')
+							.mb-3
+								label.form-label(for="title") Title
+								input.form-control#title(
+									type="text"
+									name="title"
+									value=(chore ? chore.title : '')
+									placeholder="e.g., Refill prescription"
+									required
+									autofocus
+								)
+
+							.mb-3
+								label.form-label(for="description") Notes (optional)
+								textarea.form-control#description(
+									name="description"
+									rows="3"
+									placeholder="Prescription number, details, etc."
+								)= chore ? chore.description : ''
+
+							.mb-3
+								label.form-label(for="url") URL (optional)
+								input.form-control#url(
+									type="url"
+									name="url"
+									value=(chore ? chore.url : '')
+									placeholder="https://..."
+								)
+								.form-text A quick-action link for the spawned task.
+
+							.d-flex.gap-2
+								button.btn.btn-chore(type="submit")
+									if chore
+										| Save Changes
+									else
+										| Add Chore
+								a.btn.btn-outline-secondary(href="/chores") Cancel

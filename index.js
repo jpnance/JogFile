@@ -11,6 +11,7 @@ import { attachSession, requireLogin } from './auth/middleware.js';
 import Task from './models/Task.js';
 import Recurring from './models/Recurring.js';
 import Person from './models/Person.js';
+import Chore from './models/Chore.js';
 import { getTodayRange, getTomorrowRange, getScheduleDate, formatDate, formatToday, getLogicalToday } from './lib/dates.js';
 
 /**
@@ -437,6 +438,9 @@ app.get('/', requireLogin, async (req, res) => {
 		}
 	}
 
+	// Fetch chores for quick-add
+	const chores = await Chore.find().sort({ title: 1 });
+
 	res.render('today', {
 		tasks,
 		tomorrowTasks,
@@ -447,6 +451,7 @@ app.get('/', requireLogin, async (req, res) => {
 		scratchPadTasks,
 		completedTasks,
 		upcomingBirthdays,
+		chores,
 		formatDate,
 		todayFormatted: formatToday()
 	});
@@ -946,6 +951,105 @@ app.post('/birthdays/:id/edit', requireLogin, async (req, res) => {
 app.post('/birthdays/:id/delete', requireLogin, async (req, res) => {
 	await Person.findByIdAndDelete(req.params.id);
 	res.redirect('/birthdays');
+});
+
+// Chore Routes
+app.get('/chores', requireLogin, async (req, res) => {
+	const chores = await Chore.find().sort({ title: 1 });
+	res.render('chores', { chores });
+});
+
+app.get('/chores/new', requireLogin, (req, res) => {
+	res.render('edit-chore', { chore: null });
+});
+
+app.post('/chores', requireLogin, async (req, res) => {
+	const { title, description, url } = req.body;
+
+	if (!title || title.trim() === '') {
+		return res.status(400).send('Title is required');
+	}
+
+	const chore = new Chore({
+		title: title.trim(),
+		description: description?.trim() || '',
+		url: url?.trim() || ''
+	});
+
+	await chore.save();
+	res.redirect('/chores');
+});
+
+app.get('/chores/:id/edit', requireLogin, async (req, res) => {
+	const chore = await Chore.findById(req.params.id);
+	if (!chore) {
+		return res.status(404).send('Chore not found');
+	}
+	res.render('edit-chore', { chore });
+});
+
+app.post('/chores/:id/edit', requireLogin, async (req, res) => {
+	const chore = await Chore.findById(req.params.id);
+	if (!chore) {
+		return res.status(404).send('Chore not found');
+	}
+
+	const { title, description, url } = req.body;
+
+	chore.title = title.trim();
+	chore.description = description?.trim() || '';
+	chore.url = url?.trim() || '';
+
+	await chore.save();
+	res.redirect('/chores');
+});
+
+app.post('/chores/:id/delete', requireLogin, async (req, res) => {
+	await Chore.findByIdAndDelete(req.params.id);
+	res.redirect('/chores');
+});
+
+app.post('/chores/:id/create-task', requireLogin, async (req, res) => {
+	const chore = await Chore.findById(req.params.id);
+	if (!chore) {
+		return res.status(404).send('Chore not found');
+	}
+
+	const { destination, scheduledFor } = req.body;
+
+	let taskDate = null;
+	let positionStart, positionEnd;
+	const { start, end } = getTodayRange();
+
+	if (destination === 'tomorrow') {
+		const { start: tomorrowStart, end: tomorrowEnd } = getTomorrowRange();
+		taskDate = new Date(tomorrowStart.getTime() + (tomorrowEnd.getTime() - tomorrowStart.getTime()) / 2);
+		positionStart = tomorrowStart;
+		positionEnd = tomorrowEnd;
+	} else if (destination === 'date' && scheduledFor) {
+		taskDate = getScheduleDate(scheduledFor);
+		positionStart = start;
+		positionEnd = end;
+	} else {
+		taskDate = new Date(start.getTime() + (end.getTime() - start.getTime()) / 2);
+		positionStart = start;
+		positionEnd = end;
+	}
+
+	const positionQuery = { scheduledFor: { $gte: positionStart, $lt: positionEnd }, status: 'pending' };
+	const lastTask = await Task.findOne(positionQuery).sort({ position: -1 });
+	const newPosition = lastTask ? lastTask.position + 1 : 0;
+
+	const task = new Task({
+		title: chore.title,
+		description: chore.description,
+		url: chore.url,
+		scheduledFor: taskDate,
+		position: newPosition
+	});
+
+	await task.save();
+	res.redirect('/');
 });
 
 const port = process.env.PORT || 3000;
