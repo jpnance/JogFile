@@ -45,26 +45,41 @@ block content
 									if task.rollovers > 0
 										|  · Deferred #{task.rollovers}×
 
-						.advance-actions
+						.advance-main-actions
 							form(method="POST" action=`/advance/${task._id}/complete`)
-								button.btn.btn-success(type="submit") I Did That
+								button.btn.btn-success(type="submit")
+									i.bi.bi-check-lg
+									|  I Did That
 
 							form(method="POST" action=`/advance/${task._id}/today`)
-								button.btn.btn-primary(type="submit") Move to Today
+								button.btn.btn-primary(type="submit")
+									i.bi.bi-sun
+									|  Move to Today
 
-							form(method="POST" action=`/advance/${task._id}/defer`)
-								input(type="hidden" name="date" value=tomorrowDateStr)
-								button.btn.btn-tomorrow(type="submit") Tomorrow
+						.advance-defer-section
+							.advance-defer-toggle(onclick="this.nextElementSibling.classList.toggle('show')")
+								i.bi.bi-calendar-plus
+								span Defer to another day
+								i.bi.bi-chevron-down
+							.advance-defer-options
+								form(method="POST" action=`/advance/${task._id}/defer`)
+									input(type="hidden" name="date" value=tomorrowDateStr)
+									button.advance-defer-chip(type="submit") Tomorrow
+								form(method="POST" action=`/advance/${task._id}/defer`)
+									input(type="hidden" name="date" value=nextWeekDateStr)
+									button.advance-defer-chip(type="submit") Next Week
+								form(method="POST" action=`/advance/${task._id}/defer`)
+									input(type="hidden" name="date" value=nextMonthDateStr)
+									button.advance-defer-chip(type="submit") Next Month
+								form.advance-defer-date(method="POST" action=`/advance/${task._id}/defer`)
+									input.form-control.form-control-sm(type="date" name="date" required)
+									button.advance-defer-chip(type="submit") Go
 
-							form.d-flex.gap-2.schedule-form(method="POST" action=`/advance/${task._id}/defer`)
-								input.form-control.form-control-sm.schedule-date(type="date" name="date" required style="width: auto")
-								button.btn.btn-tomorrow(type="submit") Schedule
-
+						.advance-footer
 							form(method="POST" action=`/advance/${task._id}/scratch`)
-								button.btn.btn-scratch(type="submit") Scratch Pad
-
+								button.advance-footer-btn(type="submit") Scratch Pad
 							form(method="POST" action=`/advance/${task._id}/archive`)
-								button.btn.btn-outline-danger(type="submit") Archive
+								button.advance-footer-btn.advance-footer-btn-danger(type="submit") Archive
 
 			//- Then process recurring prompts
 			else if recurringPrompts.length > 0
@@ -80,20 +95,35 @@ block content
 						.mb-3
 							small.text-muted= recurring.getPatternDescription()
 
-						.advance-actions
+						.advance-main-actions
 							form(method="POST" action=`/advance/recurring/${recurring._id}/today`)
-								button.btn.btn-primary(type="submit") Add to Today
-
-							form(method="POST" action=`/advance/recurring/${recurring._id}/defer`)
-								input(type="hidden" name="date" value=tomorrowDateStr)
-								button.btn.btn-tomorrow(type="submit") Tomorrow
-
-							form.d-flex.gap-2.schedule-form(method="POST" action=`/advance/recurring/${recurring._id}/defer`)
-								input.form-control.form-control-sm.schedule-date(type="date" name="date" required style="width: auto")
-								button.btn.btn-tomorrow(type="submit") Schedule
+								button.btn.btn-primary(type="submit")
+									i.bi.bi-plus-lg
+									|  Add to Today
 
 							form(method="POST" action=`/advance/recurring/${recurring._id}/skip`)
-								button.btn.btn-outline-secondary(type="submit") Skip
+								button.btn.btn-outline-secondary(type="submit")
+									i.bi.bi-skip-forward
+									|  Skip
+
+						.advance-defer-section
+							.advance-defer-toggle(onclick="this.nextElementSibling.classList.toggle('show')")
+								i.bi.bi-calendar-plus
+								span Schedule for later
+								i.bi.bi-chevron-down
+							.advance-defer-options
+								form(method="POST" action=`/advance/recurring/${recurring._id}/defer`)
+									input(type="hidden" name="date" value=tomorrowDateStr)
+									button.advance-defer-chip(type="submit") Tomorrow
+								form(method="POST" action=`/advance/recurring/${recurring._id}/defer`)
+									input(type="hidden" name="date" value=nextWeekDateStr)
+									button.advance-defer-chip(type="submit") Next Week
+								form(method="POST" action=`/advance/recurring/${recurring._id}/defer`)
+									input(type="hidden" name="date" value=nextMonthDateStr)
+									button.advance-defer-chip(type="submit") Next Month
+								form.advance-defer-date(method="POST" action=`/advance/recurring/${recurring._id}/defer`)
+									input.form-control.form-control-sm(type="date" name="date" required)
+									button.advance-defer-chip(type="submit") Go
 
 			//- Then process today's birthdays
 			else if birthdayCount > 0

@@ -104,9 +104,22 @@ app.get('/advance', requireLogin, async (req, res) => {
 		return res.redirect('/');
 	}
 
-	// Calculate tomorrow's date for the shortcut button
+	// Calculate date strings for defer options
 	const { start: tomorrowStart } = getTomorrowRange();
 	const tomorrowDateStr = tomorrowStart.toISOString().split('T')[0];
+
+	const today = new Date(tomorrowStart);
+	today.setDate(today.getDate() - 1);
+	const todayDayOfWeek = today.getDay();
+	const daysUntilMonday = todayDayOfWeek === 0 ? 1 : 8 - todayDayOfWeek;
+	const nextMonday = new Date(today);
+	nextMonday.setDate(nextMonday.getDate() + daysUntilMonday);
+	const nextWeekDateStr = nextMonday.toISOString().split('T')[0];
+
+	const firstOfNextMonth = new Date(today);
+	firstOfNextMonth.setMonth(firstOfNextMonth.getMonth() + 1);
+	firstOfNextMonth.setDate(1);
+	const nextMonthDateStr = firstOfNextMonth.toISOString().split('T')[0];
 
 	res.render('advance', {
 		rolloverTasks,
@@ -114,7 +127,9 @@ app.get('/advance', requireLogin, async (req, res) => {
 		todaysBirthdays,
 		currentIndex: 0,
 		formatDate,
-		tomorrowDateStr
+		tomorrowDateStr,
+		nextWeekDateStr,
+		nextMonthDateStr
 	});
 });
 
