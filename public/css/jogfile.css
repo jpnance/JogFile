@@ -699,6 +699,11 @@ h1 { font-size: 2rem; }
 	font-weight: 500;
 }
 
+.shoe-logo {
+	height: 2.5rem;
+	width: auto;
+}
+
 /* Navigation link */
 .nav-link-secondary {
 	display: inline-flex;
