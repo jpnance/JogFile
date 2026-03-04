@@ -45,35 +45,33 @@ block content
 									if task.rollovers > 0
 										|  · Deferred #{task.rollovers}×
 
-						.advance-main-actions
+						.advance-primary-actions
 							form(method="POST" action=`/advance/${task._id}/complete`)
 								button.btn.btn-success(type="submit")
 									i.bi.bi-check-lg
-									|  I Did That
+									|  Done
 
 							form(method="POST" action=`/advance/${task._id}/today`)
 								button.btn.btn-primary(type="submit")
 									i.bi.bi-sun
-									|  Move to Today
+									|  Today
 
-						.advance-defer-section
-							.advance-defer-toggle(onclick="this.nextElementSibling.classList.toggle('show')")
+							form(method="POST" action=`/advance/${task._id}/defer`)
+								input(type="hidden" name="date" value=tomorrowDateStr)
+								button.btn.btn-outline-secondary(type="submit") Tomorrow
+
+						.advance-schedule-section
+							.advance-schedule-toggle(onclick="this.nextElementSibling.classList.toggle('show')")
 								i.bi.bi-calendar-plus
-								span Defer to another day
+								span Schedule for later
 								i.bi.bi-chevron-down
-							.advance-defer-options
-								form(method="POST" action=`/advance/${task._id}/defer`)
-									input(type="hidden" name="date" value=tomorrowDateStr)
-									button.advance-defer-chip(type="submit") Tomorrow
-								form(method="POST" action=`/advance/${task._id}/defer`)
-									input(type="hidden" name="date" value=nextWeekDateStr)
-									button.advance-defer-chip(type="submit") Next Week
-								form(method="POST" action=`/advance/${task._id}/defer`)
-									input(type="hidden" name="date" value=nextMonthDateStr)
-									button.advance-defer-chip(type="submit") Next Month
-								form.advance-defer-date(method="POST" action=`/advance/${task._id}/defer`)
-									input.form-control.form-control-sm(type="date" name="date" required)
-									button.advance-defer-chip(type="submit") Go
+							.advance-schedule-content
+								.advance-quick-dates
+									span.advance-quick-date(onclick="setScheduleDate(this, 7)") Next Week
+									span.advance-quick-date(onclick="setScheduleDate(this, 30)") Next Month
+								form.advance-schedule-form(method="POST" action=`/advance/${task._id}/defer`)
+									input.form-control(type="date" name="date" required)
+									button.btn.btn-outline-primary(type="submit") Schedule
 
 						.advance-footer
 							form(method="POST" action=`/advance/${task._id}/scratch`)
@@ -95,35 +93,33 @@ block content
 						.mb-3
 							small.text-muted= recurring.getPatternDescription()
 
-						.advance-main-actions
+						.advance-primary-actions
 							form(method="POST" action=`/advance/recurring/${recurring._id}/today`)
 								button.btn.btn-primary(type="submit")
 									i.bi.bi-plus-lg
-									|  Add to Today
+									|  Today
+
+							form(method="POST" action=`/advance/recurring/${recurring._id}/defer`)
+								input(type="hidden" name="date" value=tomorrowDateStr)
+								button.btn.btn-outline-secondary(type="submit") Tomorrow
 
 							form(method="POST" action=`/advance/recurring/${recurring._id}/skip`)
 								button.btn.btn-outline-secondary(type="submit")
 									i.bi.bi-skip-forward
 									|  Skip
 
-						.advance-defer-section
-							.advance-defer-toggle(onclick="this.nextElementSibling.classList.toggle('show')")
+						.advance-schedule-section
+							.advance-schedule-toggle(onclick="this.nextElementSibling.classList.toggle('show')")
 								i.bi.bi-calendar-plus
 								span Schedule for later
 								i.bi.bi-chevron-down
-							.advance-defer-options
-								form(method="POST" action=`/advance/recurring/${recurring._id}/defer`)
-									input(type="hidden" name="date" value=tomorrowDateStr)
-									button.advance-defer-chip(type="submit") Tomorrow
-								form(method="POST" action=`/advance/recurring/${recurring._id}/defer`)
-									input(type="hidden" name="date" value=nextWeekDateStr)
-									button.advance-defer-chip(type="submit") Next Week
-								form(method="POST" action=`/advance/recurring/${recurring._id}/defer`)
-									input(type="hidden" name="date" value=nextMonthDateStr)
-									button.advance-defer-chip(type="submit") Next Month
-								form.advance-defer-date(method="POST" action=`/advance/recurring/${recurring._id}/defer`)
-									input.form-control.form-control-sm(type="date" name="date" required)
-									button.advance-defer-chip(type="submit") Go
+							.advance-schedule-content
+								.advance-quick-dates
+									span.advance-quick-date(onclick="setScheduleDate(this, 7)") Next Week
+									span.advance-quick-date(onclick="setScheduleDate(this, 30)") Next Month
+								form.advance-schedule-form(method="POST" action=`/advance/recurring/${recurring._id}/defer`)
+									input.form-control(type="date" name="date" required)
+									button.btn.btn-outline-primary(type="submit") Schedule
 
 			//- Then process today's birthdays
 			else if birthdayCount > 0
@@ -144,4 +140,14 @@ block content
 						.mt-4
 							form(method="POST" action=`/advance/birthday/${person._id}/acknowledge`)
 								button.btn.btn-birthday(type="submit") Got It
+
+block scripts
+	script.
+		function setScheduleDate(element, daysFromNow) {
+			const date = new Date();
+			date.setDate(date.getDate() + daysFromNow);
+			const dateStr = date.toISOString().split('T')[0];
+			const form = element.closest('.advance-schedule-content').querySelector('.advance-schedule-form');
+			form.querySelector('input[type="date"]').value = dateStr;
+		}
 
