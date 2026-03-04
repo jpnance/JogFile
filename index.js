@@ -12,7 +12,7 @@ import Task from './models/Task.js';
 import Recurring from './models/Recurring.js';
 import Person from './models/Person.js';
 import Chore from './models/Chore.js';
-import { getTodayRange, getTomorrowRange, getScheduleDate, formatDate, formatToday, getLogicalToday } from './lib/dates.js';
+import { getTodayRange, getTomorrowRange, getScheduleDate, formatDate, getLogicalToday } from './lib/dates.js';
 
 /**
  * Get all pending tasks scheduled before today (rollover tasks).
@@ -467,8 +467,7 @@ app.get('/', requireLogin, async (req, res) => {
 		completedTasks,
 		upcomingBirthdays,
 		chores,
-		formatDate,
-		todayFormatted: formatToday()
+		formatDate
 	});
 });
 

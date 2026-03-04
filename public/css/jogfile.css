@@ -693,14 +693,8 @@ h1 { font-size: 2rem; }
 	margin: 0;
 }
 
-.page-header .date {
-	color: var(--jf-today);
-	font-size: 0.9375rem;
-	font-weight: 500;
-}
-
 .shoe-logo {
-	height: 2.5rem;
+	height: 2rem;
 	width: auto;
 }
 
