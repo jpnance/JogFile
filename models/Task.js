@@ -19,7 +19,8 @@ const taskSchema = new mongoose.Schema({
 	completedAt: { type: Date, default: null },
 	rollovers: { type: Number, default: 0 },
 	lastRolloverDate: { type: Date, default: null },
-	generatedFrom: { type: mongoose.Schema.Types.ObjectId, ref: 'Recurring', default: null }
+	generatedFrom: { type: mongoose.Schema.Types.ObjectId, ref: 'Recurring', default: null },
+	snoozedUntil: { type: Date, default: null }
 });
 
 const Task = mongoose.model('Task', taskSchema);

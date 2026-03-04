@@ -44,6 +44,40 @@ async function getTodaysRecurringPrompts() {
 	});
 }
 
+/**
+ * Get one scratch pad item eligible for advancement review.
+ * Returns the oldest item that is 7+ days old and not currently snoozed.
+ */
+async function getScratchPadPrompt() {
+	const now = new Date();
+	const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+	
+	return Task.findOne({
+		scheduledFor: null,
+		status: 'pending',
+		createdAt: { $lt: sevenDaysAgo },
+		$or: [
+			{ snoozedUntil: null },
+			{ snoozedUntil: { $lte: now } }
+		]
+	}).sort({ createdAt: 1 });
+}
+
+/**
+ * Get today's birthdays that haven't been acknowledged this year.
+ */
+async function getTodaysBirthdays() {
+	const allPeople = await Person.find();
+	const logicalTodayStr = getLogicalToday();
+	const logicalTodayDate = new Date(logicalTodayStr + 'T12:00:00');
+	const currentYear = logicalTodayDate.getFullYear();
+	
+	return allPeople.filter(person => {
+		// @ts-ignore - Mongoose custom method
+		return person.isBirthdayOn(logicalTodayDate) && person.lastAcknowledgedYear !== currentYear;
+	});
+}
+
 const app = express();
 
 // Static files
@@ -89,18 +123,10 @@ app.post('/logout', (req, res) => {
 app.get('/advance', requireLogin, async (req, res) => {
 	const rolloverTasks = await getRolloverTasks();
 	const recurringPrompts = await getTodaysRecurringPrompts();
-	
-	// Check for today's birthdays that haven't been acknowledged this year
-	const allPeople = await Person.find();
-	const logicalTodayStr = getLogicalToday();
-	const logicalTodayDate = new Date(logicalTodayStr + 'T12:00:00');
-	const currentYear = logicalTodayDate.getFullYear();
-	const todaysBirthdays = allPeople.filter(person => {
-		// @ts-ignore - Mongoose custom method
-		return person.isBirthdayOn(logicalTodayDate) && person.lastAcknowledgedYear !== currentYear;
-	});
+	const todaysBirthdays = await getTodaysBirthdays();
+	const scratchPadPrompt = await getScratchPadPrompt();
 
-	if (rolloverTasks.length === 0 && recurringPrompts.length === 0 && todaysBirthdays.length === 0) {
+	if (rolloverTasks.length === 0 && recurringPrompts.length === 0 && todaysBirthdays.length === 0 && !scratchPadPrompt) {
 		return res.redirect('/');
 	}
 
@@ -125,6 +151,7 @@ app.get('/advance', requireLogin, async (req, res) => {
 		rolloverTasks,
 		recurringPrompts,
 		todaysBirthdays,
+		scratchPadPrompt,
 		currentIndex: 0,
 		formatDate,
 		tomorrowDateStr,
@@ -337,11 +364,92 @@ app.post('/advance/birthday/:id/acknowledge', requireLogin, async (req, res) => 
 	res.redirect('/advance');
 });
 
+// Scratch pad advancement - schedule for today
+app.post('/advance/scratchpad/:id/today', requireLogin, async (req, res) => {
+	const task = await Task.findById(req.params.id);
+	if (!task) {
+		return res.status(404).send('Task not found');
+	}
+
+	const { start, end } = getTodayRange();
+	const todayMiddle = new Date(start.getTime() + (end.getTime() - start.getTime()) / 2);
+	task.scheduledFor = todayMiddle;
+	task.snoozedUntil = null;
+	await task.save();
+
+	res.redirect('/advance');
+});
+
+// Scratch pad advancement - schedule for specific date
+app.post('/advance/scratchpad/:id/defer', requireLogin, async (req, res) => {
+	const task = await Task.findById(req.params.id);
+	if (!task) {
+		return res.status(404).send('Task not found');
+	}
+
+	const date = getScheduleDate(req.body.date);
+	task.scheduledFor = date;
+	task.snoozedUntil = null;
+	await task.save();
+
+	res.redirect('/advance');
+});
+
+// Scratch pad advancement - snooze (keep in scratch pad)
+app.post('/advance/scratchpad/:id/snooze', requireLogin, async (req, res) => {
+	const task = await Task.findById(req.params.id);
+	if (!task) {
+		return res.status(404).send('Task not found');
+	}
+
+	// Random snooze between 5-10 days
+	const snoozeDays = Math.floor(Math.random() * 6) + 5;
+	const snoozeUntil = new Date();
+	snoozeUntil.setDate(snoozeUntil.getDate() + snoozeDays);
+	task.snoozedUntil = snoozeUntil;
+	await task.save();
+
+	res.redirect('/advance');
+});
+
+// Scratch pad advancement - archive
+app.post('/advance/scratchpad/:id/archive', requireLogin, async (req, res) => {
+	const task = await Task.findById(req.params.id);
+	if (!task) {
+		return res.status(404).send('Task not found');
+	}
+
+	task.status = 'archived';
+	await task.save();
+
+	res.redirect('/advance');
+});
+
+// Scratch pad advancement - edit (snooze first, then redirect to edit page)
+app.post('/advance/scratchpad/:id/edit', requireLogin, async (req, res) => {
+	const task = await Task.findById(req.params.id);
+	if (!task) {
+		return res.status(404).send('Task not found');
+	}
+
+	// Snooze before redirecting to edit - clicking Edit counts as interaction
+	const snoozeDays = Math.floor(Math.random() * 6) + 5;
+	const snoozeUntil = new Date();
+	snoozeUntil.setDate(snoozeUntil.getDate() + snoozeDays);
+	task.snoozedUntil = snoozeUntil;
+	await task.save();
+
+	res.redirect(`/tasks/${task._id}/edit`);
+});
+
 app.get('/', requireLogin, async (req, res) => {
-	// Check for rollover tasks and recurring prompts first
+	// Check for items that require advancement processing
 	const rolloverTasks = await getRolloverTasks();
 	const recurringPrompts = await getTodaysRecurringPrompts();
-	if (rolloverTasks.length > 0 || recurringPrompts.length > 0) {
+	const scratchPadPrompt = await getScratchPadPrompt();
+	const todaysBirthdays = await getTodaysBirthdays();
+
+	if (rolloverTasks.length > 0 || recurringPrompts.length > 0 || scratchPadPrompt || todaysBirthdays.length > 0) {
 		return res.redirect('/advance');
 	}
 

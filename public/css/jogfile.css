@@ -524,6 +524,13 @@ h1 { font-size: 2rem; }
 	border-radius: var(--jf-radius) var(--jf-radius) 0 0;
 }
 
+.advance-header-scratchpad {
+	background: linear-gradient(135deg, #d29922 0%, #b8860b 100%);
+	color: white;
+	border-bottom: none;
+	border-radius: var(--jf-radius) var(--jf-radius) 0 0;
+}
+
 .birthday-emoji {
 	font-size: 4rem;
 	line-height: 1;
