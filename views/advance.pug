@@ -71,9 +71,11 @@ block content
 
 						.advance-footer
 							form(method="POST" action=`/advance/${task._id}/scratch`)
-								button.advance-footer-btn(type="submit") Scratch Pad
+								button.btn.btn-outline-secondary(type="submit")
+									i.bi.bi-sticky
+									|  Scratch Pad
 							form(method="POST" action=`/advance/${task._id}/archive`)
-								button.advance-footer-btn.advance-footer-btn-danger(type="submit") Archive
+								button.btn.btn-outline-danger(type="submit") Archive
 
 			//- Then process recurring prompts
 			else if recurringPrompts.length > 0

@@ -1081,18 +1081,9 @@ h1 { font-size: 2rem; }
 		padding-right: 1rem;
 	}
 	
-	.advance-primary-actions {
-		flex-direction: column;
-	}
-	
-	.advance-schedule-form {
-		flex-direction: column;
-		width: 100%;
-	}
-	
-	.advance-schedule-form .form-control,
-	.advance-schedule-form .btn {
-		width: 100%;
+	.advance-primary-actions .btn {
+		padding: 0.75rem 0.5rem;
+		font-size: 0.875rem;
 	}
 	
 	.destination-selector {
