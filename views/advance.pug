@@ -1,7 +1,7 @@
 extends layout
 
 block content
-	main.container.py-4
+	main.container.py-4.advance-container
 		- const birthdayCount = todaysBirthdays ? todaysBirthdays.length : 0
 		- const scratchPadCount = scratchPadPrompt ? 1 : 0
 		- const totalItems = rolloverTasks.length + recurringPrompts.length + birthdayCount + scratchPadCount
@@ -29,7 +29,6 @@ block content
 				.advance-card.card
 					.card-header.advance-header-rollover
 						span Rollover
-						span.badge.bg-white.bg-opacity-25 #{rolloverTasks.length} left
 					.card-body
 						h4.mb-2= task.title
 						if task.description
@@ -83,7 +82,6 @@ block content
 				.advance-card.card
 					.card-header.advance-header-recurring
 						span Recurring
-						span.badge.bg-white.bg-opacity-25 #{recurringPrompts.length} left
 					.card-body
 						h4.mb-2= recurring.title
 						if recurring.description
@@ -126,7 +124,6 @@ block content
 				.advance-card.card
 					.card-header.advance-header-birthday
 						span Birthday
-						span.badge.bg-white.bg-opacity-25 #{birthdayCount} left
 					.card-body.text-center
 						.birthday-emoji.mb-3
 							i.bi.bi-cake2
