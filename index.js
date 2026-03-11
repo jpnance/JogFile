@@ -402,11 +402,9 @@ app.post('/advance/scratchpad/:id/snooze', requireLogin, async (req, res) => {
 		return res.status(404).send('Task not found');
 	}
 
-	// Random snooze between 5-10 days
+	const { start } = getTodayRange();
 	const snoozeDays = Math.floor(Math.random() * 6) + 5;
-	const snoozeUntil = new Date();
-	snoozeUntil.setDate(snoozeUntil.getDate() + snoozeDays);
-	task.snoozedUntil = snoozeUntil;
+	task.snoozedUntil = new Date(start.getTime() + snoozeDays * 24 * 60 * 60 * 1000);
 	await task.save();
 
 	res.redirect('/advance');
@@ -432,11 +430,9 @@ app.post('/advance/scratchpad/:id/edit', requireLogin, async (req, res) => {
 		return res.status(404).send('Task not found');
 	}
 
-	// Snooze before redirecting to edit - clicking Edit counts as interaction
+	const { start } = getTodayRange();
 	const snoozeDays = Math.floor(Math.random() * 6) + 5;
-	const snoozeUntil = new Date();
-	snoozeUntil.setDate(snoozeUntil.getDate() + snoozeDays);
-	task.snoozedUntil = snoozeUntil;
+	task.snoozedUntil = new Date(start.getTime() + snoozeDays * 24 * 60 * 60 * 1000);
 	await task.save();
 
 	res.redirect(`/tasks/${task._id}/edit`);
