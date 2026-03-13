@@ -1007,6 +1007,27 @@ app.post('/recurring/:id/resume', requireLogin, async (req, res) => {
 app.get('/birthdays', requireLogin, async (req, res) => {
 	const people = await Person.find().sort({ birthMonth: 1, birthDay: 1, name: 1 });
 	
+	// Calculate upcoming birthdays (next 30 days)
+	const today = new Date();
+	today.setHours(12, 0, 0, 0);
+	
+	const upcoming = [];
+	for (const person of people) {
+		const nextBirthday = person.getNextBirthday();
+		const diffTime = nextBirthday.getTime() - today.getTime();
+		const daysUntil = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+		
+		if (daysUntil >= 0 && daysUntil <= 30) {
+			upcoming.push({
+				person,
+				daysUntil,
+				isToday: daysUntil === 0,
+				turningAge: person.getTurningAge(nextBirthday)
+			});
+		}
+	}
+	upcoming.sort((a, b) => a.daysUntil - b.daysUntil);
+	
 	// Group by month
 	const monthNames = ['', 'January', 'February', 'March', 'April', 'May', 'June',
 		'July', 'August', 'September', 'October', 'November', 'December'];
@@ -1019,7 +1040,7 @@ app.get('/birthdays', requireLogin, async (req, res) => {
 		}
 	}
 	
-	res.render('birthdays', { byMonth, totalCount: people.length });
+	res.render('birthdays', { upcoming, byMonth, totalCount: people.length });
 });
 
 app.get('/birthdays/new', requireLogin, (req, res) => {

@@ -913,22 +913,16 @@ h1 { font-size: 2rem; }
 	color: white;
 }
 
-.birthday-section-header {
-	border-left: 3px solid var(--jf-birthday);
-	background: var(--jf-birthday-light);
-}
-
-.birthday-section-header:hover {
-	background: #fed7d7;
-}
-
+.birthday-section-header .chevron,
 .birthday-section-header .section-title {
 	color: var(--jf-birthday);
 }
-
 .birthday-section-header .section-count {
-	background: var(--jf-birthday);
-	color: white;
+	background: var(--jf-birthday-light);
+	color: var(--jf-birthday);
+}
+.birthday-section-header:hover {
+	background: var(--jf-birthday-light);
 }
 
 .birthday-item {
