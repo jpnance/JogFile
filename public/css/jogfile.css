@@ -488,8 +488,14 @@ h1 { font-size: 2rem; }
 
 /* Advancement view */
 .advance-card {
-	max-width: 600px;
+	width: 100%;
 	margin: 0 auto;
+}
+
+@media (min-width: 576px) {
+	.advance-card {
+		max-width: 600px;
+	}
 }
 
 .advance-card .card-header {
