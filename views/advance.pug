@@ -7,7 +7,7 @@ block content
 		- const totalItems = rolloverTasks.length + recurringPrompts.length + birthdayCount + scratchPadCount
 
 		if totalItems === 0
-			.advance-card.card
+			.advance-card.card.w-100.mx-auto
 				.card-body.text-center.py-5
 					.empty-state-icon.mb-3
 						i.bi.bi-stars
@@ -26,7 +26,7 @@ block content
 			//- Process rollover tasks first
 			if rolloverTasks.length > 0
 				- const task = rolloverTasks[currentIndex]
-				.advance-card.card
+				.advance-card.card.w-100.mx-auto
 					.card-header.advance-header-rollover
 						span Rollover
 					.card-body
@@ -79,7 +79,7 @@ block content
 			//- Then process recurring prompts
 			else if recurringPrompts.length > 0
 				- const recurring = recurringPrompts[0]
-				.advance-card.card
+				.advance-card.card.w-100.mx-auto
 					.card-header.advance-header-recurring
 						span Recurring
 					.card-body
@@ -121,7 +121,7 @@ block content
 			else if birthdayCount > 0
 				- const person = todaysBirthdays[0]
 				- const turningAge = person.getTurningAge(new Date())
-				.advance-card.card
+				.advance-card.card.w-100.mx-auto
 					.card-header.advance-header-birthday
 						span Birthday
 					.card-body.text-center
@@ -139,7 +139,7 @@ block content
 			//- Finally process scratch pad item
 			else if scratchPadPrompt
 				- const daysAgo = Math.floor((Date.now() - new Date(scratchPadPrompt.createdAt).getTime()) / (1000 * 60 * 60 * 24))
-				.advance-card.card
+				.advance-card.card.w-100.mx-auto
 					.card-header.advance-header-scratchpad
 						span Scratch Pad
 					.card-body
