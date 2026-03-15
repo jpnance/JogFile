@@ -487,6 +487,13 @@ h1 { font-size: 2rem; }
 }
 
 /* Advancement view */
+.advance-container {
+	min-height: 100dvh;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
+
 .advance-card {
 	width: 100%;
 	margin: 0 auto;
@@ -1081,13 +1088,6 @@ h1 { font-size: 2rem; }
 		padding-right: 1rem;
 	}
 	
-	.advance-container {
-		min-height: 100dvh;
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-	}
-
 	.advance-primary-actions .btn {
 		padding: 0.75rem 0.5rem;
 		font-size: 0.875rem;
