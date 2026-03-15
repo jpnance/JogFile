@@ -1,5 +1,19 @@
 extends layout
 
+mixin scheduleSection(deferAction)
+	.advance-schedule-section
+		.advance-schedule-toggle(onclick="this.nextElementSibling.classList.toggle('show')")
+			i.bi.bi-calendar-plus
+			span Schedule for later
+			i.bi.bi-chevron-down
+		.advance-schedule-content
+			.advance-quick-dates
+				span.advance-quick-date(onclick="setNextMonday(this)") Next Week
+				span.advance-quick-date(onclick="setNextFirstOfMonth(this)") Next Month
+			form.advance-schedule-form(method="POST" action=deferAction)
+				input.form-control(type="date" name="date" required)
+				button.btn.btn-outline-primary(type="submit") Schedule
+
 block content
 	main.container.advance-container
 		- const birthdayCount = todaysBirthdays ? todaysBirthdays.length : 0
@@ -55,18 +69,7 @@ block content
 								input(type="hidden" name="date" value=tomorrowDateStr)
 								button.btn.btn-outline-secondary(type="submit") Tomorrow
 
-						.advance-schedule-section
-							.advance-schedule-toggle(onclick="this.nextElementSibling.classList.toggle('show')")
-								i.bi.bi-calendar-plus
-								span Schedule for later
-								i.bi.bi-chevron-down
-							.advance-schedule-content
-								.advance-quick-dates
-span.advance-quick-date(onclick="setNextMonday(this)") Next Week
-								span.advance-quick-date(onclick="setNextFirstOfMonth(this)") Next Month
-								form.advance-schedule-form(method="POST" action=`/advance/${task._id}/defer`)
-									input.form-control(type="date" name="date" required)
-									button.btn.btn-outline-primary(type="submit") Schedule
+						+scheduleSection(`/advance/${task._id}/defer`)
 
 						.advance-footer
 							form(method="POST" action=`/advance/${task._id}/scratch`)
@@ -104,18 +107,7 @@ span.advance-quick-date(onclick="setNextMonday(this)") Next Week
 									i.bi.bi-skip-forward
 									|  Skip
 
-						.advance-schedule-section
-							.advance-schedule-toggle(onclick="this.nextElementSibling.classList.toggle('show')")
-								i.bi.bi-calendar-plus
-								span Schedule for later
-								i.bi.bi-chevron-down
-							.advance-schedule-content
-								.advance-quick-dates
-span.advance-quick-date(onclick="setNextMonday(this)") Next Week
-								span.advance-quick-date(onclick="setNextFirstOfMonth(this)") Next Month
-								form.advance-schedule-form(method="POST" action=`/advance/recurring/${recurring._id}/defer`)
-									input.form-control(type="date" name="date" required)
-									button.btn.btn-outline-primary(type="submit") Schedule
+						+scheduleSection(`/advance/recurring/${recurring._id}/defer`)
 
 			//- Then process today's birthdays
 			else if birthdayCount > 0
@@ -160,18 +152,7 @@ span.advance-quick-date(onclick="setNextMonday(this)") Next Week
 									i.bi.bi-sticky
 									|  Keep
 
-						.advance-schedule-section
-							.advance-schedule-toggle(onclick="this.nextElementSibling.classList.toggle('show')")
-								i.bi.bi-calendar-plus
-								span Schedule for later
-								i.bi.bi-chevron-down
-							.advance-schedule-content
-								.advance-quick-dates
-span.advance-quick-date(onclick="setNextMonday(this)") Next Week
-								span.advance-quick-date(onclick="setNextFirstOfMonth(this)") Next Month
-								form.advance-schedule-form(method="POST" action=`/advance/scratchpad/${scratchPadPrompt._id}/defer`)
-									input.form-control(type="date" name="date" required)
-									button.btn.btn-outline-primary(type="submit") Schedule
+						+scheduleSection(`/advance/scratchpad/${scratchPadPrompt._id}/defer`)
 
 						.advance-footer
 							form(method="POST" action=`/advance/scratchpad/${scratchPadPrompt._id}/edit`)
