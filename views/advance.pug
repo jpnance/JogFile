@@ -1,7 +1,7 @@
 extends layout
 
 block content
-	main.container.py-4.advance-container
+	main.container.advance-container
 		- const birthdayCount = todaysBirthdays ? todaysBirthdays.length : 0
 		- const scratchPadCount = scratchPadPrompt ? 1 : 0
 		- const totalItems = rolloverTasks.length + recurringPrompts.length + birthdayCount + scratchPadCount
