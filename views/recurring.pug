@@ -45,6 +45,8 @@ block content
 															if rec.isPaused()
 																span.badge.bg-warning Paused until #{rec.pausedUntil.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
 												.recurring-item-actions
+													form.d-inline(method="POST" action=`/recurring/${rec._id}/create-task`)
+														button.btn.btn-sm.btn-outline-primary(type="submit") → Today
 													a.btn.btn-sm.btn-outline-secondary(href=`/recurring/${rec._id}/edit`) Edit
 													if rec.isPaused()
 														form(method="POST" action=`/recurring/${rec._id}/resume`)

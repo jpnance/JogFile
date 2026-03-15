@@ -1000,6 +1000,34 @@ app.post('/recurring/:id/resume', requireLogin, async (req, res) => {
 	res.redirect('/recurring');
 });
 
+app.post('/recurring/:id/create-task', requireLogin, async (req, res) => {
+	const recurring = await Recurring.findById(req.params.id);
+	if (!recurring) {
+		return res.status(404).send('Recurring template not found');
+	}
+
+	const { start, end } = getTodayRange();
+	const todayMiddle = new Date(start.getTime() + (end.getTime() - start.getTime()) / 2);
+
+	const lastTask = await Task.findOne({
+		scheduledFor: { $gte: start, $lt: end },
+		status: 'pending'
+	}).sort({ position: -1 });
+	const newPosition = lastTask ? lastTask.position + 1 : 0;
+
+	const task = new Task({
+		title: recurring.title,
+		description: recurring.description,
+		url: recurring.url || '',
+		scheduledFor: todayMiddle,
+		position: newPosition,
+		generatedFrom: recurring._id
+	});
+	await task.save();
+
+	res.redirect('/');
+});
+
 // ============================================
 // Birthday / People Routes
 // ============================================
