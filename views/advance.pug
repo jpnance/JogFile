@@ -62,8 +62,8 @@ block content
 								i.bi.bi-chevron-down
 							.advance-schedule-content
 								.advance-quick-dates
-									span.advance-quick-date(onclick="setScheduleDate(this, 7)") Next Week
-									span.advance-quick-date(onclick="setScheduleDate(this, 30)") Next Month
+span.advance-quick-date(onclick="setNextMonday(this)") Next Week
+								span.advance-quick-date(onclick="setNextFirstOfMonth(this)") Next Month
 								form.advance-schedule-form(method="POST" action=`/advance/${task._id}/defer`)
 									input.form-control(type="date" name="date" required)
 									button.btn.btn-outline-primary(type="submit") Schedule
@@ -111,8 +111,8 @@ block content
 								i.bi.bi-chevron-down
 							.advance-schedule-content
 								.advance-quick-dates
-									span.advance-quick-date(onclick="setScheduleDate(this, 7)") Next Week
-									span.advance-quick-date(onclick="setScheduleDate(this, 30)") Next Month
+span.advance-quick-date(onclick="setNextMonday(this)") Next Week
+								span.advance-quick-date(onclick="setNextFirstOfMonth(this)") Next Month
 								form.advance-schedule-form(method="POST" action=`/advance/recurring/${recurring._id}/defer`)
 									input.form-control(type="date" name="date" required)
 									button.btn.btn-outline-primary(type="submit") Schedule
@@ -167,8 +167,8 @@ block content
 								i.bi.bi-chevron-down
 							.advance-schedule-content
 								.advance-quick-dates
-									span.advance-quick-date(onclick="setScheduleDate(this, 7)") Next Week
-									span.advance-quick-date(onclick="setScheduleDate(this, 30)") Next Month
+span.advance-quick-date(onclick="setNextMonday(this)") Next Week
+								span.advance-quick-date(onclick="setNextFirstOfMonth(this)") Next Month
 								form.advance-schedule-form(method="POST" action=`/advance/scratchpad/${scratchPadPrompt._id}/defer`)
 									input.form-control(type="date" name="date" required)
 									button.btn.btn-outline-primary(type="submit") Schedule
@@ -183,9 +183,19 @@ block content
 
 block scripts
 	script.
-		function setScheduleDate(element, daysFromNow) {
+		function setNextMonday(element) {
 			const date = new Date();
-			date.setDate(date.getDate() + daysFromNow);
+			const dayOfWeek = date.getDay();
+			const daysUntilMonday = (8 - dayOfWeek) % 7 || 7;
+			date.setDate(date.getDate() + daysUntilMonday);
+			const dateStr = date.toISOString().split('T')[0];
+			const form = element.closest('.advance-schedule-content').querySelector('.advance-schedule-form');
+			form.querySelector('input[type="date"]').value = dateStr;
+		}
+
+		function setNextFirstOfMonth(element) {
+			const date = new Date();
+			date.setMonth(date.getMonth() + 1, 1);
 			const dateStr = date.toISOString().split('T')[0];
 			const form = element.closest('.advance-schedule-content').querySelector('.advance-schedule-form');
 			form.querySelector('input[type="date"]').value = dateStr;
