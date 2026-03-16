@@ -697,9 +697,11 @@ app.post('/tasks/:id/restore', requireLogin, async (req, res) => {
 	}
 
 	task.status = 'pending';
-	// Put it back on today's list
-	const { start, end } = getTodayRange();
-	task.scheduledFor = new Date(start.getTime() + (end.getTime() - start.getTime()) / 2);
+	// Only set a date if it was originally a scheduled task (not scratch pad)
+	if (task.scheduledFor !== null) {
+		const { start, end } = getTodayRange();
+		task.scheduledFor = new Date(start.getTime() + (end.getTime() - start.getTime()) / 2);
+	}
 	await task.save();
 
 	res.redirect('/');
