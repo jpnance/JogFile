@@ -53,5 +53,5 @@
 				li
 					hr.dropdown-divider
 				li
-					form(method="POST" action=`/tasks/${task._id}/archive`)
+					form(method="POST" action=`/tasks/${task._id}/archive` onsubmit="return confirm('Archive this task? Archived tasks cannot be recovered.')")
 						button.dropdown-item.text-danger(type="submit") Archive

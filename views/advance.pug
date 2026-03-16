@@ -33,7 +33,7 @@ block content
 			if rolloverTasks.length > 5
 				.escape-hatches
 					form(method="POST" action="/advance/bankruptcy")
-						button.btn.btn-sm.btn-outline-danger(type="submit" onclick="return confirm('Archive all rollover tasks?')") Declare Bankruptcy
+						button.btn.btn-sm.btn-outline-danger(type="submit" onclick="return confirm('Archive all rollover tasks? Archived tasks cannot be recovered.')") Declare Bankruptcy
 					form(method="POST" action="/advance/best-guess")
 						button.btn.btn-sm.btn-outline-secondary(type="submit" onclick="return confirm('Move all tasks to today?')") Move All to Today
 
@@ -76,7 +76,7 @@ block content
 								button.btn.btn-outline-secondary(type="submit")
 									i.bi.bi-sticky
 									|  Scratch Pad
-							form(method="POST" action=`/advance/${task._id}/archive`)
+							form(method="POST" action=`/advance/${task._id}/archive` onsubmit="return confirm('Archive this task? Archived tasks cannot be recovered.')")
 								button.btn.btn-outline-danger(type="submit") Archive
 
 			//- Then process recurring prompts
@@ -159,7 +159,7 @@ block content
 								button.btn.btn-outline-secondary(type="submit")
 									i.bi.bi-pencil
 									|  Edit
-							form(method="POST" action=`/advance/scratchpad/${scratchPadPrompt._id}/archive`)
+							form(method="POST" action=`/advance/scratchpad/${scratchPadPrompt._id}/archive` onsubmit="return confirm('Archive this task? Archived tasks cannot be recovered.')")
 								button.btn.btn-outline-danger(type="submit") Archive
 
 block scripts

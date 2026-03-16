@@ -47,5 +47,5 @@ block content
 						.d-flex.gap-2.justify-content-between
 							form(method="POST" action=`/tasks/${task._id}/complete`)
 								button.btn.btn-success(type="submit") Mark Complete
-							form(method="POST" action=`/tasks/${task._id}/archive` onsubmit="return confirm('Archive this task?')")
+							form(method="POST" action=`/tasks/${task._id}/archive` onsubmit="return confirm('Archive this task? Archived tasks cannot be recovered.')")
 								button.btn.btn-outline-danger(type="submit") Archive
