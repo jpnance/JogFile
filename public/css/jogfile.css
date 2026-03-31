@@ -20,26 +20,32 @@
 	--jf-today: #3182ce;
 	--jf-today-light: #ebf4ff;
 	--jf-tomorrow: #805ad5;
+	--jf-tomorrow-hover: #6b46c1;
 	--jf-tomorrow-light: #f3e8ff;
 	--jf-upcoming: #319795;
 	--jf-upcoming-light: #e6fffa;
 	--jf-later: #718096;
 	--jf-later-light: #f7fafc;
 	--jf-scratch: #d69e2e;
+	--jf-scratch-hover: #b7791f;
 	--jf-scratch-light: #fefcbf;
 	--jf-recurring: #805ad5;
+	--jf-recurring-hover: #6b46c1;
 	--jf-recurring-light: #f3e8ff;
 	--jf-completed: #38a169;
 	--jf-completed-light: #f0fff4;
 	--jf-birthday: #e53e3e;
+	--jf-birthday-hover: #c53030;
 	--jf-birthday-light: #fff5f5;
 	--jf-chore: #2b6cb0;
+	--jf-chore-hover: #2c5282;
 	--jf-chore-light: #ebf8ff;
 }
 
 * {
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
+	-webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -106,9 +112,12 @@ h1 { font-size: 2rem; }
 	border-radius: var(--jf-radius-sm);
 	padding: 0.5rem 1rem;
 	transition: all 0.2s;
+	--bs-btn-active-shadow: none;
 }
 
 .btn-primary {
+	--bs-btn-active-bg: var(--jf-accent-hover);
+	--bs-btn-active-border-color: var(--jf-accent-hover);
 	background: var(--jf-accent);
 	border-color: var(--jf-accent);
 }
@@ -119,47 +128,61 @@ h1 { font-size: 2rem; }
 }
 
 .btn-recurring {
+	--bs-btn-active-bg: var(--jf-recurring-hover);
+	--bs-btn-active-border-color: var(--jf-recurring-hover);
+	--bs-btn-active-color: white;
 	background: var(--jf-recurring);
 	border-color: var(--jf-recurring);
 	color: white;
 }
 
 .btn-recurring:hover {
-	background: #6b46c1;
-	border-color: #6b46c1;
+	background: var(--jf-recurring-hover);
+	border-color: var(--jf-recurring-hover);
 	color: white;
 }
 
 .btn-tomorrow {
+	--bs-btn-active-bg: var(--jf-tomorrow-hover);
+	--bs-btn-active-border-color: var(--jf-tomorrow-hover);
+	--bs-btn-active-color: white;
 	background: var(--jf-tomorrow);
 	border-color: var(--jf-tomorrow);
 	color: white;
 }
 
 .btn-tomorrow:hover {
-	background: #6b46c1;
-	border-color: #6b46c1;
+	background: var(--jf-tomorrow-hover);
+	border-color: var(--jf-tomorrow-hover);
 	color: white;
 }
 
 .btn-scratch {
+	--bs-btn-active-bg: var(--jf-scratch-hover);
+	--bs-btn-active-border-color: var(--jf-scratch-hover);
+	--bs-btn-active-color: white;
 	background: var(--jf-scratch);
 	border-color: var(--jf-scratch);
 	color: white;
 }
 
 .btn-scratch:hover {
-	background: #b7791f;
-	border-color: #b7791f;
+	background: var(--jf-scratch-hover);
+	border-color: var(--jf-scratch-hover);
 	color: white;
 }
 
 .btn-success {
+	--bs-btn-active-bg: var(--jf-success);
+	--bs-btn-active-border-color: var(--jf-success);
 	background: var(--jf-success);
 	border-color: var(--jf-success);
 }
 
 .btn-outline-secondary {
+	--bs-btn-active-bg: var(--jf-bg);
+	--bs-btn-active-border-color: var(--jf-border);
+	--bs-btn-active-color: var(--jf-text);
 	border-color: var(--jf-border);
 	color: var(--jf-text-secondary);
 }
@@ -171,6 +194,8 @@ h1 { font-size: 2rem; }
 }
 
 .btn-outline-danger {
+	--bs-btn-active-bg: var(--jf-danger);
+	--bs-btn-active-border-color: var(--jf-danger);
 	color: var(--jf-danger);
 	border-color: var(--jf-danger);
 }
@@ -256,6 +281,9 @@ h1 { font-size: 2rem; }
 
 /* Complete button */
 .btn-outline-success {
+	--bs-btn-active-bg: var(--jf-success);
+	--bs-btn-active-border-color: var(--jf-success);
+	--bs-btn-active-color: white;
 	border-color: var(--jf-success);
 	color: var(--jf-success);
 	border-radius: 50%;
@@ -276,6 +304,9 @@ h1 { font-size: 2rem; }
 
 /* Action dropdown */
 .task-actions .dropdown-toggle {
+	--bs-btn-active-bg: transparent;
+	--bs-btn-active-border-color: transparent;
+	--bs-btn-active-color: var(--jf-text);
 	border: none;
 	background: transparent;
 	color: var(--jf-text-secondary);
@@ -297,6 +328,8 @@ h1 { font-size: 2rem; }
 }
 
 .dropdown-menu {
+	--bs-dropdown-link-active-bg: var(--jf-bg);
+	--bs-dropdown-link-active-color: var(--jf-text);
 	border: 1px solid var(--jf-border);
 	border-radius: var(--jf-radius-sm);
 	box-shadow: var(--jf-shadow-lg);
@@ -915,14 +948,17 @@ h1 { font-size: 2rem; }
 
 /* Birthday styles */
 .btn-birthday {
+	--bs-btn-active-bg: var(--jf-birthday-hover);
+	--bs-btn-active-border-color: var(--jf-birthday-hover);
+	--bs-btn-active-color: white;
 	background-color: var(--jf-birthday);
 	border-color: var(--jf-birthday);
 	color: white;
 }
 
 .btn-birthday:hover {
-	background-color: #c53030;
-	border-color: #c53030;
+	background-color: var(--jf-birthday-hover);
+	border-color: var(--jf-birthday-hover);
 	color: white;
 }
 
@@ -1011,14 +1047,17 @@ h1 { font-size: 2rem; }
 
 /* Chore styles */
 .btn-chore {
+	--bs-btn-active-bg: var(--jf-chore-hover);
+	--bs-btn-active-border-color: var(--jf-chore-hover);
+	--bs-btn-active-color: white;
 	background-color: var(--jf-chore);
 	border-color: var(--jf-chore);
 	color: white;
 }
 
 .btn-chore:hover {
-	background-color: #2c5282;
-	border-color: #2c5282;
+	background-color: var(--jf-chore-hover);
+	border-color: var(--jf-chore-hover);
 	color: white;
 }
 
@@ -1070,6 +1109,9 @@ h1 { font-size: 2rem; }
 }
 
 .btn-outline-chore {
+	--bs-btn-active-bg: var(--jf-chore);
+	--bs-btn-active-border-color: var(--jf-chore);
+	--bs-btn-active-color: white;
 	color: var(--jf-chore);
 	border-color: var(--jf-chore);
 	background: transparent;
