@@ -19,7 +19,9 @@ import {
 	formatDate,
 	getLogicalToday,
 	getPacificYmd,
-	formatComingUpDayLabel
+	formatComingUpDayLabel,
+	normalizeTimeOfDay,
+	formatTaskTimeDisplay
 } from './lib/dates.js';
 
 /**
@@ -463,11 +465,17 @@ app.get('/', requireLogin, async (req, res) => {
 	const weekWindowEnd = new Date(todayStart);
 	weekWindowEnd.setDate(weekWindowEnd.getDate() + 7);
 
-	// Today's tasks
+	// Today's tasks — chronological by time when set, else manual order (position)
 	const tasks = await Task.find({
 		scheduledFor: { $gte: todayStart, $lt: todayEnd },
 		status: 'pending'
 	}).sort({ position: 1 });
+	tasks.sort((a, b) => {
+		const ta = a.timeOfDay || '99:99';
+		const tb = b.timeOfDay || '99:99';
+		if (ta !== tb) return ta.localeCompare(tb);
+		return (a.position ?? 0) - (b.position ?? 0);
+	});
 
 	// Pending tasks in the 7-day window (used to populate Coming up; today's bucket excluded there)
 	const tasksInWeek = await Task.find({
@@ -475,12 +483,26 @@ app.get('/', requireLogin, async (req, res) => {
 		status: 'pending'
 	}).sort({ scheduledFor: 1, position: 1 });
 
-	/** @type {Map<string, object[]>} */
+	/** @type {Map<string, any[]>} */
 	const tasksByPacificYmd = new Map();
 	for (const task of tasksInWeek) {
-		const ymd = getPacificYmd(task.scheduledFor);
-		if (!tasksByPacificYmd.has(ymd)) tasksByPacificYmd.set(ymd, []);
-		tasksByPacificYmd.get(ymd).push(task);
+		const sf = task.scheduledFor;
+		if (!sf) continue;
+		const ymd = getPacificYmd(sf);
+		let bucket = tasksByPacificYmd.get(ymd);
+		if (!bucket) {
+			bucket = [];
+			tasksByPacificYmd.set(ymd, bucket);
+		}
+		bucket.push(task);
+	}
+	for (const arr of tasksByPacificYmd.values()) {
+		arr.sort((a, b) => {
+			const ta = a.timeOfDay || '99:99';
+			const tb = b.timeOfDay || '99:99';
+			if (ta !== tb) return ta.localeCompare(tb);
+			return (a.position ?? 0) - (b.position ?? 0);
+		});
 	}
 
 	// Later (beyond the 7-day window)
@@ -488,6 +510,15 @@ app.get('/', requireLogin, async (req, res) => {
 		scheduledFor: { $gte: weekWindowEnd },
 		status: 'pending'
 	}).sort({ scheduledFor: 1, position: 1 });
+	laterTasks.sort((a, b) => {
+		const da =
+			(a.scheduledFor?.getTime() ?? 0) - (b.scheduledFor?.getTime() ?? 0);
+		if (da !== 0) return da;
+		const ta = a.timeOfDay || '99:99';
+		const tb = b.timeOfDay || '99:99';
+		if (ta !== tb) return ta.localeCompare(tb);
+		return (a.position ?? 0) - (b.position ?? 0);
+	});
 
 	// Scratch pad (no date)
 	const scratchPadTasks = await Task.find({
@@ -542,14 +573,22 @@ app.get('/', requireLogin, async (req, res) => {
 		}
 
 		items.sort((a, b) => {
+			/** @type {Record<string, number>} */
 			const order = { birthday: 0, task: 1 };
 			const ao = order[a.kind] ?? 99;
 			const bo = order[b.kind] ?? 99;
 			if (ao !== bo) return ao - bo;
 			if (a.kind === 'task' && b.kind === 'task') {
+				// @ts-expect-error task payload from items.push above
+				const ta = a.task.timeOfDay || '99:99';
+				// @ts-expect-error
+				const tb = b.task.timeOfDay || '99:99';
+				if (ta !== tb) return ta.localeCompare(tb);
+				// @ts-expect-error
 				return ((a.task).position ?? 0) - ((b.task).position ?? 0);
 			}
 			if (a.kind === 'birthday' && b.kind === 'birthday') {
+				// @ts-expect-error person on birthday item
 				return String(a.person.name).localeCompare(String(b.person.name));
 			}
 			return 0;
@@ -574,12 +613,13 @@ app.get('/', requireLogin, async (req, res) => {
 		completedTasks,
 		comingUpDays,
 		chores,
-		formatDate
+		formatDate,
+		formatTaskTimeDisplay
 	});
 });
 
 app.post('/tasks', requireLogin, async (req, res) => {
-	const { title, description, scheduledFor, destination } = req.body;
+	const { title, description, scheduledFor, destination, timeOfDay } = req.body;
 
 	if (!title || title.trim() === '') {
 		return res.status(400).send('Title is required');
@@ -621,7 +661,8 @@ app.post('/tasks', requireLogin, async (req, res) => {
 		title: title.trim(),
 		description: description?.trim() || '',
 		scheduledFor: taskDate,
-		position: newPosition
+		position: newPosition,
+		timeOfDay: taskDate ? normalizeTimeOfDay(timeOfDay) : null
 	});
 
 	await task.save();
@@ -676,6 +717,7 @@ app.post('/tasks/:id/scratch', requireLogin, async (req, res) => {
 	}
 
 	task.scheduledFor = null;
+	task.timeOfDay = null;
 	await task.save();
 
 	res.redirect('/');
@@ -716,7 +758,7 @@ app.get('/tasks/:id/edit', requireLogin, async (req, res) => {
 		return res.status(404).send('Task not found');
 	}
 
-	res.render('edit-task', { task, formatDate });
+	res.render('edit-task', { task, formatDate, formatTaskTimeDisplay });
 });
 
 app.post('/tasks/:id/edit', requireLogin, async (req, res) => {
@@ -725,7 +767,7 @@ app.post('/tasks/:id/edit', requireLogin, async (req, res) => {
 		return res.status(404).send('Task not found');
 	}
 
-	const { title, description, url, scheduledFor } = req.body;
+	const { title, description, url, scheduledFor, timeOfDay } = req.body;
 
 	if (!title || title.trim() === '') {
 		return res.status(400).send('Title is required');
@@ -737,8 +779,10 @@ app.post('/tasks/:id/edit', requireLogin, async (req, res) => {
 
 	if (scheduledFor === '') {
 		task.scheduledFor = null;
+		task.timeOfDay = null;
 	} else if (scheduledFor) {
 		task.scheduledFor = getScheduleDate(scheduledFor);
+		task.timeOfDay = normalizeTimeOfDay(timeOfDay);
 	}
 
 	await task.save();
@@ -1046,6 +1090,7 @@ app.get('/birthdays', requireLogin, async (req, res) => {
 	
 	const upcoming = [];
 	for (const person of people) {
+		// @ts-ignore - Mongoose instance methods
 		const nextBirthday = person.getNextBirthday();
 		const diffTime = nextBirthday.getTime() - today.getTime();
 		const daysUntil = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -1055,6 +1100,7 @@ app.get('/birthdays', requireLogin, async (req, res) => {
 				person,
 				daysUntil,
 				isToday: daysUntil === 0,
+				// @ts-ignore - Mongoose instance methods
 				turningAge: person.getTurningAge(nextBirthday)
 			});
 		}

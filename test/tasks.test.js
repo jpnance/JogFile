@@ -36,13 +36,30 @@ describe('Tasks', () => {
 			await request(app)
 				.post('/tasks')
 				.set('Cookie', `session=${process.env.JOG_FILE_PASSWORD}`)
-				.send({ title: 'Call dentist', scheduledFor: '2026-01-25' })
+				.send({ title: 'Call dentist', scheduledFor: '2026-01-25', destination: 'date' })
 				.expect(302);
 
 			const task = await Task.findOne({ title: 'Call dentist' });
 			expect(task).to.not.be.null;
 			if (!task) throw new Error('Task not found');
 			expect(task.scheduledFor?.toISOString()).to.include('2026-01-25');
+		});
+
+		it('stores optional time of day when dated', async () => {
+			await request(app)
+				.post('/tasks')
+				.set('Cookie', `session=${process.env.JOG_FILE_PASSWORD}`)
+				.send({
+					title: 'Dentist appt',
+					destination: 'tomorrow',
+					timeOfDay: '15:45'
+				})
+				.expect(302);
+
+			const task = await Task.findOne({ title: 'Dentist appt' });
+			expect(task).to.not.be.null;
+			if (!task) throw new Error('Task not found');
+			expect(task.timeOfDay).to.equal('15:45');
 		});
 
 		it('redirects to login when not authenticated', async () => {

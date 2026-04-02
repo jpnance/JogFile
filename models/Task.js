@@ -9,6 +9,8 @@ const taskSchema = new mongoose.Schema({
 		done: { type: Boolean, default: false }
 	}],
 	scheduledFor: { type: Date, default: null },
+	/** Wall-clock time for this calendar day, `HH:mm` (24h), e.g. from `<input type="time">`. Null = no specific time. */
+	timeOfDay: { type: String, default: null },
 	status: {
 		type: String,
 		enum: ['pending', 'completed', 'archived'],

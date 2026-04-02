@@ -32,15 +32,34 @@ block content
 								input.form-control#url(type="url" name="url" value=task.url placeholder="https://...")
 								.form-text Clicking the task will open this URL
 
-							.mb-4
+							.mb-3
 								label.form-label(for="scheduledFor") Scheduled For
 								- var dateValue = task.scheduledFor ? task.scheduledFor.toLocaleDateString('en-CA', { timeZone: 'America/Los_Angeles' }) : ''
 								input.form-control.w-auto#scheduledFor(type="date" name="scheduledFor" value=dateValue)
 								.form-text Leave blank for scratch pad
 
+							.mb-4#editTimeWrap(class=!task.scheduledFor ? 'd-none' : '')
+								label.form-label(for="timeOfDay") Time (optional)
+								input.form-control.w-auto#timeOfDay(type="time" name="timeOfDay" value=(task.timeOfDay || ''))
+								.form-text Appointment or reminder time for that day. Cleared when there is no date.
+
 							.d-flex.gap-2
 								button.btn.btn-primary(type="submit") Save Changes
 								a.btn.btn-outline-secondary(href="/") Cancel
+
+				script.
+					(function () {
+						const dateInput = document.getElementById('scheduledFor');
+						const timeWrap = document.getElementById('editTimeWrap');
+						if (!dateInput || !timeWrap) return;
+						function sync() {
+							const hasDate = dateInput.value && String(dateInput.value).trim() !== '';
+							timeWrap.classList.toggle('d-none', !hasDate);
+						}
+						dateInput.addEventListener('change', sync);
+						dateInput.addEventListener('input', sync);
+						sync();
+					})();
 
 				.card.mt-3
 					.card-body

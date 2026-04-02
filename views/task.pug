@@ -10,6 +10,8 @@
 				a.task-link(href=task.url target="_blank" rel="noopener")= task.title
 			else
 				span= task.title
+			if task.timeOfDay
+				span.task-time(title="Appointment time")= formatTaskTimeDisplay(task.timeOfDay)
 			if task.generatedFrom
 				span.task-source-indicator
 					i.bi.bi-arrow-repeat

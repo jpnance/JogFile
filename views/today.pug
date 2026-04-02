@@ -50,6 +50,8 @@ block content
 										else if row.kind === 'task'
 											.cu-grid-line.cu-grid-task
 												a(href=`/tasks/${row.task._id}/edit`)= row.task.title
+												if row.task.timeOfDay
+													span.cu-grid-task-time= formatTaskTimeDisplay(row.task.timeOfDay)
 
 				//- Add task form (collapsible)
 				#addTaskForm.collapse.mb-4
@@ -74,6 +76,9 @@ block content
 							#scheduleDateWrap.schedule-date-wrap.d-none.mt-2
 								label.small.text-muted.mb-1.d-block(for="scheduledForDate") Date
 								input#scheduledForDate.form-control.form-control-sm(type="date" name="scheduledFor" style="max-width: 10rem")
+							#scheduleTimeWrap.schedule-time-wrap.d-none.mt-2
+								label.small.text-muted.mb-1.d-block(for="timeOfDayAdd") Time (optional)
+								input#timeOfDayAdd.form-control.form-control-sm(type="time" name="timeOfDay" style="max-width: 8rem")
 
 						if chores && chores.length > 0
 							.chore-quick-add
@@ -85,8 +90,9 @@ block content
 											button.btn.btn-sm.btn-outline-chore(type="submit")= chore.title
 
 				script.
-					// Show/hide date input when Schedule is selected
+					// Show/hide date input when Schedule is selected; show optional time for any dated destination
 					const scheduleDateWrap = document.getElementById('scheduleDateWrap');
+					const scheduleTimeWrap = document.getElementById('scheduleTimeWrap');
 					const dateRadio = document.getElementById('destDate');
 					const destinationRadios = document.querySelectorAll('input[name="destination"]');
 					function updateScheduleDateVisibility() {
@@ -94,7 +100,18 @@ block content
 							scheduleDateWrap.classList.toggle('d-none', !dateRadio.checked);
 						}
 					}
-					destinationRadios.forEach(radio => radio.addEventListener('change', updateScheduleDateVisibility));
+					function updateTimeVisibility() {
+						const dest = document.querySelector('input[name="destination"]:checked');
+						const scratch = dest && dest.value === 'scratch';
+						if (scheduleTimeWrap) scheduleTimeWrap.classList.toggle('d-none', scratch);
+					}
+					function onDestinationChange() {
+						updateScheduleDateVisibility();
+						updateTimeVisibility();
+					}
+					destinationRadios.forEach(radio => radio.addEventListener('change', onDestinationChange));
+					updateScheduleDateVisibility();
+					updateTimeVisibility();
 					// Focus the title input when the form is shown
 					const addTaskForm = document.getElementById('addTaskForm');
 					const addTaskInput = document.getElementById('addTaskInput');
@@ -129,6 +146,8 @@ block content
 								each task in laterTasks
 									.task-preview
 										a(href=`/tasks/${task._id}/edit`)= task.title
+										if task.timeOfDay
+											span.task-preview-time= formatTaskTimeDisplay(task.timeOfDay)
 										.task-preview-date= formatDate(task.scheduledFor)
 
 				.section-divider

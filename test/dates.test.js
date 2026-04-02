@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { getTodayRange, DAY_START_HOUR } from '../lib/dates.js';
+import { getTodayRange, DAY_START_HOUR, normalizeTimeOfDay, formatTaskTimeDisplay } from '../lib/dates.js';
 
 describe('dates', () => {
 	describe('getTodayRange', () => {
@@ -57,6 +57,29 @@ describe('dates', () => {
 
 			expect(start.getDate()).to.equal(22);
 			expect(end.getDate()).to.equal(23);
+		});
+	});
+
+	describe('normalizeTimeOfDay', () => {
+		it('returns null for empty or invalid', () => {
+			expect(normalizeTimeOfDay('')).to.be.null;
+			expect(normalizeTimeOfDay(undefined)).to.be.null;
+			expect(normalizeTimeOfDay('25:00')).to.be.null;
+		});
+
+		it('normalizes to HH:mm', () => {
+			expect(normalizeTimeOfDay('9:05')).to.equal('09:05');
+			expect(normalizeTimeOfDay('14:30')).to.equal('14:30');
+		});
+	});
+
+	describe('formatTaskTimeDisplay', () => {
+		it('returns empty for null', () => {
+			expect(formatTaskTimeDisplay(null)).to.equal('');
+		});
+
+		it('formats 12-hour label', () => {
+			expect(formatTaskTimeDisplay('14:30')).to.match(/2:30/);
 		});
 	});
 });
