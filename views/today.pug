@@ -34,27 +34,22 @@ block content
 							span +
 							span.d-none.d-sm-inline  Add
 
-				//- Upcoming birthdays widget
-				if upcomingBirthdays && upcomingBirthdays.length > 0
-					.upcoming-birthdays.mb-4
-						.upcoming-birthdays-header
-							i.bi.bi-cake2
-							span Upcoming Birthdays
-						each item in upcomingBirthdays
-							.upcoming-birthday-item(class=item.isToday ? 'upcoming-birthday-today' : '')
-								if item.isToday
-									span.text-danger Today: #{item.person.name}
-									if item.turningAge
-										span.birthday-age  (#{item.turningAge})
-								else if item.daysUntil === 1
-									span Tomorrow: #{item.person.name}
-									if item.turningAge
-										span.text-muted  (turning #{item.turningAge})
-								else
-									span= item.person.name
-									span.text-muted  in #{item.daysUntil} days
-									if item.turningAge
-										span.text-muted  (turning #{item.turningAge})
+				//- Next 7 days at a glance (birthdays + dated tasks; today’s tasks stay in the list below)
+				if comingUpDays && comingUpDays.length > 0
+					section.cu-grid.mb-4(aria-label="Next seven days")
+						each day in comingUpDays
+							.cu-grid-cell
+								.cu-grid-cell-head= day.label
+								.cu-grid-cell-body
+									each row in day.items
+										if row.kind === 'birthday'
+											.cu-grid-line.cu-grid-birthday(class=row.hasNotes ? 'cu-grid-birthday-notes' : '')
+												a(href=`/birthdays/${row.person._id}/edit`)= row.person.name
+												if row.turningAge
+													span.cu-grid-meta  · #{row.turningAge}
+										else if row.kind === 'task'
+											.cu-grid-line.cu-grid-task
+												a(href=`/tasks/${row.task._id}/edit`)= row.task.title
 
 				//- Add task form (collapsible)
 				#addTaskForm.collapse.mb-4
@@ -119,54 +114,6 @@ block content
 							include task
 
 				.section-divider
-
-				//- Tomorrow section
-				- var tomorrowTotal = tomorrowTasks.length + (tomorrowRecurring ? tomorrowRecurring.length : 0)
-				.mb-2
-					.section-header(data-bs-toggle="collapse" data-bs-target="#tomorrowSection" aria-expanded="false")
-						span.chevron ▶
-						span.section-title Tomorrow
-						span.section-count= tomorrowTotal
-					#tomorrowSection.collapse
-						.px-4.py-2
-							if tomorrowTotal === 0
-								p.text-muted.small.mb-0 Nothing scheduled
-							else
-								each task in tomorrowTasks
-									.task-preview.d-flex.align-items-center
-										a(href=`/tasks/${task._id}/edit`)= task.title
-								if tomorrowRecurring && tomorrowRecurring.length > 0
-									each rec in tomorrowRecurring
-										.task-preview.d-flex.align-items-center.task-preview-recurring
-											a(href=`/recurring/${rec._id}/edit`)
-												= rec.title
-												span.task-source-indicator
-													i.bi.bi-arrow-repeat
-
-				//- Next 7 days section
-				- var upcomingTotal = upcomingTasks.length + (upcomingRecurring ? upcomingRecurring.length : 0)
-				.mb-2
-					.section-header(data-bs-toggle="collapse" data-bs-target="#upcomingSection" aria-expanded="false")
-						span.chevron ▶
-						span.section-title Next 7 Days
-						span.section-count= upcomingTotal
-					#upcomingSection.collapse
-						.px-4.py-2
-							if upcomingTotal === 0
-								p.text-muted.small.mb-0 Nothing scheduled
-							else
-								each task in upcomingTasks
-									.task-preview
-										a(href=`/tasks/${task._id}/edit`)= task.title
-										.task-preview-date= formatDate(task.scheduledFor)
-								if upcomingRecurring && upcomingRecurring.length > 0
-									each rec in upcomingRecurring
-										.task-preview.task-preview-recurring
-											a(href=`/recurring/${rec._id}/edit`)
-												= rec.title
-												span.task-source-indicator
-													i.bi.bi-arrow-repeat
-											.task-preview-date= formatDate(rec.scheduledFor)
 
 				//- Later section
 				.mb-2

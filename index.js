@@ -12,7 +12,15 @@ import Task from './models/Task.js';
 import Recurring from './models/Recurring.js';
 import Person from './models/Person.js';
 import Chore from './models/Chore.js';
-import { getTodayRange, getTomorrowRange, getScheduleDate, formatDate, getLogicalToday } from './lib/dates.js';
+import {
+	getTodayRange,
+	getTomorrowRange,
+	getScheduleDate,
+	formatDate,
+	getLogicalToday,
+	getPacificYmd,
+	formatComingUpDayLabel
+} from './lib/dates.js';
 
 /**
  * Get all pending tasks scheduled before today (rollover tasks).
@@ -450,11 +458,10 @@ app.get('/', requireLogin, async (req, res) => {
 	}
 
 	const { start: todayStart, end: todayEnd } = getTodayRange();
-	const { start: tomorrowStart, end: tomorrowEnd } = getTomorrowRange();
 
-	// Calculate date ranges
-	const next7DaysEnd = new Date(todayStart);
-	next7DaysEnd.setDate(next7DaysEnd.getDate() + 7);
+	// Window: today through the next 6 days (7 calendar days); exclusive end for queries
+	const weekWindowEnd = new Date(todayStart);
+	weekWindowEnd.setDate(weekWindowEnd.getDate() + 7);
 
 	// Today's tasks
 	const tasks = await Task.find({
@@ -462,21 +469,23 @@ app.get('/', requireLogin, async (req, res) => {
 		status: 'pending'
 	}).sort({ position: 1 });
 
-	// Tomorrow's tasks
-	const tomorrowTasks = await Task.find({
-		scheduledFor: { $gte: tomorrowStart, $lt: tomorrowEnd },
-		status: 'pending'
-	}).sort({ position: 1 });
-
-	// Next 7 days (excluding today and tomorrow)
-	const upcomingTasks = await Task.find({
-		scheduledFor: { $gte: tomorrowEnd, $lt: next7DaysEnd },
+	// Pending tasks in the 7-day window (used to populate Coming up; today's bucket excluded there)
+	const tasksInWeek = await Task.find({
+		scheduledFor: { $gte: todayStart, $lt: weekWindowEnd },
 		status: 'pending'
 	}).sort({ scheduledFor: 1, position: 1 });
 
-	// Later (beyond 7 days)
+	/** @type {Map<string, object[]>} */
+	const tasksByPacificYmd = new Map();
+	for (const task of tasksInWeek) {
+		const ymd = getPacificYmd(task.scheduledFor);
+		if (!tasksByPacificYmd.has(ymd)) tasksByPacificYmd.set(ymd, []);
+		tasksByPacificYmd.get(ymd).push(task);
+	}
+
+	// Later (beyond the 7-day window)
 	const laterTasks = await Task.find({
-		scheduledFor: { $gte: next7DaysEnd },
+		scheduledFor: { $gte: weekWindowEnd },
 		status: 'pending'
 	}).sort({ scheduledFor: 1, position: 1 });
 
@@ -494,66 +503,64 @@ app.get('/', requireLogin, async (req, res) => {
 		completedAt: { $ne: null, $gte: sevenDaysAgo }
 	}).sort({ completedAt: -1 }).limit(20);
 
-	// Upcoming birthdays (next 14 days) — only for people with notes (heuristic for "special" / advance notice)
 	const allPeople = await Person.find();
-	const upcomingBirthdays = [];
 	const logicalTodayStr = getLogicalToday();
 	const logicalTodayDate = new Date(logicalTodayStr + 'T12:00:00');
-	
-	for (const person of allPeople) {
-		// @ts-ignore - Mongoose custom method
-		const nextBirthday = person.getNextBirthday();
-		const diffTime = nextBirthday.getTime() - logicalTodayDate.getTime();
-		const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-		const hasNotes = person.notes && String(person.notes).trim() !== '';
-		
-		if (diffDays >= 0 && diffDays <= 14 && hasNotes) {
-			upcomingBirthdays.push({
+
+	/** Next 7 days (including today): birthdays and dated tasks (today’s dated tasks stay in the main list only). */
+	const comingUpDays = [];
+	for (let offset = 0; offset < 7; offset++) {
+		const dayDate = new Date(todayStart);
+		dayDate.setDate(dayDate.getDate() + offset);
+		const dayYmd = getPacificYmd(dayDate);
+
+		/** @type {Array<{ kind: string, [key: string]: unknown }>} */
+		const items = [];
+
+		for (const person of allPeople) {
+			// @ts-ignore - Mongoose method
+			const nextBirthday = person.getNextBirthday();
+			const diffTime = nextBirthday.getTime() - logicalTodayDate.getTime();
+			const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+			if (diffDays !== offset) continue;
+			const hasNotes = Boolean(person.notes && String(person.notes).trim() !== '');
+			items.push({
+				kind: 'birthday',
 				person,
-				daysUntil: diffDays,
-				isToday: diffDays === 0,
-				// @ts-ignore - Mongoose custom method
-				turningAge: person.getTurningAge(nextBirthday)
+				hasNotes,
+				// @ts-ignore - Mongoose method
+				turningAge: person.getTurningAge(nextBirthday),
+				isToday: offset === 0
 			});
 		}
-	}
-	
-	// Sort by days until birthday
-	upcomingBirthdays.sort((a, b) => a.daysUntil - b.daysUntil);
 
-	// Find upcoming recurring items for each date range
-	const allRecurring = await Recurring.find({ isActive: true });
-	
-	// Helper to check recurring for a specific date
-	const getRecurringForDate = (/** @type {Date} */ date) => {
-		return allRecurring.filter(rec => {
-			// @ts-ignore - Mongoose custom method
-			return rec.isScheduledFor(date);
-		}).map(rec => ({
-			_id: rec._id,
-			title: rec.title,
-			description: rec.description,
-			// @ts-ignore - Mongoose custom method
-			patternDescription: rec.getPatternDescription(),
-			isRecurring: true
-		}));
-	};
-	
-	// Tomorrow's recurring
-	const tomorrowRecurring = getRecurringForDate(tomorrowStart);
-	
-	// Next 7 days recurring (check each day)
-	const upcomingRecurring = [];
-	const seenRecurringIds = new Set();
-	for (let d = 2; d <= 7; d++) {
-		const checkDate = new Date(todayStart);
-		checkDate.setDate(checkDate.getDate() + d);
-		const dayRecurring = getRecurringForDate(checkDate);
-		for (const rec of dayRecurring) {
-			if (!seenRecurringIds.has(rec._id.toString())) {
-				seenRecurringIds.add(rec._id.toString());
-				upcomingRecurring.push({ ...rec, scheduledFor: new Date(checkDate) });
+		if (offset > 0) {
+			const dayTasks = tasksByPacificYmd.get(dayYmd) || [];
+			for (const task of dayTasks) {
+				items.push({ kind: 'task', task });
 			}
+		}
+
+		items.sort((a, b) => {
+			const order = { birthday: 0, task: 1 };
+			const ao = order[a.kind] ?? 99;
+			const bo = order[b.kind] ?? 99;
+			if (ao !== bo) return ao - bo;
+			if (a.kind === 'task' && b.kind === 'task') {
+				return ((a.task).position ?? 0) - ((b.task).position ?? 0);
+			}
+			if (a.kind === 'birthday' && b.kind === 'birthday') {
+				return String(a.person.name).localeCompare(String(b.person.name));
+			}
+			return 0;
+		});
+
+		if (items.length > 0) {
+			comingUpDays.push({
+				offset,
+				label: formatComingUpDayLabel(offset, dayDate),
+				items
+			});
 		}
 	}
 
@@ -562,14 +569,10 @@ app.get('/', requireLogin, async (req, res) => {
 
 	res.render('today', {
 		tasks,
-		tomorrowTasks,
-		tomorrowRecurring,
-		upcomingTasks,
-		upcomingRecurring,
 		laterTasks,
 		scratchPadTasks,
 		completedTasks,
-		upcomingBirthdays,
+		comingUpDays,
 		chores,
 		formatDate
 	});

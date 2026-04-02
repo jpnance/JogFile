@@ -40,6 +40,9 @@
 	--jf-chore: #2b6cb0;
 	--jf-chore-hover: #2c5282;
 	--jf-chore-light: #ebf8ff;
+	/* Day grid on home — slightly cooler / lighter than page bg so cells read as tiles */
+	--jf-coming-up-cell-bg: #e8f0fa;
+	--jf-coming-up-cell-border: #c9d8ea;
 }
 
 * {
@@ -218,11 +221,6 @@ h1 { font-size: 2rem; }
 	border-radius: var(--jf-radius-sm);
 	padding: 0.875rem 1rem !important;
 	margin-bottom: 0.5rem !important;
-	transition: all 0.2s;
-}
-
-.task-item:hover {
-	box-shadow: var(--jf-shadow);
 }
 
 /* Recurring-generated tasks */
@@ -261,11 +259,6 @@ h1 { font-size: 2rem; }
 .task-link {
 	color: inherit;
 	text-decoration: none;
-}
-
-.task-link:hover {
-	color: var(--jf-accent);
-	text-decoration: underline;
 }
 
 .task-url-indicator {
@@ -311,16 +304,6 @@ h1 { font-size: 2rem; }
 	background: transparent;
 	color: var(--jf-text-secondary);
 	padding: 0.25rem 0.5rem;
-	opacity: 0.5;
-	transition: opacity 0.2s;
-}
-
-.task-item:hover .task-actions .dropdown-toggle {
-	opacity: 1;
-}
-
-.task-actions .dropdown-toggle:hover {
-	color: var(--jf-text);
 }
 
 .task-actions .dropdown-toggle::after {
@@ -404,17 +387,6 @@ h1 { font-size: 2rem; }
 }
 
 /* Section color variants */
-#tomorrowSection + .section-header .chevron,
-.section-header[data-bs-target="#tomorrowSection"] .chevron,
-.section-header[data-bs-target="#tomorrowSection"] .section-title { color: var(--jf-tomorrow); }
-.section-header[data-bs-target="#tomorrowSection"] .section-count { background: var(--jf-tomorrow-light); color: var(--jf-tomorrow); }
-.section-header[data-bs-target="#tomorrowSection"]:hover { background: var(--jf-tomorrow-light); }
-
-.section-header[data-bs-target="#upcomingSection"] .chevron,
-.section-header[data-bs-target="#upcomingSection"] .section-title { color: var(--jf-upcoming); }
-.section-header[data-bs-target="#upcomingSection"] .section-count { background: var(--jf-upcoming-light); color: var(--jf-upcoming); }
-.section-header[data-bs-target="#upcomingSection"]:hover { background: var(--jf-upcoming-light); }
-
 .section-header[data-bs-target="#laterSection"] .chevron,
 .section-header[data-bs-target="#laterSection"] .section-title { color: var(--jf-later); }
 .section-header[data-bs-target="#laterSection"] .section-count { background: var(--jf-later-light); color: var(--jf-later); }
@@ -457,10 +429,6 @@ h1 { font-size: 2rem; }
 	font-size: 0.9375rem;
 }
 
-.task-preview a:hover {
-	color: var(--jf-accent);
-}
-
 .task-preview .date,
 .task-preview-date {
 	display: block;
@@ -471,10 +439,6 @@ h1 { font-size: 2rem; }
 
 .task-preview-recurring a {
 	color: var(--jf-recurring);
-}
-
-.task-preview-recurring a:hover {
-	color: var(--jf-accent);
 }
 
 /* Add task card */
@@ -838,8 +802,8 @@ h1 { font-size: 2rem; }
 }
 
 .recurring-item:hover {
-	box-shadow: var(--jf-shadow);
 	background: var(--jf-recurring-light);
+	border-color: #c6b5e0;
 }
 
 .recurring-item-content {
@@ -1042,6 +1006,57 @@ h1 { font-size: 2rem; }
 }
 
 .upcoming-birthday-today {
+	font-weight: 600;
+}
+
+/* Next 7 days — day cells (no outer card; grid is the section) */
+.cu-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+	gap: 0.5rem;
+}
+
+.cu-grid-cell {
+	background: var(--jf-coming-up-cell-bg);
+	border: 1px solid var(--jf-coming-up-cell-border);
+	border-radius: var(--jf-radius-sm);
+	padding: 0.45rem 0.55rem;
+	min-height: 3rem;
+}
+
+.cu-grid-cell-head {
+	font-size: 0.65rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: var(--jf-text-secondary);
+	margin-bottom: 0.25rem;
+}
+
+.cu-grid-cell-body {
+	font-size: 0.8125rem;
+	line-height: 1.35;
+}
+
+.cu-grid-line {
+	margin-bottom: 0.2rem;
+}
+
+.cu-grid-line:last-child {
+	margin-bottom: 0;
+}
+
+.cu-grid-line a {
+	color: var(--jf-text);
+	text-decoration: none;
+}
+
+.cu-grid-meta {
+	color: var(--jf-text-secondary);
+	font-size: 0.75rem;
+}
+
+.cu-grid-birthday-notes a {
 	font-weight: 600;
 }
 
