@@ -1030,6 +1030,7 @@ h1 { font-size: 2rem; }
 	border-radius: var(--jf-radius-sm);
 	padding: 0.45rem 0.55rem;
 	min-height: 3rem;
+	min-width: 0; /* allow grid column to shrink so ellipsis can apply */
 }
 
 .cu-grid-cell-head {
@@ -1046,30 +1047,80 @@ h1 { font-size: 2rem; }
 	line-height: 1.35;
 }
 
+/* Semantic list; icons act as bullets (see .cu-grid-bullet) */
+.cu-grid-list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
 .cu-grid-line {
-	margin-bottom: 0.2rem;
+	display: flex;
+	align-items: flex-start;
+	gap: 0.45rem;
+	margin-bottom: 0.4rem;
+	min-width: 0;
 }
 
 .cu-grid-line:last-child {
 	margin-bottom: 0;
 }
 
-.cu-grid-line a {
+.cu-grid-bullet {
+	flex: 0 0 1.05rem;
+	width: 1.05rem;
+	text-align: center;
+	line-height: 1.3;
+	padding-top: 0.08rem;
+	color: var(--jf-text-secondary);
+	font-size: 0.8rem;
+}
+
+.cu-grid-birthday-notes .cu-grid-bullet {
+	color: var(--jf-birthday);
+}
+
+.cu-grid-task-appt .cu-grid-bullet {
+	color: var(--jf-accent);
+}
+
+.cu-grid-task-plain .cu-grid-bullet {
+	color: var(--jf-text-secondary);
+	opacity: 0.8;
+}
+
+.cu-grid-line-main {
+	display: flex;
+	flex-wrap: nowrap;
+	align-items: baseline;
+	gap: 0.35rem;
+	flex: 1;
+	min-width: 0;
+}
+
+.cu-grid-line-main > a {
+	flex: 1 1 auto;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 	color: var(--jf-text);
 	text-decoration: none;
 }
 
 .cu-grid-meta {
+	flex-shrink: 0;
 	color: var(--jf-text-secondary);
 	font-size: 0.75rem;
+	white-space: nowrap;
 }
 
-.cu-grid-birthday-notes a {
+.cu-grid-birthday-notes .cu-grid-line-main > a {
 	font-weight: 600;
 }
 
 .cu-grid-task-time {
-	margin-left: 0.35rem;
+	flex-shrink: 0;
 	font-size: 0.75rem;
 	font-weight: 500;
 	color: var(--jf-text-secondary);

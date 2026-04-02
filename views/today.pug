@@ -41,17 +41,25 @@ block content
 							.cu-grid-cell
 								.cu-grid-cell-head= day.label
 								.cu-grid-cell-body
-									each row in day.items
-										if row.kind === 'birthday'
-											.cu-grid-line.cu-grid-birthday(class=row.hasNotes ? 'cu-grid-birthday-notes' : '')
-												a(href=`/birthdays/${row.person._id}/edit`)= row.person.name
-												if row.turningAge
-													span.cu-grid-meta  · #{row.turningAge}
-										else if row.kind === 'task'
-											.cu-grid-line.cu-grid-task
-												a(href=`/tasks/${row.task._id}/edit`)= row.task.title
-												if row.task.timeOfDay
-													span.cu-grid-task-time= formatTaskTimeDisplay(row.task.timeOfDay)
+									ul.cu-grid-list
+										each row in day.items
+											if row.kind === 'birthday'
+												li.cu-grid-line.cu-grid-birthday(class=row.hasNotes ? 'cu-grid-birthday-notes' : '')
+													span.cu-grid-bullet(aria-hidden="true")
+														i.bi.bi-cake2
+													span.cu-grid-line-main
+														a(href=`/birthdays/${row.person._id}/edit`)= row.person.name
+														if row.turningAge
+															span.cu-grid-meta  · #{row.turningAge}
+											else if row.kind === 'task'
+												- var isAppt = row.task.timeOfDay
+												li.cu-grid-line.cu-grid-task(class=isAppt ? 'cu-grid-task-appt' : 'cu-grid-task-plain')
+													span.cu-grid-bullet(aria-hidden="true")
+														i.bi(class=isAppt ? 'bi-clock' : 'bi-calendar3')
+													span.cu-grid-line-main
+														a(href=`/tasks/${row.task._id}/edit`)= row.task.title
+														if row.task.timeOfDay
+															span.cu-grid-task-time= formatTaskTimeDisplay(row.task.timeOfDay)
 
 				//- Add task form (collapsible)
 				#addTaskForm.collapse.mb-4
