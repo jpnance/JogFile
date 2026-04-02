@@ -538,9 +538,27 @@ app.get('/', requireLogin, async (req, res) => {
 	const logicalTodayStr = getLogicalToday();
 	const logicalTodayDate = new Date(logicalTodayStr + 'T12:00:00');
 
-	/** Next 7 days (including today): birthdays and dated tasks (today’s dated tasks stay in the main list only). */
+	/** Today’s birthdays — shown above the task list (not in the Coming up grid). */
+	const todayBirthdays = [];
+	for (const person of allPeople) {
+		// @ts-ignore - Mongoose method
+		const nextBirthday = person.getNextBirthday();
+		const diffTime = nextBirthday.getTime() - logicalTodayDate.getTime();
+		const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+		if (diffDays !== 0) continue;
+		const hasNotes = Boolean(person.notes && String(person.notes).trim() !== '');
+		todayBirthdays.push({
+			person,
+			hasNotes,
+			// @ts-ignore - Mongoose method
+			turningAge: person.getTurningAge(nextBirthday)
+		});
+	}
+	todayBirthdays.sort((a, b) => String(a.person.name).localeCompare(String(b.person.name)));
+
+	/** Next 3 days (tomorrow through day after tomorrow): birthdays + dated tasks in the grid. */
 	const comingUpDays = [];
-	for (let offset = 0; offset < 7; offset++) {
+	for (let offset = 1; offset < 4; offset++) {
 		const dayDate = new Date(todayStart);
 		dayDate.setDate(dayDate.getDate() + offset);
 		const dayYmd = getPacificYmd(dayDate);
@@ -560,16 +578,13 @@ app.get('/', requireLogin, async (req, res) => {
 				person,
 				hasNotes,
 				// @ts-ignore - Mongoose method
-				turningAge: person.getTurningAge(nextBirthday),
-				isToday: offset === 0
+				turningAge: person.getTurningAge(nextBirthday)
 			});
 		}
 
-		if (offset > 0) {
-			const dayTasks = tasksByPacificYmd.get(dayYmd) || [];
-			for (const task of dayTasks) {
-				items.push({ kind: 'task', task });
-			}
+		const dayTasks = tasksByPacificYmd.get(dayYmd) || [];
+		for (const task of dayTasks) {
+			items.push({ kind: 'task', task });
 		}
 
 		items.sort((a, b) => {
@@ -594,13 +609,11 @@ app.get('/', requireLogin, async (req, res) => {
 			return 0;
 		});
 
-		if (items.length > 0) {
-			comingUpDays.push({
-				offset,
-				label: formatComingUpDayLabel(offset, dayDate),
-				items
-			});
-		}
+		comingUpDays.push({
+			offset,
+			label: formatComingUpDayLabel(offset, dayDate),
+			items
+		});
 	}
 
 	// Fetch chores for quick-add
@@ -608,6 +621,7 @@ app.get('/', requireLogin, async (req, res) => {
 
 	res.render('today', {
 		tasks,
+		todayBirthdays,
 		laterTasks,
 		scratchPadTasks,
 		completedTasks,

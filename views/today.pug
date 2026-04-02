@@ -34,32 +34,35 @@ block content
 							span +
 							span.d-none.d-sm-inline  Add
 
-				//- Next 7 days at a glance (birthdays + dated tasks; today’s tasks stay in the list below)
-				if comingUpDays && comingUpDays.length > 0
-					section.cu-grid.mb-4(aria-label="Next seven days")
+				//- Next 3 days: birthdays + dated tasks — today’s birthdays are above the task list (cells always shown; may be empty)
+				if comingUpDays && comingUpDays.length
+					section.cu-grid.mb-4(aria-label="Tomorrow and the next two days")
 						each day in comingUpDays
-							.cu-grid-cell
+							.cu-grid-cell(class=day.offset === 1 ? 'cu-grid-cell-tomorrow' : '')
 								.cu-grid-cell-head= day.label
 								.cu-grid-cell-body
-									ul.cu-grid-list
-										each row in day.items
-											if row.kind === 'birthday'
-												li.cu-grid-line.cu-grid-birthday(class=row.hasNotes ? 'cu-grid-birthday-notes' : '')
-													span.cu-grid-bullet(aria-hidden="true")
-														i.bi.bi-cake2
-													span.cu-grid-line-main
-														a(href=`/birthdays/${row.person._id}/edit`)= row.person.name
-														if row.turningAge
-															span.cu-grid-meta  · #{row.turningAge}
-											else if row.kind === 'task'
-												- var isAppt = row.task.timeOfDay
-												li.cu-grid-line.cu-grid-task(class=isAppt ? 'cu-grid-task-appt' : 'cu-grid-task-plain')
-													span.cu-grid-bullet(aria-hidden="true")
-														i.bi(class=isAppt ? 'bi-clock' : 'bi-calendar3')
-													span.cu-grid-line-main
-														a(href=`/tasks/${row.task._id}/edit`)= row.task.title
-														if row.task.timeOfDay
-															span.cu-grid-task-time= formatTaskTimeDisplay(row.task.timeOfDay)
+									if !day.items || !day.items.length
+										p.cu-grid-empty.text-muted.small.mb-0 Nothing scheduled
+									else
+										ul.cu-grid-list
+											each row in day.items
+												if row.kind === 'birthday'
+													li.cu-grid-line.cu-grid-birthday(class=row.hasNotes ? 'cu-grid-birthday-notes' : '')
+														span.cu-grid-bullet(aria-hidden="true")
+															i.bi.bi-cake2
+														span.cu-grid-line-main
+															a(href=`/birthdays/${row.person._id}/edit`)= row.person.name
+															if row.turningAge
+																span.cu-grid-meta  · #{row.turningAge}
+												else if row.kind === 'task'
+													- var isAppt = row.task.timeOfDay
+													li.cu-grid-line.cu-grid-task(class=isAppt ? 'cu-grid-task-appt' : 'cu-grid-task-plain')
+														span.cu-grid-bullet(aria-hidden="true")
+															i.bi(class=isAppt ? 'bi-clock' : 'bi-calendar3')
+														span.cu-grid-line-main
+															a(href=`/tasks/${row.task._id}/edit`)= row.task.title
+															if row.task.timeOfDay
+																span.cu-grid-task-time= formatTaskTimeDisplay(row.task.timeOfDay)
 
 				//- Add task form (collapsible)
 				#addTaskForm.collapse.mb-4
@@ -127,13 +130,26 @@ block content
 						addTaskForm.addEventListener('shown.bs.collapse', () => addTaskInput.focus());
 					}
 
+				//- Today's birthdays (task-like rows; not in Coming up grid)
+				if todayBirthdays && todayBirthdays.length > 0
+					section.today-birthday-strip.mb-4(aria-label="Birthdays today")
+						each b in todayBirthdays
+							.today-birthday-item.d-flex.align-items-center(class=b.hasNotes ? 'today-birthday-item-notes' : '')
+								span.today-birthday-leading.me-3(aria-hidden="true")
+									i.bi.bi-cake2
+								.today-birthday-body.flex-grow-1
+									a.today-birthday-name(href=`/birthdays/${b.person._id}/edit`)= b.person.name
+									if b.turningAge
+										span.today-birthday-meta  · turning #{b.turningAge}
+
 				//- Today's tasks
-				if tasks.length === 0
+				- var hasTodayBirthdays = todayBirthdays && todayBirthdays.length > 0
+				if tasks.length === 0 && !hasTodayBirthdays
 					.empty-state
 						.empty-state-icon
 							i.bi.bi-check-lg
 						p All clear for today
-				else
+				else if tasks.length > 0
 					.task-list.mb-4
 						each task in tasks
 							include task
