@@ -12,6 +12,7 @@ import Task from './models/Task.js';
 import Recurring from './models/Recurring.js';
 import Person from './models/Person.js';
 import Chore from './models/Chore.js';
+import Holiday from './models/Holiday.js';
 import {
 	getTodayRange,
 	getTomorrowRange,
@@ -21,7 +22,8 @@ import {
 	getPacificYmd,
 	formatComingUpDayLabel,
 	normalizeTimeOfDay,
-	formatTaskTimeDisplay
+	formatTaskTimeDisplay,
+	isValidMonthDay
 } from './lib/dates.js';
 
 /**
@@ -535,6 +537,7 @@ app.get('/', requireLogin, async (req, res) => {
 	}).sort({ completedAt: -1 }).limit(20);
 
 	const allPeople = await Person.find();
+	const allHolidays = await Holiday.find().sort({ month: 1, day: 1, name: 1 });
 	const logicalTodayStr = getLogicalToday();
 	const logicalTodayDate = new Date(logicalTodayStr + 'T12:00:00');
 
@@ -556,7 +559,20 @@ app.get('/', requireLogin, async (req, res) => {
 	}
 	todayBirthdays.sort((a, b) => String(a.person.name).localeCompare(String(b.person.name)));
 
-	/** Next 3 days (tomorrow through day after tomorrow): birthdays + dated tasks in the grid. */
+	/** Today’s holidays — same strip pattern as birthdays; not in the Coming up grid. */
+	const todayHolidays = [];
+	for (const holiday of allHolidays) {
+		// @ts-ignore - Mongoose method
+		const nextOcc = holiday.getNextOccurrence();
+		const diffTime = nextOcc.getTime() - logicalTodayDate.getTime();
+		const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+		if (diffDays !== 0) continue;
+		const hasNotes = Boolean(holiday.notes && String(holiday.notes).trim() !== '');
+		todayHolidays.push({ holiday, hasNotes });
+	}
+	todayHolidays.sort((a, b) => String(a.holiday.name).localeCompare(String(b.holiday.name)));
+
+	/** Next 3 days (tomorrow through day after tomorrow): birthdays + holidays + dated tasks in the grid. */
 	const comingUpDays = [];
 	for (let offset = 1; offset < 4; offset++) {
 		const dayDate = new Date(todayStart);
@@ -582,6 +598,16 @@ app.get('/', requireLogin, async (req, res) => {
 			});
 		}
 
+		for (const holiday of allHolidays) {
+			// @ts-ignore - Mongoose method
+			const nextOcc = holiday.getNextOccurrence();
+			const diffTime = nextOcc.getTime() - logicalTodayDate.getTime();
+			const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+			if (diffDays !== offset) continue;
+			const hasNotes = Boolean(holiday.notes && String(holiday.notes).trim() !== '');
+			items.push({ kind: 'holiday', holiday, hasNotes });
+		}
+
 		const dayTasks = tasksByPacificYmd.get(dayYmd) || [];
 		for (const task of dayTasks) {
 			items.push({ kind: 'task', task });
@@ -589,7 +615,7 @@ app.get('/', requireLogin, async (req, res) => {
 
 		items.sort((a, b) => {
 			/** @type {Record<string, number>} */
-			const order = { birthday: 0, task: 1 };
+			const order = { birthday: 0, holiday: 1, task: 2 };
 			const ao = order[a.kind] ?? 99;
 			const bo = order[b.kind] ?? 99;
 			if (ao !== bo) return ao - bo;
@@ -605,6 +631,10 @@ app.get('/', requireLogin, async (req, res) => {
 			if (a.kind === 'birthday' && b.kind === 'birthday') {
 				// @ts-expect-error person on birthday item
 				return String(a.person.name).localeCompare(String(b.person.name));
+			}
+			if (a.kind === 'holiday' && b.kind === 'holiday') {
+				// @ts-expect-error holiday on item
+				return String(a.holiday.name).localeCompare(String(b.holiday.name));
 			}
 			return 0;
 		});
@@ -622,6 +652,7 @@ app.get('/', requireLogin, async (req, res) => {
 	res.render('today', {
 		tasks,
 		todayBirthdays,
+		todayHolidays,
 		laterTasks,
 		scratchPadTasks,
 		completedTasks,
@@ -1183,6 +1214,112 @@ app.post('/birthdays/:id/edit', requireLogin, async (req, res) => {
 app.post('/birthdays/:id/delete', requireLogin, async (req, res) => {
 	await Person.findByIdAndDelete(req.params.id);
 	res.redirect('/birthdays');
+});
+
+// ============================================
+// Holidays (annual, fixed month/day — not Recurring)
+// ============================================
+
+app.get('/holidays', requireLogin, async (req, res) => {
+	const holidays = await Holiday.find().sort({ month: 1, day: 1, name: 1 });
+
+	const today = new Date();
+	today.setHours(12, 0, 0, 0);
+
+	const upcoming = [];
+	for (const holiday of holidays) {
+		// @ts-ignore - Mongoose method
+		const nextOcc = holiday.getNextOccurrence();
+		const diffTime = nextOcc.getTime() - today.getTime();
+		const daysUntil = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+		if (daysUntil >= 0 && daysUntil <= 30) {
+			upcoming.push({
+				holiday,
+				daysUntil,
+				isToday: daysUntil === 0
+			});
+		}
+	}
+	upcoming.sort((a, b) => a.daysUntil - b.daysUntil);
+
+	const monthNames = ['', 'January', 'February', 'March', 'April', 'May', 'June',
+		'July', 'August', 'September', 'October', 'November', 'December'];
+
+	const byMonth = [];
+	for (let m = 1; m <= 12; m++) {
+		const monthHolidays = holidays.filter(h => h.month === m);
+		if (monthHolidays.length > 0) {
+			byMonth.push({ month: m, name: monthNames[m], holidays: monthHolidays });
+		}
+	}
+
+	res.render('holidays', { upcoming, byMonth, totalCount: holidays.length });
+});
+
+app.get('/holidays/new', requireLogin, (req, res) => {
+	res.render('edit-holiday', { holiday: null });
+});
+
+app.post('/holidays', requireLogin, async (req, res) => {
+	const { name, month, day, notes } = req.body;
+	const m = parseInt(month, 10);
+	const d = parseInt(day, 10);
+
+	if (!name || !name.trim()) {
+		return res.status(400).send('Name is required');
+	}
+	if (!isValidMonthDay(m, d)) {
+		return res.status(400).send('Invalid month and day');
+	}
+
+	await Holiday.create({
+		name: name.trim(),
+		month: m,
+		day: d,
+		notes: notes || ''
+	});
+
+	res.redirect('/holidays');
+});
+
+app.get('/holidays/:id/edit', requireLogin, async (req, res) => {
+	const holiday = await Holiday.findById(req.params.id);
+	if (!holiday) {
+		return res.status(404).send('Holiday not found');
+	}
+	res.render('edit-holiday', { holiday });
+});
+
+app.post('/holidays/:id/edit', requireLogin, async (req, res) => {
+	const holiday = await Holiday.findById(req.params.id);
+	if (!holiday) {
+		return res.status(404).send('Holiday not found');
+	}
+
+	const { name, month, day, notes } = req.body;
+	const m = parseInt(month, 10);
+	const d = parseInt(day, 10);
+
+	if (!name || !name.trim()) {
+		return res.status(400).send('Name is required');
+	}
+	if (!isValidMonthDay(m, d)) {
+		return res.status(400).send('Invalid month and day');
+	}
+
+	holiday.name = name.trim();
+	holiday.month = m;
+	holiday.day = d;
+	holiday.notes = notes || '';
+
+	await holiday.save();
+	res.redirect('/holidays');
+});
+
+app.post('/holidays/:id/delete', requireLogin, async (req, res) => {
+	await Holiday.findByIdAndDelete(req.params.id);
+	res.redirect('/holidays');
 });
 
 // Chore Routes

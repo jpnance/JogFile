@@ -21,6 +21,10 @@ block content
 										i.bi.bi-cake2.me-2
 										| Birthdays
 								li
+									a.dropdown-item(href="/holidays")
+										i.bi.bi-stars.me-2
+										| Holidays
+								li
 									a.dropdown-item(href="/recurring")
 										i.bi.bi-arrow-repeat.me-2
 										| Recurring
@@ -54,6 +58,12 @@ block content
 															a(href=`/birthdays/${row.person._id}/edit`)= row.person.name
 															if row.turningAge
 																span.cu-grid-meta  · #{row.turningAge}
+												else if row.kind === 'holiday'
+													li.cu-grid-line.cu-grid-holiday(class=row.hasNotes ? 'cu-grid-holiday-notes' : '')
+														span.cu-grid-bullet(aria-hidden="true")
+															i.bi.bi-stars
+														span.cu-grid-line-main
+															a(href=`/holidays/${row.holiday._id}/edit`)= row.holiday.name
 												else if row.kind === 'task'
 													- var isAppt = row.task.timeOfDay
 													li.cu-grid-line.cu-grid-task(class=isAppt ? 'cu-grid-task-appt' : 'cu-grid-task-plain')
@@ -142,9 +152,19 @@ block content
 									if b.turningAge
 										span.today-birthday-meta  · turning #{b.turningAge}
 
+				if todayHolidays && todayHolidays.length > 0
+					section.today-holiday-strip.mb-4(aria-label="Holidays today")
+						each h in todayHolidays
+							.today-holiday-item.d-flex.align-items-center(class=h.hasNotes ? 'today-holiday-item-notes' : '')
+								span.today-holiday-leading.me-3(aria-hidden="true")
+									i.bi.bi-stars
+								.today-holiday-body.flex-grow-1
+									a.today-holiday-name(href=`/holidays/${h.holiday._id}/edit`)= h.holiday.name
+
 				//- Today's tasks
 				- var hasTodayBirthdays = todayBirthdays && todayBirthdays.length > 0
-				if tasks.length === 0 && !hasTodayBirthdays
+				- var hasTodayHolidays = todayHolidays && todayHolidays.length > 0
+				if tasks.length === 0 && !hasTodayBirthdays && !hasTodayHolidays
 					.empty-state
 						.empty-state-icon
 							i.bi.bi-check-lg

@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { getTodayRange, DAY_START_HOUR, normalizeTimeOfDay, formatTaskTimeDisplay } from '../lib/dates.js';
+import { getTodayRange, DAY_START_HOUR, normalizeTimeOfDay, formatTaskTimeDisplay, isValidMonthDay } from '../lib/dates.js';
 
 describe('dates', () => {
 	describe('getTodayRange', () => {
@@ -80,6 +80,24 @@ describe('dates', () => {
 
 		it('formats 12-hour label', () => {
 			expect(formatTaskTimeDisplay('14:30')).to.match(/2:30/);
+		});
+	});
+
+	describe('isValidMonthDay', () => {
+		it('accepts Feb 29 (leap year)', () => {
+			expect(isValidMonthDay(2, 29)).to.be.true;
+		});
+
+		it('rejects Feb 30', () => {
+			expect(isValidMonthDay(2, 30)).to.be.false;
+		});
+
+		it('rejects April 31', () => {
+			expect(isValidMonthDay(4, 31)).to.be.false;
+		});
+
+		it('rejects non-integers', () => {
+			expect(isValidMonthDay(1.5, 1)).to.be.false;
 		});
 	});
 });

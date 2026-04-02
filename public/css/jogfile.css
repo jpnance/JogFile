@@ -37,6 +37,9 @@
 	--jf-birthday: #e53e3e;
 	--jf-birthday-hover: #c53030;
 	--jf-birthday-light: #fff5f5;
+	--jf-holiday: #276749;
+	--jf-holiday-hover: #22543d;
+	--jf-holiday-light: #f0fff4;
 	--jf-chore: #2b6cb0;
 	--jf-chore-hover: #2c5282;
 	--jf-chore-light: #ebf8ff;
@@ -278,6 +281,57 @@ h1 { font-size: 2rem; }
 .today-birthday-meta {
 	color: var(--jf-text-secondary);
 	font-size: 0.8125rem;
+}
+
+/* Today’s holidays — mirror birthday strip */
+.today-holiday-item {
+	background: var(--jf-today-light);
+	border: 1px solid var(--jf-border);
+	border-left: 3px solid var(--jf-today);
+	border-radius: var(--jf-radius-sm);
+	padding: 0.875rem 1rem !important;
+	margin-bottom: 0.5rem !important;
+}
+
+.today-holiday-item:last-child {
+	margin-bottom: 0 !important;
+}
+
+.today-holiday-item-notes {
+	border-left-color: var(--jf-holiday);
+	background: var(--jf-holiday-light);
+}
+
+.today-holiday-leading {
+	flex-shrink: 0;
+	width: 28px;
+	height: 28px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 0.875rem;
+	color: var(--jf-text-secondary);
+	line-height: 1;
+}
+
+.today-holiday-item-notes .today-holiday-leading {
+	color: var(--jf-holiday);
+}
+
+.today-holiday-body {
+	min-width: 0;
+	font-size: 0.9375rem;
+	line-height: 1.4;
+}
+
+.today-holiday-name {
+	font-weight: 500;
+	color: var(--jf-text);
+	text-decoration: none;
+}
+
+.today-holiday-item-notes .today-holiday-name {
+	font-weight: 600;
 }
 
 /* Recurring-generated tasks */
@@ -991,6 +1045,26 @@ h1 { font-size: 2rem; }
 	color: white;
 }
 
+.btn-holiday {
+	--bs-btn-active-bg: var(--jf-holiday-hover);
+	--bs-btn-active-border-color: var(--jf-holiday-hover);
+	--bs-btn-active-color: white;
+	background-color: var(--jf-holiday);
+	border-color: var(--jf-holiday);
+	color: white;
+}
+
+.btn-holiday:hover {
+	background-color: var(--jf-holiday-hover);
+	border-color: var(--jf-holiday-hover);
+	color: white;
+}
+
+.text-holiday-today {
+	color: var(--jf-holiday);
+	font-weight: 600;
+}
+
 .birthday-section-header .chevron,
 .birthday-section-header .section-title {
 	color: var(--jf-birthday);
@@ -1037,6 +1111,52 @@ h1 { font-size: 2rem; }
 }
 
 .birthday-item-actions {
+	display: flex;
+	gap: 0.5rem;
+	flex-shrink: 0;
+}
+
+.holiday-section-header .chevron,
+.holiday-section-header .section-title {
+	color: var(--jf-holiday);
+}
+.holiday-section-header .section-count {
+	background: var(--jf-holiday-light);
+	color: var(--jf-holiday);
+}
+.holiday-section-header:hover {
+	background: var(--jf-holiday-light);
+}
+
+.holiday-item {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 1rem;
+	padding: 0.75rem 1rem;
+	background: var(--jf-card-bg);
+	border: 1px solid var(--jf-border);
+	border-left: 3px solid var(--jf-holiday);
+	border-radius: var(--jf-radius-sm);
+	margin-bottom: 0.5rem;
+}
+
+.holiday-item-content {
+	flex: 1;
+	min-width: 0;
+}
+
+.holiday-name {
+	font-weight: 500;
+	color: var(--jf-text);
+}
+
+.holiday-date {
+	font-size: 0.875rem;
+	color: var(--jf-text-secondary);
+}
+
+.holiday-item-actions {
 	display: flex;
 	gap: 0.5rem;
 	flex-shrink: 0;
@@ -1154,6 +1274,10 @@ h1 { font-size: 2rem; }
 
 .cu-grid-birthday-notes .cu-grid-bullet {
 	color: var(--jf-birthday);
+}
+
+.cu-grid-holiday-notes .cu-grid-bullet {
+	color: var(--jf-holiday);
 }
 
 .cu-grid-task-appt .cu-grid-bullet {

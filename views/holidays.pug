@@ -1,0 +1,67 @@
+extends layout
+
+mixin holidayItem(holiday, options)
+	- var daysUntil = options && options.daysUntil
+	- var isToday = options && options.isToday
+	.holiday-item
+		.holiday-item-content
+			.holiday-name= holiday.name
+			.holiday-date
+				if isToday
+					span.text-holiday-today Today!
+				else if daysUntil === 1
+					| Tomorrow
+				else if daysUntil !== undefined
+					| in #{daysUntil} days
+				if daysUntil !== undefined
+					|  · 
+				= holiday.getHolidayString()
+			if holiday.notes
+				.text-muted.small.mt-1= holiday.notes
+		.holiday-item-actions
+			a.btn.btn-sm.btn-outline-secondary(href=`/holidays/${holiday._id}/edit`) Edit
+			form(method="POST" action=`/holidays/${holiday._id}/delete` onsubmit="return confirm('Remove this holiday?')")
+				button.btn.btn-sm.btn-outline-danger(type="submit") Delete
+
+block content
+	main.container.py-4
+		.row.justify-content-center
+			.col-12.col-lg-10.col-xl-8
+				a.nav-link-secondary.mb-3(href="/")
+					i.bi.bi-arrow-left.me-1
+					| Back to Today
+
+				.page-header
+					h1 Holidays
+					a.btn.btn-holiday.btn-sm(href="/holidays/new") + New
+
+				if totalCount === 0
+					.empty-state
+						.empty-state-icon
+							i.bi.bi-stars
+						p No holidays yet
+						a.btn.btn-holiday(href="/holidays/new") Add your first
+				else
+					if upcoming && upcoming.length > 0
+						.mb-4
+							.section-header.holiday-section-header(data-bs-toggle="collapse" data-bs-target="#holiday-coming-up" aria-expanded="true")
+								span.chevron ▶
+								span.section-title Coming Up
+								span.section-count= upcoming.length
+							.collapse.show(id="holiday-coming-up")
+								.pt-2
+									each item in upcoming
+										+holidayItem(item.holiday, { daysUntil: item.daysUntil, isToday: item.isToday })
+
+					.section-divider
+
+					each group in byMonth
+						.mb-3
+							.section-header.holiday-section-header(data-bs-toggle="collapse" data-bs-target=`#holiday-month-${group.month}` aria-expanded="false")
+								span.chevron ▶
+								span.section-title= group.name
+								span.section-count= group.holidays.length
+							.collapse(id=`holiday-month-${group.month}`)
+								.pt-2
+									each holiday in group.holidays
+										+holidayItem(holiday)
