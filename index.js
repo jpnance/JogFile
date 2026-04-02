@@ -23,7 +23,9 @@ import {
 	formatComingUpDayLabel,
 	normalizeTimeOfDay,
 	formatTaskTimeDisplay,
-	isValidMonthDay
+	isValidMonthDay,
+	getNthWeekdayInMonth,
+	sortHolidaysChronologically
 } from './lib/dates.js';
 
 /**
@@ -1217,11 +1219,64 @@ app.post('/birthdays/:id/delete', requireLogin, async (req, res) => {
 });
 
 // ============================================
-// Holidays (annual, fixed month/day — not Recurring)
+// Holidays (annual — fixed date or nth weekday in month; not Recurring)
 // ============================================
 
+/**
+ * @param {import('express').Request} req
+ * @returns {{ recurrenceType: 'fixed' | 'nth_weekday', name: string, month: number, day: number | null, weekday: number | null, weekOrdinal: number | null, notes: string }}
+ */
+function parseHolidayBody(req) {
+	const recurrenceType = req.body.recurrenceType === 'nth_weekday' ? 'nth_weekday' : 'fixed';
+	const name = typeof req.body.name === 'string' ? req.body.name.trim() : '';
+	const month = parseInt(req.body.month, 10);
+	const notes = typeof req.body.notes === 'string' ? req.body.notes : '';
+
+	if (recurrenceType === 'fixed') {
+		const day = parseInt(req.body.day, 10);
+		return { recurrenceType, name, month, day, weekday: null, weekOrdinal: null, notes };
+	}
+
+	const weekday = parseInt(req.body.weekday, 10);
+	const weekOrdinal = parseInt(req.body.weekOrdinal, 10);
+	return { recurrenceType, name, month, day: null, weekday, weekOrdinal, notes };
+}
+
+/**
+ * @param {{ recurrenceType: string, name: string, month: number, day: number | null, weekday: number | null, weekOrdinal: number | null }} p
+ * @returns {string | null} error message or null
+ */
+function validateHolidayPayload(p) {
+	if (!p.name) {
+		return 'Name is required';
+	}
+	if (!Number.isInteger(p.month) || p.month < 1 || p.month > 12) {
+		return 'Invalid month';
+	}
+
+	if (p.recurrenceType === 'fixed') {
+		if (!Number.isInteger(p.day) || p.day === null || !isValidMonthDay(p.month, p.day)) {
+			return 'Invalid month and day';
+		}
+		return null;
+	}
+
+	if (!Number.isInteger(p.weekday) || p.weekday === null || p.weekday < 0 || p.weekday > 6) {
+		return 'Invalid weekday';
+	}
+	if (p.weekOrdinal === null || ![1, 2, 3, 4, -1].includes(p.weekOrdinal)) {
+		return 'Invalid week';
+	}
+	const probe = getNthWeekdayInMonth(2025, p.month, p.weekday, p.weekOrdinal);
+	if (!probe) {
+		return 'That weekday does not occur that many times in the chosen month';
+	}
+
+	return null;
+}
+
 app.get('/holidays', requireLogin, async (req, res) => {
-	const holidays = await Holiday.find().sort({ month: 1, day: 1, name: 1 });
+	const holidays = sortHolidaysChronologically(await Holiday.find());
 
 	const today = new Date();
 	today.setHours(12, 0, 0, 0);
@@ -1248,7 +1303,9 @@ app.get('/holidays', requireLogin, async (req, res) => {
 
 	const byMonth = [];
 	for (let m = 1; m <= 12; m++) {
-		const monthHolidays = holidays.filter(h => h.month === m);
+		const monthHolidays = holidays.filter(
+			/** @param {{ month: number }} h */ h => h.month === m
+		);
 		if (monthHolidays.length > 0) {
 			byMonth.push({ month: m, name: monthNames[m], holidays: monthHolidays });
 		}
@@ -1262,22 +1319,20 @@ app.get('/holidays/new', requireLogin, (req, res) => {
 });
 
 app.post('/holidays', requireLogin, async (req, res) => {
-	const { name, month, day, notes } = req.body;
-	const m = parseInt(month, 10);
-	const d = parseInt(day, 10);
-
-	if (!name || !name.trim()) {
-		return res.status(400).send('Name is required');
-	}
-	if (!isValidMonthDay(m, d)) {
-		return res.status(400).send('Invalid month and day');
+	const p = parseHolidayBody(req);
+	const err = validateHolidayPayload(p);
+	if (err) {
+		return res.status(400).send(err);
 	}
 
 	await Holiday.create({
-		name: name.trim(),
-		month: m,
-		day: d,
-		notes: notes || ''
+		name: p.name,
+		recurrenceType: p.recurrenceType,
+		month: p.month,
+		day: p.recurrenceType === 'fixed' ? p.day : null,
+		weekday: p.recurrenceType === 'nth_weekday' ? p.weekday : null,
+		weekOrdinal: p.recurrenceType === 'nth_weekday' ? p.weekOrdinal : null,
+		notes: p.notes || ''
 	});
 
 	res.redirect('/holidays');
@@ -1297,21 +1352,25 @@ app.post('/holidays/:id/edit', requireLogin, async (req, res) => {
 		return res.status(404).send('Holiday not found');
 	}
 
-	const { name, month, day, notes } = req.body;
-	const m = parseInt(month, 10);
-	const d = parseInt(day, 10);
-
-	if (!name || !name.trim()) {
-		return res.status(400).send('Name is required');
-	}
-	if (!isValidMonthDay(m, d)) {
-		return res.status(400).send('Invalid month and day');
+	const p = parseHolidayBody(req);
+	const verr = validateHolidayPayload(p);
+	if (verr) {
+		return res.status(400).send(verr);
 	}
 
-	holiday.name = name.trim();
-	holiday.month = m;
-	holiday.day = d;
-	holiday.notes = notes || '';
+	holiday.name = p.name;
+	holiday.recurrenceType = p.recurrenceType;
+	holiday.month = p.month;
+	holiday.notes = p.notes || '';
+	if (p.recurrenceType === 'fixed') {
+		holiday.day = p.day;
+		holiday.weekday = null;
+		holiday.weekOrdinal = null;
+	} else {
+		holiday.day = null;
+		holiday.weekday = p.weekday;
+		holiday.weekOrdinal = p.weekOrdinal;
+	}
 
 	await holiday.save();
 	res.redirect('/holidays');

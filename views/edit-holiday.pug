@@ -16,20 +16,39 @@ block content
 
 				.card
 					.card-body
-						form(method="POST" action=holiday ? `/holidays/${holiday._id}/edit` : '/holidays')
+						form#holidayForm(method="POST" action=holiday ? `/holidays/${holiday._id}/edit` : '/holidays')
 							.mb-3
 								label.form-label(for="name") Name
 								input.form-control#name(
 									type="text"
 									name="name"
 									value=(holiday ? holiday.name : '')
-									placeholder="e.g., Christmas, Tax day"
+									placeholder="e.g., Labor Day, Christmas"
 									required
 									autofocus
 								)
 
+							.mb-3
+								span.form-label.d-block.mb-2 Repeats
+								.form-check
+									input.form-check-input#recFixed(
+										type="radio"
+										name="recurrenceType"
+										value="fixed"
+										checked=(holiday ? (holiday.recurrenceType || 'fixed') === 'fixed' : true)
+									)
+									label.form-check-label(for="recFixed") Same calendar date every year
+								.form-check
+									input.form-check-input#recNth(
+										type="radio"
+										name="recurrenceType"
+										value="nth_weekday"
+										checked=(holiday && holiday.recurrenceType === 'nth_weekday')
+									)
+									label.form-check-label(for="recNth") A specific weekday of the month (e.g. first Monday in September)
+
 							.row.mb-3
-								.col-6
+								.col-md-6
 									label.form-label(for="month") Month
 									select.form-select#month(name="month" required)
 										option(value="" disabled selected=!holiday) Select month
@@ -37,12 +56,29 @@ block content
 										each month, i in months
 											option(value=i+1 selected=(holiday && holiday.month === i+1))= month
 
-								.col-6
+								.col-md-6#fixedDayCol
 									label.form-label(for="day") Day
-									select.form-select#day(name="day" required)
-										option(value="" disabled selected=!holiday) Day
+									select.form-select#day(name="day")
+										option(value="" disabled=!holiday) Day
 										- for (var d = 1; d <= 31; d++)
-											option(value=d selected=(holiday && holiday.day === d))= d
+											option(value=d selected=(holiday && (holiday.recurrenceType || 'fixed') === 'fixed' && holiday.day === d))= d
+
+							.row.mb-3#nthWeekRow(class=(holiday && holiday.recurrenceType === 'nth_weekday') ? '' : 'd-none')
+								.col-md-6
+									label.form-label(for="weekday") Weekday
+									select.form-select#weekday(name="weekday")
+										option(value="" disabled=true) Select
+										each pair in [[1,'Monday'],[2,'Tuesday'],[3,'Wednesday'],[4,'Thursday'],[5,'Friday'],[6,'Saturday'],[0,'Sunday']]
+											option(value=pair[0] selected=(holiday && holiday.recurrenceType === 'nth_weekday' && holiday.weekday === pair[0]))= pair[1]
+								.col-md-6
+									label.form-label(for="weekOrdinal") Which one
+									select.form-select#weekOrdinal(name="weekOrdinal")
+										option(value="" disabled=true) Select
+										each ord in [[1,'First'],[2,'Second'],[3,'Third'],[4,'Fourth'],[-1,'Last']]
+											option(value=ord[0] selected=(holiday && holiday.recurrenceType === 'nth_weekday' && holiday.weekOrdinal === ord[0]))= ord[1]
+
+							p.form-text.small.text-muted.mb-3
+								| Lunar or movable feasts (e.g. Easter): add them once as a fixed date when you know the day.
 
 							.mb-3
 								label.form-label(for="notes") Notes (optional)
@@ -59,3 +95,37 @@ block content
 									else
 										| Add Holiday
 								a.btn.btn-outline-secondary(href="/holidays") Cancel
+
+				script.
+					(function () {
+						var form = document.getElementById('holidayForm');
+						var recFixed = document.getElementById('recFixed');
+						var recNth = document.getElementById('recNth');
+						var fixedDayCol = document.getElementById('fixedDayCol');
+						var nthWeekRow = document.getElementById('nthWeekRow');
+						var day = document.getElementById('day');
+						var weekday = document.getElementById('weekday');
+						var weekOrdinal = document.getElementById('weekOrdinal');
+
+						function sync() {
+							var nth = recNth && recNth.checked;
+							if (nthWeekRow) nthWeekRow.classList.toggle('d-none', !nth);
+							if (fixedDayCol) fixedDayCol.classList.toggle('d-none', nth);
+							if (day) {
+								day.required = !nth;
+								day.disabled = nth;
+							}
+							if (weekday) {
+								weekday.required = !!nth;
+								weekday.disabled = !nth;
+							}
+							if (weekOrdinal) {
+								weekOrdinal.required = !!nth;
+								weekOrdinal.disabled = !nth;
+							}
+						}
+
+						if (recFixed) recFixed.addEventListener('change', sync);
+						if (recNth) recNth.addEventListener('change', sync);
+						sync();
+					})();

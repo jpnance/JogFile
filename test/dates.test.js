@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { getTodayRange, DAY_START_HOUR, normalizeTimeOfDay, formatTaskTimeDisplay, isValidMonthDay } from '../lib/dates.js';
+import { getTodayRange, DAY_START_HOUR, normalizeTimeOfDay, formatTaskTimeDisplay, isValidMonthDay, getNthWeekdayInMonth } from '../lib/dates.js';
 
 describe('dates', () => {
 	describe('getTodayRange', () => {
@@ -98,6 +98,30 @@ describe('dates', () => {
 
 		it('rejects non-integers', () => {
 			expect(isValidMonthDay(1.5, 1)).to.be.false;
+		});
+	});
+
+	describe('getNthWeekdayInMonth', () => {
+		it('first Monday in September 2025 is Sep 1', () => {
+			const d = getNthWeekdayInMonth(2025, 9, 1, 1);
+			expect(d).to.not.be.null;
+			if (!d) throw new Error('expected date');
+			expect(d.getFullYear()).to.equal(2025);
+			expect(d.getMonth()).to.equal(8);
+			expect(d.getDate()).to.equal(1);
+		});
+
+		it('last Monday in May 2025', () => {
+			const d = getNthWeekdayInMonth(2025, 5, 1, -1);
+			expect(d).to.not.be.null;
+			if (!d) throw new Error('expected date');
+			expect(d.getMonth()).to.equal(4);
+			expect(d.getDate()).to.equal(26);
+		});
+
+		it('returns null for fifth Monday in a February with only four Mondays', () => {
+			const d = getNthWeekdayInMonth(2025, 2, 1, 5);
+			expect(d).to.be.null;
 		});
 	});
 });
