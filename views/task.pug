@@ -5,19 +5,20 @@
 		button.btn.btn-outline-success(type="submit" title="Complete")
 			i.bi.bi-check-lg
 	.flex-grow-1
-		.task-title
-			if task.url
-				a.task-link(href=task.url target="_blank" rel="noopener")= task.title
-			else
-				span= task.title
+		.task-title-block
+			.task-title
+				if task.url
+					a.task-link(href=task.url target="_blank" rel="noopener")= task.title
+				else
+					span= task.title
+				if task.generatedFrom
+					span.task-source-indicator
+						i.bi.bi-arrow-repeat
+				if task.url
+					span.task-url-indicator
+						i.bi.bi-link-45deg
 			if task.timeOfDay
-				span.task-time(title="Appointment time")= formatTaskTimeDisplay(task.timeOfDay)
-			if task.generatedFrom
-				span.task-source-indicator
-					i.bi.bi-arrow-repeat
-			if task.url
-				span.task-url-indicator
-					i.bi.bi-link-45deg
+				.task-time(title="Appointment time")= formatTaskTimeDisplay(task.timeOfDay)
 		if task.description
 			.task-description= task.description
 		if task.rollovers > 0
