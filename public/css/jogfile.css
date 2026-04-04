@@ -362,13 +362,18 @@ h1 { font-size: 2rem; }
 	margin-left: 0.5rem;
 }
 
+.task-title-block {
+	margin-bottom: 0.375rem;
+}
+
 .task-title {
 	font-weight: 500;
 	font-size: 0.9375rem;
 }
 
 .task-time {
-	margin-left: 0.5rem;
+	display: block;
+	margin-top: 0.25rem;
 	font-size: 0.8125rem;
 	font-weight: 500;
 	color: var(--jf-text-secondary);
@@ -388,7 +393,7 @@ h1 { font-size: 2rem; }
 .task-description {
 	color: var(--jf-text-secondary);
 	font-size: 0.8125rem;
-	margin-top: 0.25rem;
+	margin-top: 0.375rem;
 }
 
 /* Complete button */
