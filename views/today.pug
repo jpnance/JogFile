@@ -32,6 +32,10 @@ block content
 									a.dropdown-item(href="/chores")
 										i.bi.bi-wrench.me-2
 										| Chores
+								li
+									a.dropdown-item(href="/quick-lists")
+										i.bi.bi-card-list.me-2
+										| Quick Lists
 
 						//- Add button
 						button.btn.btn-primary.btn-sm(type="button" data-bs-toggle="collapse" data-bs-target="#addTaskForm" aria-expanded="false" aria-controls="addTaskForm")
@@ -176,6 +180,27 @@ block content
 															a(href=`/tasks/${row.task._id}/edit`)= row.task.title
 															if row.task.timeOfDay
 																span.cu-grid-task-time= formatTaskTimeDisplay(row.task.timeOfDay)
+
+				//- Quick Lists
+				if quickLists && quickLists.length
+					.section-divider
+
+					section.ql-grid.mb-4(aria-label="Quick lists")
+						each ql in quickLists
+							.ql-card
+								.ql-card-head
+									a.ql-card-title(href=`/quick-lists/${ql._id}/edit`)= ql.name
+								.ql-card-body
+									ul.ql-items
+										each item in ql.items
+											li.ql-item
+												span.ql-item-text= item.text
+												form.ql-item-delete(method="POST" action=`/quick-lists/${ql._id}/items/${item._id}/delete`)
+													button.ql-item-delete-btn(type="submit" title="Remove")
+														i.bi.bi-x
+										li.ql-item.ql-item-add
+											form.ql-add-form(method="POST" action=`/quick-lists/${ql._id}/items`)
+												input.ql-add-input(type="text" name="text" placeholder="Add…" autocomplete="off")
 
 				.section-divider
 

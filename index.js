@@ -13,6 +13,7 @@ import Recurring from './models/Recurring.js';
 import Person from './models/Person.js';
 import Chore from './models/Chore.js';
 import Holiday from './models/Holiday.js';
+import QuickList from './models/QuickList.js';
 import {
 	getTodayRange,
 	getTomorrowRange,
@@ -651,6 +652,9 @@ app.get('/', requireLogin, async (req, res) => {
 	// Fetch chores for quick-add
 	const chores = await Chore.find().sort({ title: 1 });
 
+	// Fetch quick lists for display
+	const quickLists = await QuickList.find().sort({ position: 1, name: 1 });
+
 	res.render('today', {
 		tasks,
 		todayBirthdays,
@@ -660,6 +664,7 @@ app.get('/', requireLogin, async (req, res) => {
 		completedTasks,
 		comingUpDays,
 		chores,
+		quickLists,
 		formatDate,
 		formatTaskTimeDisplay
 	});
@@ -1379,6 +1384,95 @@ app.post('/holidays/:id/edit', requireLogin, async (req, res) => {
 app.post('/holidays/:id/delete', requireLogin, async (req, res) => {
 	await Holiday.findByIdAndDelete(req.params.id);
 	res.redirect('/holidays');
+});
+
+// ============================================
+// Quick Lists
+// ============================================
+
+app.get('/quick-lists', requireLogin, async (req, res) => {
+	const quickLists = await QuickList.find().sort({ position: 1, name: 1 });
+	res.render('quick-lists', { quickLists });
+});
+
+app.get('/quick-lists/new', requireLogin, (req, res) => {
+	res.render('edit-quick-list', { quickList: null });
+});
+
+app.post('/quick-lists', requireLogin, async (req, res) => {
+	const { name } = req.body;
+
+	if (!name || !name.trim()) {
+		return res.status(400).send('Name is required');
+	}
+
+	const lastList = await QuickList.findOne().sort({ position: -1 });
+	const newPosition = lastList ? lastList.position + 1 : 0;
+
+	await QuickList.create({
+		name: name.trim(),
+		items: [],
+		position: newPosition
+	});
+
+	res.redirect('/quick-lists');
+});
+
+app.get('/quick-lists/:id/edit', requireLogin, async (req, res) => {
+	const quickList = await QuickList.findById(req.params.id);
+	if (!quickList) {
+		return res.status(404).send('Quick list not found');
+	}
+	res.render('edit-quick-list', { quickList });
+});
+
+app.post('/quick-lists/:id/edit', requireLogin, async (req, res) => {
+	const quickList = await QuickList.findById(req.params.id);
+	if (!quickList) {
+		return res.status(404).send('Quick list not found');
+	}
+
+	const { name } = req.body;
+	if (!name || !name.trim()) {
+		return res.status(400).send('Name is required');
+	}
+
+	quickList.name = name.trim();
+	await quickList.save();
+	res.redirect('/quick-lists');
+});
+
+app.post('/quick-lists/:id/delete', requireLogin, async (req, res) => {
+	await QuickList.findByIdAndDelete(req.params.id);
+	res.redirect('/quick-lists');
+});
+
+app.post('/quick-lists/:id/items', requireLogin, async (req, res) => {
+	const quickList = await QuickList.findById(req.params.id);
+	if (!quickList) {
+		return res.status(404).send('Quick list not found');
+	}
+
+	const { text } = req.body;
+	if (!text || !text.trim()) {
+		return res.redirect('/');
+	}
+
+	quickList.items.push({ text: text.trim() });
+	await quickList.save();
+	res.redirect('/');
+});
+
+app.post('/quick-lists/:id/items/:itemId/delete', requireLogin, async (req, res) => {
+	const quickList = await QuickList.findById(req.params.id);
+	if (!quickList) {
+		return res.status(404).send('Quick list not found');
+	}
+
+	// @ts-ignore - Mongoose subdocument method
+	quickList.items.pull({ _id: req.params.itemId });
+	await quickList.save();
+	res.redirect('/');
 });
 
 // Chore Routes

@@ -43,6 +43,11 @@
 	--jf-chore: #2b6cb0;
 	--jf-chore-hover: #2c5282;
 	--jf-chore-light: #ebf8ff;
+	--jf-quick-list: #0d9488;
+	--jf-quick-list-hover: #0f766e;
+	--jf-quick-list-light: #ccfbf1;
+	--jf-quick-list-card-bg: #e6f7f5;
+	--jf-quick-list-card-border: #b2e4df;
 	/* Day grid on home — slightly cooler / lighter than page bg so cells read as tiles */
 	--jf-coming-up-cell-bg: #e8f0fa;
 	--jf-coming-up-cell-border: #c9d8ea;
@@ -1161,6 +1166,183 @@ h1 { font-size: 2rem; }
 	display: flex;
 	gap: 0.5rem;
 	flex-shrink: 0;
+}
+
+/* Quick Lists — cards on Today view (match Coming Up style) */
+.ql-grid {
+	display: grid;
+	gap: 0.5rem;
+	grid-template-columns: repeat(2, 1fr);
+}
+
+@media (min-width: 768px) {
+	.ql-grid {
+		grid-template-columns: repeat(4, 1fr);
+	}
+}
+
+.ql-card {
+	background: var(--jf-quick-list-card-bg);
+	border: 1px solid var(--jf-quick-list-card-border);
+	border-radius: var(--jf-radius-sm);
+	padding: 0.45rem 0.55rem;
+	display: flex;
+	flex-direction: column;
+	min-height: 4.5rem;
+}
+
+.ql-card-head {
+	margin-bottom: 0.25rem;
+}
+
+.ql-card-title {
+	font-size: 0.65rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: var(--jf-quick-list);
+	text-decoration: none;
+}
+
+.ql-card-title:hover {
+	text-decoration: underline;
+}
+
+.ql-card-body {
+	flex: 1;
+	font-size: 0.8125rem;
+	line-height: 1.4;
+}
+
+.ql-empty {
+	font-style: italic;
+	opacity: 0.85;
+}
+
+.ql-items {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+.ql-item {
+	display: flex;
+	align-items: flex-start;
+	gap: 0.25rem;
+	margin-bottom: 0.25rem;
+}
+
+.ql-item:last-child {
+	margin-bottom: 0;
+}
+
+.ql-item-text {
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.ql-item-delete {
+	display: inline;
+	margin: 0;
+	padding: 0;
+}
+
+.ql-item-delete-btn {
+	background: none;
+	border: none;
+	padding: 0;
+	margin: 0;
+	color: var(--jf-text-secondary);
+	cursor: pointer;
+	font-size: 0.75rem;
+	line-height: 1;
+	opacity: 0.5;
+	transition: opacity 0.1s;
+}
+
+.ql-item-delete-btn:hover {
+	opacity: 1;
+	color: var(--jf-danger);
+}
+
+.ql-item-add {
+	margin-top: 0;
+}
+
+.ql-add-form {
+	flex: 1;
+}
+
+.ql-add-input {
+	width: 100%;
+	border: 1px solid var(--jf-border);
+	border-radius: 4px;
+	padding: 0.25rem 0.4rem;
+	font-size: 0.75rem;
+	background: var(--jf-bg);
+}
+
+.ql-add-input:focus {
+	outline: none;
+	border-color: var(--jf-quick-list);
+}
+
+.ql-add-input::placeholder {
+	color: var(--jf-text-secondary);
+	opacity: 0.7;
+}
+
+/* Quick list admin page */
+.quick-list-admin-item {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 1rem;
+	padding: 0.75rem 1rem;
+	background: var(--jf-card-bg);
+	border: 1px solid var(--jf-border);
+	border-left: 3px solid var(--jf-quick-list);
+	border-radius: var(--jf-radius-sm);
+	margin-bottom: 0.5rem;
+}
+
+.quick-list-admin-content {
+	flex: 1;
+	min-width: 0;
+}
+
+.quick-list-admin-name {
+	font-weight: 500;
+	color: var(--jf-text);
+}
+
+.quick-list-admin-count {
+	font-size: 0.875rem;
+	color: var(--jf-text-secondary);
+}
+
+.quick-list-admin-actions {
+	display: flex;
+	gap: 0.5rem;
+	flex-shrink: 0;
+}
+
+.btn-quick-list {
+	--bs-btn-active-bg: var(--jf-quick-list-hover);
+	--bs-btn-active-border-color: var(--jf-quick-list-hover);
+	--bs-btn-active-color: white;
+	background-color: var(--jf-quick-list);
+	border-color: var(--jf-quick-list);
+	color: white;
+}
+
+.btn-quick-list:hover {
+	background-color: var(--jf-quick-list-hover);
+	border-color: var(--jf-quick-list-hover);
+	color: white;
 }
 
 /* Upcoming birthdays widget */
