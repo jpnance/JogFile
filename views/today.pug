@@ -102,9 +102,8 @@ block content
 						each task in pinnedTasks
 							a.pinned-tile(href=`/tasks/${task._id}/edit`)
 								span.pinned-tile-title= task.title
-								if task.scheduledFor
+								if task.scheduledFor && task.scheduledFor >= todayEnd
 									span.pinned-tile-date= formatDate(task.scheduledFor)
-					.section-divider
 
 				//- Today's birthdays (task-like rows; not in Coming up grid)
 				if todayBirthdays && todayBirthdays.length > 0
@@ -140,8 +139,6 @@ block content
 						each task in tasks
 							include task
 
-
-				.section-divider
 
 				//- Next 3 days: birthdays + dated tasks — today’s birthdays are above the task list (cells always shown; may be empty)
 				if comingUpDays && comingUpDays.length
@@ -181,8 +178,6 @@ block content
 
 				//- Quick Lists
 				if quickLists && quickLists.length
-					.section-divider
-
 					section.ql-grid.mb-4(aria-label="Quick lists")
 						each ql in quickLists
 							.ql-card
@@ -199,6 +194,20 @@ block content
 										li.ql-item.ql-item-add
 											form.ql-add-form(method="POST" action=`/quick-lists/${ql._id}/items`)
 												input.ql-add-input(type="text" name="text" placeholder="Add…" autocomplete="off")
+
+				//- Sticky Notes — always visible
+				section.sticky-notes-section(aria-label="Sticky notes")
+					.sticky-notes-grid
+						if stickyNotes && stickyNotes.length
+							each note in stickyNotes
+								.sticky-note-tile
+									a.sticky-note-text(href=`/sticky-notes/${note._id}/edit`)= note.text
+									form.sticky-note-delete(method="POST" action=`/sticky-notes/${note._id}/delete`)
+										button.sticky-note-delete-btn(type="submit" title="Remove")
+											i.bi.bi-x
+						.sticky-note-tile.sticky-note-add
+							form.sticky-note-add-form(method="POST" action="/sticky-notes")
+								input.sticky-note-input(type="text" name="text" placeholder="Add note..." autocomplete="off")
 
 				.section-divider
 
@@ -242,8 +251,6 @@ block content
 																	if row.task.timeOfDay
 																		span.cu-grid-task-time= formatTaskTimeDisplay(row.task.timeOfDay)
 
-				.section-divider
-
 				//- Completed section
 				.mb-2
 					.section-header(data-bs-toggle="collapse" data-bs-target="#completedSection" aria-expanded="false")
@@ -260,19 +267,3 @@ block content
 										span.text-muted= task.title
 										form(method="POST" action=`/tasks/${task._id}/restore` style="margin: 0")
 											button.btn.btn-sm.btn-outline-secondary(type="submit") Restore
-
-				.section-divider
-
-				//- Sticky Notes — always visible at bottom
-				section.sticky-notes-section(aria-label="Sticky notes")
-					.sticky-notes-grid
-						if stickyNotes && stickyNotes.length
-							each note in stickyNotes
-								.sticky-note-tile
-									span.sticky-note-text= note.text
-									form.sticky-note-delete(method="POST" action=`/sticky-notes/${note._id}/delete`)
-										button.sticky-note-delete-btn(type="submit" title="Remove")
-											i.bi.bi-x
-						.sticky-note-tile.sticky-note-add
-							form.sticky-note-add-form(method="POST" action="/sticky-notes")
-								input.sticky-note-input(type="text" name="text" placeholder="Add note..." autocomplete="off")

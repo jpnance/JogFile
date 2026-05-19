@@ -562,7 +562,8 @@ app.get('/', requireLogin, async (req, res) => {
 		quickLists,
 		stickyNotes,
 		formatDate,
-		formatTaskTimeDisplay
+		formatTaskTimeDisplay,
+		todayEnd
 	});
 });
 
@@ -1467,6 +1468,30 @@ app.post('/sticky-notes', requireLogin, async (req, res) => {
 
 app.post('/sticky-notes/:id/delete', requireLogin, async (req, res) => {
 	await StickyNote.findByIdAndDelete(req.params.id);
+	res.redirect('/');
+});
+
+app.get('/sticky-notes/:id/edit', requireLogin, async (req, res) => {
+	const stickyNote = await StickyNote.findById(req.params.id);
+	if (!stickyNote) {
+		return res.status(404).send('Sticky note not found');
+	}
+	res.render('edit-sticky-note', { stickyNote });
+});
+
+app.post('/sticky-notes/:id/edit', requireLogin, async (req, res) => {
+	const stickyNote = await StickyNote.findById(req.params.id);
+	if (!stickyNote) {
+		return res.status(404).send('Sticky note not found');
+	}
+
+	const { text } = req.body;
+	if (!text || !text.trim()) {
+		return res.status(400).send('Text is required');
+	}
+
+	stickyNote.text = text.trim();
+	await stickyNote.save();
 	res.redirect('/');
 });
 
