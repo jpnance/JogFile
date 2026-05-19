@@ -35,13 +35,17 @@ block content
 							.mb-3
 								label.form-label(for="scheduledFor") Scheduled For
 								- var dateValue = task.scheduledFor ? task.scheduledFor.toLocaleDateString('en-CA', { timeZone: 'America/Los_Angeles' }) : ''
-								input.form-control.w-auto#scheduledFor(type="date" name="scheduledFor" value=dateValue)
-								.form-text Leave blank for scratch pad
+								input.form-control.w-auto#scheduledFor(type="date" name="scheduledFor" value=dateValue required)
 
 							.mb-4#editTimeWrap(class=!task.scheduledFor ? 'd-none' : '')
 								label.form-label(for="timeOfDay") Time (optional)
 								input.form-control.w-auto#timeOfDay(type="time" name="timeOfDay" value=(task.timeOfDay || ''))
 								.form-text Appointment or reminder time for that day. Cleared when there is no date.
+
+							.mb-4.form-check
+								input.form-check-input#pinned(type="checkbox" name="pinned" checked=task.pinned)
+								label.form-check-label(for="pinned") Pinned
+								.form-text.mt-1 Pinned tasks stay at the top of the home screen.
 
 							.d-flex.gap-2
 								button.btn.btn-primary(type="submit") Save Changes

@@ -19,10 +19,14 @@ const taskSchema = new mongoose.Schema({
 	position: { type: Number, default: 0 },
 	createdAt: { type: Date, default: Date.now },
 	completedAt: { type: Date, default: null },
+	/** @deprecated Retained for existing data; no longer displayed or incremented */
 	rollovers: { type: Number, default: 0 },
+	/** @deprecated Retained for existing data; no longer used */
 	lastRolloverDate: { type: Date, default: null },
 	generatedFrom: { type: mongoose.Schema.Types.ObjectId, ref: 'Recurring', default: null },
-	snoozedUntil: { type: Date, default: null }
+	/** @deprecated Was used for scratch pad snoozing; no longer used */
+	snoozedUntil: { type: Date, default: null },
+	pinned: { type: Boolean, default: false }
 });
 
 const Task = mongoose.model('Task', taskSchema);

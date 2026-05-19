@@ -1,6 +1,5 @@
-- var staleClass = task.rollovers >= 5 ? 'task-stale-3' : task.rollovers >= 3 ? 'task-stale-2' : task.rollovers >= 1 ? 'task-stale-1' : ''
 - var recurringClass = task.generatedFrom ? 'task-recurring' : ''
-.task-item.d-flex.align-items-center(data-id=task._id data-position=task.position class=`${staleClass} ${recurringClass}`)
+.task-item.d-flex.align-items-center(data-id=task._id data-position=task.position class=recurringClass)
 	form.me-3(method="POST" action=`/tasks/${task._id}/complete`)
 		button.btn.btn-outline-success(type="submit" title="Complete")
 			i.bi.bi-check-lg
@@ -21,10 +20,6 @@
 				.task-time(title="Appointment time")= formatTaskTimeDisplay(task.timeOfDay)
 		if task.description
 			.task-description= task.description
-		if task.rollovers > 0
-			.stale-indicator
-				i.bi.bi-hourglass-split
-				span Deferred #{task.rollovers}×
 	.task-actions.ms-3
 		.dropdown
 			button.dropdown-toggle(type="button" data-bs-toggle="dropdown" aria-expanded="false") •••
@@ -50,9 +45,6 @@
 				li
 					form(method="POST" action=`/tasks/${task._id}/tomorrow`)
 						button.dropdown-item(type="submit") Defer to Tomorrow
-				li
-					form(method="POST" action=`/tasks/${task._id}/scratch`)
-						button.dropdown-item(type="submit") Send to Scratch Pad
 				li
 					hr.dropdown-divider
 				li

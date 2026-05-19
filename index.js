@@ -14,6 +14,7 @@ import Person from './models/Person.js';
 import Chore from './models/Chore.js';
 import Holiday from './models/Holiday.js';
 import QuickList from './models/QuickList.js';
+import StickyNote from './models/StickyNote.js';
 import {
 	getTodayRange,
 	getTomorrowRange,
@@ -29,16 +30,6 @@ import {
 	sortHolidaysChronologically
 } from './lib/dates.js';
 
-/**
- * Get all pending tasks scheduled before today (rollover tasks).
- */
-async function getRolloverTasks() {
-	const { start } = getTodayRange();
-	return Task.find({
-		scheduledFor: { $lt: start, $ne: null },
-		status: 'pending'
-	}).sort({ scheduledFor: 1, createdAt: 1 });
-}
 
 /**
  * Get all recurring templates that are scheduled for today and haven't been processed yet.
@@ -59,24 +50,6 @@ async function getTodaysRecurringPrompts() {
 	});
 }
 
-/**
- * Get one scratch pad item eligible for advancement review.
- * Returns the oldest item that is 7+ days old and not currently snoozed.
- */
-async function getScratchPadPrompt() {
-	const now = new Date();
-	const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-	
-	return Task.findOne({
-		scheduledFor: null,
-		status: 'pending',
-		createdAt: { $lt: sevenDaysAgo },
-		$or: [
-			{ snoozedUntil: null },
-			{ snoozedUntil: { $lte: now } }
-		]
-	}).sort({ createdAt: 1 });
-}
 
 /**
  * Get today's birthdays that haven't been acknowledged this year.
@@ -134,14 +107,12 @@ app.post('/logout', (req, res) => {
 	res.redirect('/login');
 });
 
-// Advancement routes
+// Advancement routes (birthdays and recurring only - tasks auto-roll to today)
 app.get('/advance', requireLogin, async (req, res) => {
-	const rolloverTasks = await getRolloverTasks();
 	const recurringPrompts = await getTodaysRecurringPrompts();
 	const todaysBirthdays = await getTodaysBirthdays();
-	const scratchPadPrompt = await getScratchPadPrompt();
 
-	if (rolloverTasks.length === 0 && recurringPrompts.length === 0 && todaysBirthdays.length === 0 && !scratchPadPrompt) {
+	if (recurringPrompts.length === 0 && todaysBirthdays.length === 0) {
 		return res.redirect('/');
 	}
 
@@ -163,112 +134,13 @@ app.get('/advance', requireLogin, async (req, res) => {
 	const nextMonthDateStr = firstOfNextMonth.toISOString().split('T')[0];
 
 	res.render('advance', {
-		rolloverTasks,
 		recurringPrompts,
 		todaysBirthdays,
-		scratchPadPrompt,
-		currentIndex: 0,
 		formatDate,
 		tomorrowDateStr,
 		nextWeekDateStr,
 		nextMonthDateStr
 	});
-});
-
-app.post('/advance/:id/complete', requireLogin, async (req, res) => {
-	const task = await Task.findById(req.params.id);
-	if (!task) {
-		return res.status(404).send('Task not found');
-	}
-
-	task.status = 'completed';
-	task.completedAt = new Date();
-	await task.save();
-
-	res.redirect('/advance');
-});
-
-app.post('/advance/:id/today', requireLogin, async (req, res) => {
-	const task = await Task.findById(req.params.id);
-	if (!task) {
-		return res.status(404).send('Task not found');
-	}
-
-	const { start, end } = getTodayRange();
-	task.scheduledFor = new Date(start.getTime() + (end.getTime() - start.getTime()) / 2);
-	task.rollovers = (task.rollovers || 0) + 1;
-	task.lastRolloverDate = new Date();
-	await task.save();
-
-	res.redirect('/advance');
-});
-
-app.post('/advance/:id/defer', requireLogin, async (req, res) => {
-	const task = await Task.findById(req.params.id);
-	if (!task) {
-		return res.status(404).send('Task not found');
-	}
-
-	if (!req.body.date) {
-		return res.status(400).send('Date is required');
-	}
-
-	task.scheduledFor = getScheduleDate(req.body.date);
-	task.rollovers = (task.rollovers || 0) + 1;
-	task.lastRolloverDate = new Date();
-	await task.save();
-
-	res.redirect('/advance');
-});
-
-app.post('/advance/:id/scratch', requireLogin, async (req, res) => {
-	const task = await Task.findById(req.params.id);
-	if (!task) {
-		return res.status(404).send('Task not found');
-	}
-
-	task.scheduledFor = null;
-	await task.save();
-
-	res.redirect('/advance');
-});
-
-app.post('/advance/:id/archive', requireLogin, async (req, res) => {
-	const task = await Task.findById(req.params.id);
-	if (!task) {
-		return res.status(404).send('Task not found');
-	}
-
-	task.status = 'archived';
-	await task.save();
-
-	res.redirect('/advance');
-});
-
-app.post('/advance/bankruptcy', requireLogin, async (req, res) => {
-	const rolloverTasks = await getRolloverTasks();
-
-	for (const task of rolloverTasks) {
-		task.status = 'archived';
-		await task.save();
-	}
-
-	res.redirect('/');
-});
-
-app.post('/advance/best-guess', requireLogin, async (req, res) => {
-	const rolloverTasks = await getRolloverTasks();
-	const { start, end } = getTodayRange();
-	const todayMiddle = new Date(start.getTime() + (end.getTime() - start.getTime()) / 2);
-
-	for (const task of rolloverTasks) {
-		task.scheduledFor = todayMiddle;
-		task.rollovers = (task.rollovers || 0) + 1;
-		task.lastRolloverDate = new Date();
-		await task.save();
-	}
-
-	res.redirect('/');
 });
 
 // Recurring prompt actions in advancement
@@ -379,88 +251,12 @@ app.post('/advance/birthday/:id/acknowledge', requireLogin, async (req, res) => 
 	res.redirect('/advance');
 });
 
-// Scratch pad advancement - schedule for today
-app.post('/advance/scratchpad/:id/today', requireLogin, async (req, res) => {
-	const task = await Task.findById(req.params.id);
-	if (!task) {
-		return res.status(404).send('Task not found');
-	}
-
-	const { start, end } = getTodayRange();
-	const todayMiddle = new Date(start.getTime() + (end.getTime() - start.getTime()) / 2);
-	task.scheduledFor = todayMiddle;
-	task.snoozedUntil = null;
-	await task.save();
-
-	res.redirect('/advance');
-});
-
-// Scratch pad advancement - schedule for specific date
-app.post('/advance/scratchpad/:id/defer', requireLogin, async (req, res) => {
-	const task = await Task.findById(req.params.id);
-	if (!task) {
-		return res.status(404).send('Task not found');
-	}
-
-	const date = getScheduleDate(req.body.date);
-	task.scheduledFor = date;
-	task.snoozedUntil = null;
-	await task.save();
-
-	res.redirect('/advance');
-});
-
-// Scratch pad advancement - snooze (keep in scratch pad)
-app.post('/advance/scratchpad/:id/snooze', requireLogin, async (req, res) => {
-	const task = await Task.findById(req.params.id);
-	if (!task) {
-		return res.status(404).send('Task not found');
-	}
-
-	const { start } = getTodayRange();
-	const snoozeDays = Math.floor(Math.random() * 6) + 5;
-	task.snoozedUntil = new Date(start.getTime() + snoozeDays * 24 * 60 * 60 * 1000);
-	await task.save();
-
-	res.redirect('/advance');
-});
-
-// Scratch pad advancement - archive
-app.post('/advance/scratchpad/:id/archive', requireLogin, async (req, res) => {
-	const task = await Task.findById(req.params.id);
-	if (!task) {
-		return res.status(404).send('Task not found');
-	}
-
-	task.status = 'archived';
-	await task.save();
-
-	res.redirect('/advance');
-});
-
-// Scratch pad advancement - edit (snooze first, then redirect to edit page)
-app.post('/advance/scratchpad/:id/edit', requireLogin, async (req, res) => {
-	const task = await Task.findById(req.params.id);
-	if (!task) {
-		return res.status(404).send('Task not found');
-	}
-
-	const { start } = getTodayRange();
-	const snoozeDays = Math.floor(Math.random() * 6) + 5;
-	task.snoozedUntil = new Date(start.getTime() + snoozeDays * 24 * 60 * 60 * 1000);
-	await task.save();
-
-	res.redirect(`/tasks/${task._id}/edit`);
-});
-
 app.get('/', requireLogin, async (req, res) => {
-	// Check for items that require advancement processing
-	const rolloverTasks = await getRolloverTasks();
+	// Check for items that require advancement processing (birthdays and recurring only)
 	const recurringPrompts = await getTodaysRecurringPrompts();
-	const scratchPadPrompt = await getScratchPadPrompt();
 	const todaysBirthdays = await getTodaysBirthdays();
 
-	if (rolloverTasks.length > 0 || recurringPrompts.length > 0 || scratchPadPrompt || todaysBirthdays.length > 0) {
+	if (recurringPrompts.length > 0 || todaysBirthdays.length > 0) {
 		return res.redirect('/advance');
 	}
 
@@ -470,10 +266,12 @@ app.get('/', requireLogin, async (req, res) => {
 	const weekWindowEnd = new Date(todayStart);
 	weekWindowEnd.setDate(weekWindowEnd.getDate() + 7);
 
-	// Today's tasks — chronological by time when set, else manual order (position)
+	// Today's tasks — includes past-due tasks (auto-rolled to today)
+	// Excludes pinned tasks (they appear in their own section)
 	const tasks = await Task.find({
-		scheduledFor: { $gte: todayStart, $lt: todayEnd },
-		status: 'pending'
+		scheduledFor: { $lt: todayEnd },
+		status: 'pending',
+		pinned: { $ne: true }
 	}).sort({ position: 1 });
 	tasks.sort((a, b) => {
 		const ta = a.timeOfDay || '99:99';
@@ -481,6 +279,12 @@ app.get('/', requireLogin, async (req, res) => {
 		if (ta !== tb) return ta.localeCompare(tb);
 		return (a.position ?? 0) - (b.position ?? 0);
 	});
+
+	// Pinned tasks — always visible at top of home screen
+	const pinnedTasks = await Task.find({
+		status: 'pending',
+		pinned: true
+	}).sort({ scheduledFor: 1, createdAt: 1 });
 
 	// Pending tasks in the 7-day window (used to populate Coming up; today's bucket excluded there)
 	const tasksInWeek = await Task.find({
@@ -510,26 +314,37 @@ app.get('/', requireLogin, async (req, res) => {
 		});
 	}
 
-	// Later (beyond the 7-day window)
+	// Later days (day 4+ onward) — same structure as comingUpDays but collapsed
+	const laterDaysStart = new Date(todayStart);
+	laterDaysStart.setDate(laterDaysStart.getDate() + 4);
+
 	const laterTasks = await Task.find({
-		scheduledFor: { $gte: weekWindowEnd },
+		scheduledFor: { $gte: laterDaysStart },
 		status: 'pending'
 	}).sort({ scheduledFor: 1, position: 1 });
-	laterTasks.sort((a, b) => {
-		const da =
-			(a.scheduledFor?.getTime() ?? 0) - (b.scheduledFor?.getTime() ?? 0);
-		if (da !== 0) return da;
-		const ta = a.timeOfDay || '99:99';
-		const tb = b.timeOfDay || '99:99';
-		if (ta !== tb) return ta.localeCompare(tb);
-		return (a.position ?? 0) - (b.position ?? 0);
-	});
 
-	// Scratch pad (no date)
-	const scratchPadTasks = await Task.find({
-		scheduledFor: null,
-		status: 'pending'
-	}).sort({ position: 1 });
+	/** @type {Map<string, any[]>} */
+	const laterTasksByYmd = new Map();
+	for (const task of laterTasks) {
+		const sf = task.scheduledFor;
+		if (!sf) continue;
+		const ymd = getPacificYmd(sf);
+		let bucket = laterTasksByYmd.get(ymd);
+		if (!bucket) {
+			bucket = [];
+			laterTasksByYmd.set(ymd, bucket);
+		}
+		bucket.push(task);
+	}
+	for (const arr of laterTasksByYmd.values()) {
+		arr.sort((a, b) => {
+			const ta = a.timeOfDay || '99:99';
+			const tb = b.timeOfDay || '99:99';
+			if (ta !== tb) return ta.localeCompare(tb);
+			return (a.position ?? 0) - (b.position ?? 0);
+		});
+	}
+
 
 	// Recently completed tasks (last 7 days, max 20)
 	const sevenDaysAgo = new Date(todayStart);
@@ -649,22 +464,103 @@ app.get('/', requireLogin, async (req, res) => {
 		});
 	}
 
+	/** Later days (offset 4+): same structure as comingUpDays, collapsed by default. */
+	const laterDays = [];
+	const laterHorizon = 60;
+	for (let offset = 4; offset <= laterHorizon; offset++) {
+		const dayDate = new Date(todayStart);
+		dayDate.setDate(dayDate.getDate() + offset);
+		const dayYmd = getPacificYmd(dayDate);
+
+		/** @type {Array<{ kind: string, [key: string]: unknown }>} */
+		const items = [];
+
+		for (const person of allPeople) {
+			// @ts-ignore - Mongoose method
+			const nextBirthday = person.getNextBirthday();
+			const diffTime = nextBirthday.getTime() - logicalTodayDate.getTime();
+			const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+			if (diffDays !== offset) continue;
+			const hasNotes = Boolean(person.notes && String(person.notes).trim() !== '');
+			items.push({
+				kind: 'birthday',
+				person,
+				hasNotes,
+				// @ts-ignore - Mongoose method
+				turningAge: person.getTurningAge(nextBirthday)
+			});
+		}
+
+		for (const holiday of allHolidays) {
+			// @ts-ignore - Mongoose method
+			const nextOcc = holiday.getNextOccurrence();
+			const diffTime = nextOcc.getTime() - logicalTodayDate.getTime();
+			const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+			if (diffDays !== offset) continue;
+			const hasNotes = Boolean(holiday.notes && String(holiday.notes).trim() !== '');
+			items.push({ kind: 'holiday', holiday, hasNotes });
+		}
+
+		const dayTasks = laterTasksByYmd.get(dayYmd) || [];
+		for (const task of dayTasks) {
+			items.push({ kind: 'task', task });
+		}
+
+		if (items.length === 0) continue;
+
+		items.sort((a, b) => {
+			/** @type {Record<string, number>} */
+			const order = { birthday: 0, holiday: 1, task: 2 };
+			const ao = order[a.kind] ?? 99;
+			const bo = order[b.kind] ?? 99;
+			if (ao !== bo) return ao - bo;
+			if (a.kind === 'task' && b.kind === 'task') {
+				// @ts-expect-error task payload
+				const ta = a.task.timeOfDay || '99:99';
+				// @ts-expect-error
+				const tb = b.task.timeOfDay || '99:99';
+				if (ta !== tb) return ta.localeCompare(tb);
+				// @ts-expect-error
+				return ((a.task).position ?? 0) - ((b.task).position ?? 0);
+			}
+			if (a.kind === 'birthday' && b.kind === 'birthday') {
+				// @ts-expect-error
+				return String(a.person.name).localeCompare(String(b.person.name));
+			}
+			if (a.kind === 'holiday' && b.kind === 'holiday') {
+				// @ts-expect-error
+				return String(a.holiday.name).localeCompare(String(b.holiday.name));
+			}
+			return 0;
+		});
+
+		laterDays.push({
+			offset,
+			label: formatComingUpDayLabel(offset, dayDate),
+			items
+		});
+	}
+
 	// Fetch chores for quick-add
 	const chores = await Chore.find().sort({ title: 1 });
 
 	// Fetch quick lists for display
 	const quickLists = await QuickList.find().sort({ position: 1, name: 1 });
 
+	// Fetch sticky notes
+	const stickyNotes = await StickyNote.find().sort({ createdAt: 1 });
+
 	res.render('today', {
 		tasks,
+		pinnedTasks,
 		todayBirthdays,
 		todayHolidays,
-		laterTasks,
-		scratchPadTasks,
+		laterDays,
 		completedTasks,
 		comingUpDays,
 		chores,
 		quickLists,
+		stickyNotes,
 		formatDate,
 		formatTaskTimeDisplay
 	});
@@ -677,16 +573,12 @@ app.post('/tasks', requireLogin, async (req, res) => {
 		return res.status(400).send('Title is required');
 	}
 
-	// Determine the scheduled date
-	let taskDate = null;
+	// Determine the scheduled date (always required, defaults to today)
+	let taskDate;
 	let positionStart, positionEnd;
 	const { start, end } = getTodayRange();
-	const defaultDate = new Date(start.getTime() + (end.getTime() - start.getTime()) / 2);
 
-	if (destination === 'scratch') {
-		taskDate = null;
-		positionStart = positionEnd = null;
-	} else if (destination === 'tomorrow') {
+	if (destination === 'tomorrow') {
 		const { start: tomorrowStart, end: tomorrowEnd } = getTomorrowRange();
 		taskDate = new Date(tomorrowStart.getTime() + (tomorrowEnd.getTime() - tomorrowStart.getTime()) / 2);
 		positionStart = tomorrowStart;
@@ -696,16 +588,14 @@ app.post('/tasks', requireLogin, async (req, res) => {
 		positionStart = start;
 		positionEnd = end;
 	} else {
-		taskDate = defaultDate;
+		// Default to today
+		taskDate = new Date(start.getTime() + (end.getTime() - start.getTime()) / 2);
 		positionStart = start;
 		positionEnd = end;
 	}
 
-	// Get the highest position for this day/scratch pad
-	const positionQuery = taskDate
-		? { scheduledFor: { $gte: positionStart, $lt: positionEnd }, status: 'pending' }
-		: { scheduledFor: null, status: 'pending' };
-
+	// Get the highest position for this day
+	const positionQuery = { scheduledFor: { $gte: positionStart, $lt: positionEnd }, status: 'pending' };
 	const lastTask = await Task.findOne(positionQuery).sort({ position: -1 });
 	const newPosition = lastTask ? lastTask.position + 1 : 0;
 
@@ -714,7 +604,7 @@ app.post('/tasks', requireLogin, async (req, res) => {
 		description: description?.trim() || '',
 		scheduledFor: taskDate,
 		position: newPosition,
-		timeOfDay: taskDate ? normalizeTimeOfDay(timeOfDay) : null
+		timeOfDay: normalizeTimeOfDay(timeOfDay)
 	});
 
 	await task.save();
@@ -762,19 +652,6 @@ app.post('/tasks/:id/tomorrow', requireLogin, async (req, res) => {
 	res.redirect('/');
 });
 
-app.post('/tasks/:id/scratch', requireLogin, async (req, res) => {
-	const task = await Task.findById(req.params.id);
-	if (!task) {
-		return res.status(404).send('Task not found');
-	}
-
-	task.scheduledFor = null;
-	task.timeOfDay = null;
-	await task.save();
-
-	res.redirect('/');
-});
-
 app.post('/tasks/:id/archive', requireLogin, async (req, res) => {
 	const task = await Task.findById(req.params.id);
 	if (!task) {
@@ -794,11 +671,9 @@ app.post('/tasks/:id/restore', requireLogin, async (req, res) => {
 	}
 
 	task.status = 'pending';
-	// Only set a date if it was originally a scheduled task (not scratch pad)
-	if (task.scheduledFor !== null) {
-		const { start, end } = getTodayRange();
-		task.scheduledFor = new Date(start.getTime() + (end.getTime() - start.getTime()) / 2);
-	}
+	// Always restore to today
+	const { start, end } = getTodayRange();
+	task.scheduledFor = new Date(start.getTime() + (end.getTime() - start.getTime()) / 2);
 	await task.save();
 
 	res.redirect('/');
@@ -819,7 +694,7 @@ app.post('/tasks/:id/edit', requireLogin, async (req, res) => {
 		return res.status(404).send('Task not found');
 	}
 
-	const { title, description, url, scheduledFor, timeOfDay } = req.body;
+	const { title, description, url, scheduledFor, timeOfDay, pinned } = req.body;
 
 	if (!title || title.trim() === '') {
 		return res.status(400).send('Title is required');
@@ -828,6 +703,7 @@ app.post('/tasks/:id/edit', requireLogin, async (req, res) => {
 	task.title = title.trim();
 	task.description = description?.trim() || '';
 	task.url = url?.trim() || '';
+	task.pinned = pinned === 'on';
 
 	if (scheduledFor === '') {
 		task.scheduledFor = null;
@@ -1571,6 +1447,26 @@ app.post('/chores/:id/create-task', requireLogin, async (req, res) => {
 	});
 
 	await task.save();
+	res.redirect('/');
+});
+
+// ============================================
+// Sticky Notes
+// ============================================
+
+app.post('/sticky-notes', requireLogin, async (req, res) => {
+	const { text } = req.body;
+
+	if (!text || !text.trim()) {
+		return res.redirect('/');
+	}
+
+	await StickyNote.create({ text: text.trim() });
+	res.redirect('/');
+});
+
+app.post('/sticky-notes/:id/delete', requireLogin, async (req, res) => {
+	await StickyNote.findByIdAndDelete(req.params.id);
 	res.redirect('/');
 });
 

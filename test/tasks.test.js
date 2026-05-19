@@ -115,8 +115,8 @@ describe('Tasks', () => {
 			expect(res.text).to.include('Later');
 		});
 
-		it('redirects to advancement when there are rollover tasks', async () => {
-			// Create a task scheduled for a week ago (rollover task)
+		it('shows past-due tasks in today list (auto-rolled)', async () => {
+			// Create a task scheduled for a week ago (should auto-roll to today)
 			const { start } = getTodayRange();
 			const weekAgo = new Date(start.getTime() - 7 * 24 * 60 * 60 * 1000);
 
@@ -125,22 +125,10 @@ describe('Tasks', () => {
 			const res = await request(app)
 				.get('/')
 				.set('Cookie', `session=${process.env.JOG_FILE_PASSWORD}`)
-				.expect(302);
-
-			expect(res.headers.location).to.equal('/advance');
-		});
-
-		it('shows scratch pad tasks in collapsed section', async () => {
-			await Task.create({ title: 'Someday task', scheduledFor: null });
-
-			const res = await request(app)
-				.get('/')
-				.set('Cookie', `session=${process.env.JOG_FILE_PASSWORD}`)
 				.expect(200);
 
-			// Scratch pad tasks now appear in a collapsed section
-			expect(res.text).to.include('Someday task');
-			expect(res.text).to.include('Scratch Pad');
+			// Past-due tasks now appear directly in today's task list
+			expect(res.text).to.include('Old task');
 		});
 
 		it('has a form for adding tasks', async () => {
