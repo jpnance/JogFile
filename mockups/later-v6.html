@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JogFile — Later</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root {
+      --today: #0891b2;
+      --coming: #4f46e5;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      background: #f0f9ff;
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+      font-size: 14px;
+      line-height: 1.35;
+      min-height: 100vh;
+    }
+
+    /* Header */
+    .header {
+      background: white;
+      padding: 14px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #e5e7eb;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-back {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--today);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .header-back i {
+      font-size: 18px;
+    }
+
+    .header-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #0f172a;
+    }
+
+    .header-count {
+      background: var(--coming);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    /* Main */
+    .main {
+      padding: 0;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* Date group */
+    .date-group {
+      background: var(--coming);
+      color: white;
+    }
+
+    .date-header {
+      padding: 14px 20px;
+      font-weight: 600;
+      font-size: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .date-header-date {
+      opacity: 0.8;
+      font-weight: 400;
+    }
+
+    .date-tasks {
+      padding: 0 20px 16px;
+    }
+
+    /* Task item */
+    .task-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: rgba(255,255,255,0.15);
+      padding: 14px 16px;
+      border-radius: 12px;
+      margin-bottom: 8px;
+    }
+
+    .task-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .task-check {
+      width: 24px;
+      height: 24px;
+      border: 2px solid rgba(255,255,255,0.5);
+      border-radius: 6px;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+
+    .task-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .task-title {
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    .task-title a {
+      color: white;
+      text-decoration: none;
+    }
+
+    .task-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 4px;
+      font-size: 13px;
+      opacity: 0.75;
+    }
+
+    .task-time {
+      background: rgba(255,255,255,0.2);
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .task-recurring {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .task-actions {
+      color: rgba(255,255,255,0.6);
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    /* This week vs later grouping */
+    .week-divider {
+      background: #f0f9ff;
+      padding: 12px 20px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Later dates - lighter style */
+    .date-group-later {
+      background: #818cf8;
+    }
+
+    /* Desktop */
+    @media (min-width: 600px) {
+      .main {
+        padding: 24px 20px;
+      }
+
+      .date-group {
+        border-radius: 16px;
+        overflow: hidden;
+        margin-bottom: 12px;
+      }
+
+      .week-divider {
+        background: transparent;
+        padding: 16px 0 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <a href="#" class="header-back">
+      <i class="bi bi-arrow-left"></i>
+      <span>Back</span>
+    </a>
+    <span class="header-title">Scheduled Later</span>
+    <span class="header-count">32</span>
+  </header>
+
+  <main class="main">
+    <div class="week-divider">This Week</div>
+
+    <div class="date-group">
+      <div class="date-header">
+        <span>Tomorrow</span>
+        <span class="date-header-date">Wed, May 21</span>
+      </div>
+      <div class="date-tasks">
+        <div class="task-item">
+          <div class="task-check"></div>
+          <div class="task-content">
+            <div class="task-title">Dentist appointment</div>
+            <div class="task-meta">
+              <span class="task-time">2:30 PM</span>
+            </div>
+          </div>
+          <div class="task-actions">•••</div>
+        </div>
+        <div class="task-item">
+          <div class="task-check"></div>
+          <div class="task-content">
+            <div class="task-title">Submit expense report</div>
+          </div>
+          <div class="task-actions">•••</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="date-group">
+      <div class="date-header">
+        <span>Thursday</span>
+        <span class="date-header-date">May 22</span>
+      </div>
+      <div class="date-tasks">
+        <div class="task-item">
+          <div class="task-check"></div>
+          <div class="task-content">
+            <div class="task-title">Weekly team meeting</div>
+            <div class="task-meta">
+              <span class="task-time">10:00 AM</span>
+              <span class="task-recurring"><i class="bi bi-arrow-repeat"></i> Weekly</span>
+            </div>
+          </div>
+          <div class="task-actions">•••</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="date-group">
+      <div class="date-header">
+        <span>Friday</span>
+        <span class="date-header-date">May 23</span>
+      </div>
+      <div class="date-tasks">
+        <div class="task-item">
+          <div class="task-check"></div>
+          <div class="task-content">
+            <div class="task-title">Pay rent</div>
+          </div>
+          <div class="task-actions">•••</div>
+        </div>
+        <div class="task-item">
+          <div class="task-check"></div>
+          <div class="task-content">
+            <div class="task-title"><a href="#">Order Sarah's birthday gift</a></div>
+            <div class="task-meta">
+              <i class="bi bi-link-45deg"></i>
+            </div>
+          </div>
+          <div class="task-actions">•••</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="week-divider">Later</div>
+
+    <div class="date-group date-group-later">
+      <div class="date-header">
+        <span>Next Monday</span>
+        <span class="date-header-date">May 26</span>
+      </div>
+      <div class="date-tasks">
+        <div class="task-item">
+          <div class="task-check"></div>
+          <div class="task-content">
+            <div class="task-title">Weekly review</div>
+            <div class="task-meta">
+              <span class="task-recurring"><i class="bi bi-arrow-repeat"></i> Weekly</span>
+            </div>
+          </div>
+          <div class="task-actions">•••</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="date-group date-group-later">
+      <div class="date-header">
+        <span>June 1</span>
+        <span class="date-header-date">Sunday</span>
+      </div>
+      <div class="date-tasks">
+        <div class="task-item">
+          <div class="task-check"></div>
+          <div class="task-content">
+            <div class="task-title">Mom's birthday - call her!</div>
+          </div>
+          <div class="task-actions">•••</div>
+        </div>
+        <div class="task-item">
+          <div class="task-check"></div>
+          <div class="task-content">
+            <div class="task-title">Monthly budget review</div>
+            <div class="task-meta">
+              <span class="task-recurring"><i class="bi bi-arrow-repeat"></i> Monthly</span>
+            </div>
+          </div>
+          <div class="task-actions">•••</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="date-group date-group-later">
+      <div class="date-header">
+        <span>June 15</span>
+        <span class="date-header-date">Sunday</span>
+      </div>
+      <div class="date-tasks">
+        <div class="task-item">
+          <div class="task-check"></div>
+          <div class="task-content">
+            <div class="task-title">Renew car registration</div>
+          </div>
+          <div class="task-actions">•••</div>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JogFile — v4d: Minimal Color Bars</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f9fafb;
+      --surface: #ffffff;
+      --text: #111827;
+      --text-dim: #6b7280;
+      --border: #e5e7eb;
+      
+      --pinned: #8b5cf6;
+      --today: #0ea5e9;
+      --coming: #6366f1;
+      --lists: #10b981;
+      --notes: #f59e0b;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 20px;
+    }
+
+    .header h1 {
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .header h1 span {
+      color: var(--text-dim);
+      font-weight: 500;
+    }
+
+    .btn-add {
+      background: var(--today);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    /* Card */
+    .card {
+      background: var(--surface);
+      border-radius: 8px;
+      margin-bottom: 12px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .card-accent {
+      height: 4px;
+    }
+
+    .card-header {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-header h2 {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .card-header .count {
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    .card-body {
+      padding: 10px 14px;
+    }
+
+    /* Grid layout */
+    .grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    /* Pinned */
+    .card-pinned .card-accent { background: var(--pinned); }
+    .card-pinned .card-header h2 { color: var(--pinned); }
+
+    .pinned-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .pinned-tag {
+      background: #f5f3ff;
+      color: var(--pinned);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    /* Today */
+    .card-today .card-accent { background: var(--today); }
+    .card-today .card-header h2 { color: var(--today); }
+
+    .task-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 0;
+    }
+
+    .task-row + .task-row {
+      border-top: 1px solid var(--border);
+    }
+
+    .task-check {
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--today);
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    .task-text {
+      flex: 1;
+      font-size: 14px;
+    }
+
+    .task-time {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--today);
+    }
+
+    /* Coming */
+    .card-coming .card-accent { background: var(--coming); }
+    .card-coming .card-header h2 { color: var(--coming); }
+
+    .coming-row {
+      display: flex;
+      gap: 12px;
+      padding: 6px 0;
+      font-size: 13px;
+    }
+
+    .coming-row + .coming-row {
+      border-top: 1px solid var(--border);
+    }
+
+    .coming-date {
+      width: 50px;
+      flex-shrink: 0;
+      font-weight: 600;
+      color: var(--coming);
+      font-size: 11px;
+      text-transform: uppercase;
+    }
+
+    .coming-text {
+      flex: 1;
+    }
+
+    .coming-time {
+      color: var(--coming);
+      font-weight: 600;
+    }
+
+    /* Lists */
+    .card-lists .card-accent { background: var(--lists); }
+    .card-lists .card-header h2 { color: var(--lists); }
+
+    .lists-flex {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+    }
+
+    .mini-list {
+      flex-shrink: 0;
+      min-width: 120px;
+    }
+
+    .mini-list-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--lists);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+      padding-bottom: 4px;
+      border-bottom: 2px solid var(--lists);
+    }
+
+    .mini-list-item {
+      font-size: 13px;
+      padding: 2px 0;
+    }
+
+    .mini-list-item::before {
+      content: "• ";
+      color: var(--lists);
+    }
+
+    .mini-list-add {
+      font-size: 12px;
+      color: var(--lists);
+      opacity: 0.5;
+    }
+
+    /* Notes */
+    .card-notes .card-accent { background: var(--notes); }
+    .card-notes .card-header h2 { color: var(--notes); }
+
+    .notes-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .note-tag {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+    }
+
+    .note-add {
+      background: transparent;
+      border: 1px dashed var(--notes);
+      color: var(--notes);
+    }
+
+    /* Collapsed sections */
+    .collapsed {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .collapsed .label {
+      color: var(--text-dim);
+      font-weight: 600;
+    }
+
+    .collapsed .count {
+      color: var(--text-dim);
+      margin-left: auto;
+    }
+
+    /* Responsive */
+    @media (min-width: 640px) {
+      .container {
+        padding: 24px;
+      }
+      
+      .header h1 {
+        font-size: 28px;
+      }
+      
+      .grid-2 {
+        grid-template-columns: 1fr 1fr;
+      }
+      
+      .grid-3 {
+        grid-template-columns: 1fr 1.2fr 0.8fr;
+      }
+
+      .lists-flex {
+        flex-wrap: wrap;
+      }
+      
+      .mini-list {
+        width: calc(25% - 9px);
+      }
+    }
+
+    @media (min-width: 900px) {
+      .container {
+        padding: 32px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1>Tuesday <span>May 19</span></h1>
+      <button class="btn-add">+ Add</button>
+    </header>
+
+    <div class="grid grid-3">
+      <div class="card card-pinned">
+        <div class="card-accent"></div>
+        <div class="card-header">
+          <h2>Pinned</h2>
+          <span class="count">1</span>
+        </div>
+        <div class="card-body">
+          <div class="pinned-list">
+            <span class="pinned-tag">Buy a DVD/Blu-Ray player</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card card-today">
+        <div class="card-accent"></div>
+        <div class="card-header">
+          <h2>Today</h2>
+          <span class="count">1</span>
+        </div>
+        <div class="card-body">
+          <div class="task-row">
+            <div class="task-check"></div>
+            <span class="task-text">Pick up prescriptions</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card card-coming">
+        <div class="card-accent"></div>
+        <div class="card-header">
+          <h2>Coming Up</h2>
+          <span class="count">3</span>
+        </div>
+        <div class="card-body">
+          <div class="coming-row">
+            <span class="coming-date">Wed 20</span>
+            <span class="coming-text"><span class="coming-time">3p</span> Counseling</span>
+          </div>
+          <div class="coming-row">
+            <span class="coming-date">Thu 28</span>
+            <span class="coming-text">Schedule Jack's appt</span>
+          </div>
+          <div class="coming-row">
+            <span class="coming-date">Fri 29</span>
+            <span class="coming-text"><span class="coming-time">8:30a</span> Dentist</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card card-lists">
+      <div class="card-accent"></div>
+      <div class="card-header">
+        <h2>Quick Lists</h2>
+        <span class="count">4 lists</span>
+      </div>
+      <div class="card-body">
+        <div class="lists-flex">
+          <div class="mini-list">
+            <div class="mini-list-title">Costco</div>
+            <div class="mini-list-item">Gauze</div>
+            <div class="mini-list-add">+ add</div>
+          </div>
+          <div class="mini-list">
+            <div class="mini-list-title">Target</div>
+            <div class="mini-list-item">Use gift card</div>
+            <div class="mini-list-add">+ add</div>
+          </div>
+          <div class="mini-list">
+            <div class="mini-list-title">Grocery</div>
+            <div class="mini-list-item">Oregano</div>
+            <div class="mini-list-item">Peppercorns</div>
+            <div class="mini-list-add">+ add</div>
+          </div>
+          <div class="mini-list">
+            <div class="mini-list-title">Hardware</div>
+            <div class="mini-list-add">+ add</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card card-notes">
+      <div class="card-accent"></div>
+      <div class="card-header">
+        <h2>Sticky Notes</h2>
+        <span class="count">1</span>
+      </div>
+      <div class="card-body">
+        <div class="notes-list">
+          <span class="note-tag">Pasta salad with avocado and mango</span>
+          <span class="note-tag note-add">+ add</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="collapsed">
+      <span class="label">Later</span>
+      <span class="count">32 items ▸</span>
+    </div>
+
+    <div class="collapsed">
+      <span class="label">Completed</span>
+      <span class="count">10 items ▸</span>
+    </div>
+  </div>
+</body>
+</html>

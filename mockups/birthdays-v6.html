@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JogFile — Birthdays</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root {
+      --birthday: #db2777;
+      --today: #0891b2;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      background: #f0f9ff;
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+      font-size: 14px;
+      line-height: 1.35;
+      min-height: 100vh;
+    }
+
+    /* Header */
+    .header {
+      background: white;
+      padding: 14px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #e5e7eb;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-back {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--today);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .header-back i {
+      font-size: 18px;
+    }
+
+    .header-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #0f172a;
+    }
+
+    .btn-add {
+      background: var(--birthday);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Main */
+    .main {
+      padding: 0;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* Section */
+    .section {
+      background: var(--birthday);
+      color: white;
+    }
+
+    .section-header {
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .section-chevron {
+      font-size: 12px;
+      transition: transform 0.2s;
+    }
+
+    .section.collapsed .section-chevron {
+      transform: rotate(-90deg);
+    }
+
+    .section-title {
+      font-weight: 600;
+      flex: 1;
+    }
+
+    .section-count {
+      background: rgba(255,255,255,0.2);
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 13px;
+    }
+
+    .section-content {
+      padding: 0 20px 16px;
+    }
+
+    .section.collapsed .section-content {
+      display: none;
+    }
+
+    /* Birthday item */
+    .birthday-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: rgba(255,255,255,0.15);
+      padding: 14px 16px;
+      border-radius: 12px;
+      margin-bottom: 8px;
+    }
+
+    .birthday-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .birthday-name {
+      font-weight: 600;
+      font-size: 15px;
+    }
+
+    .birthday-date {
+      font-size: 13px;
+      opacity: 0.85;
+      margin-top: 2px;
+    }
+
+    .birthday-today {
+      color: #fbbf24;
+      font-weight: 600;
+    }
+
+    .birthday-notes {
+      font-size: 12px;
+      opacity: 0.7;
+      margin-top: 4px;
+    }
+
+    .birthday-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-item {
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .btn-edit {
+      background: rgba(255,255,255,0.2);
+      color: white;
+    }
+
+    .btn-delete {
+      background: transparent;
+      color: rgba(255,255,255,0.7);
+    }
+
+    /* Month sections */
+    .month-section {
+      background: white;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .month-section .section-header {
+      color: #374151;
+    }
+
+    .month-section .section-count {
+      background: #f1f5f9;
+      color: #64748b;
+    }
+
+    .month-section .birthday-item {
+      background: #f8fafc;
+      color: #0f172a;
+    }
+
+    .month-section .birthday-date {
+      color: #64748b;
+    }
+
+    .month-section .btn-edit {
+      background: #e5e7eb;
+      color: #374151;
+    }
+
+    .month-section .btn-delete {
+      color: #dc2626;
+    }
+
+    /* Divider */
+    .divider {
+      height: 16px;
+      background: #f0f9ff;
+    }
+
+    /* Desktop */
+    @media (min-width: 600px) {
+      .main {
+        padding: 24px 20px;
+      }
+
+      .section {
+        border-radius: 16px;
+        overflow: hidden;
+        margin-bottom: 16px;
+      }
+
+      .month-section {
+        border-radius: 16px;
+        border: none;
+        margin-bottom: 12px;
+      }
+
+      .divider {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <a href="#" class="header-back">
+      <i class="bi bi-arrow-left"></i>
+      <span>Back</span>
+    </a>
+    <span class="header-title">Birthdays</span>
+    <button class="btn-add">
+      <i class="bi bi-plus"></i> New
+    </button>
+  </header>
+
+  <main class="main">
+    <!-- Coming Up section -->
+    <div class="section">
+      <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+        <i class="bi bi-chevron-down section-chevron"></i>
+        <span class="section-title">Coming Up</span>
+        <span class="section-count">3</span>
+      </div>
+      <div class="section-content">
+        <div class="birthday-item">
+          <div>
+            <div class="birthday-name">James</div>
+            <div class="birthday-date"><span class="birthday-today">Today!</span> · May 20 (turning 5)</div>
+          </div>
+          <div class="birthday-actions">
+            <a href="#" class="btn-item btn-edit">Edit</a>
+            <button class="btn-item btn-delete">Delete</button>
+          </div>
+        </div>
+        <div class="birthday-item">
+          <div>
+            <div class="birthday-name">Sarah</div>
+            <div class="birthday-date">in 3 days · May 23 (turning 32)</div>
+          </div>
+          <div class="birthday-actions">
+            <a href="#" class="btn-item btn-edit">Edit</a>
+            <button class="btn-item btn-delete">Delete</button>
+          </div>
+        </div>
+        <div class="birthday-item">
+          <div>
+            <div class="birthday-name">Mom</div>
+            <div class="birthday-date">in 12 days · June 1</div>
+            <div class="birthday-notes">Likes gardening stuff</div>
+          </div>
+          <div class="birthday-actions">
+            <a href="#" class="btn-item btn-edit">Edit</a>
+            <button class="btn-item btn-delete">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Month sections -->
+    <div class="section month-section collapsed">
+      <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+        <i class="bi bi-chevron-down section-chevron"></i>
+        <span class="section-title">January</span>
+        <span class="section-count">2</span>
+      </div>
+      <div class="section-content">
+        <div class="birthday-item">
+          <div>
+            <div class="birthday-name">Uncle Bob</div>
+            <div class="birthday-date">January 5 (turning 68)</div>
+          </div>
+          <div class="birthday-actions">
+            <a href="#" class="btn-item btn-edit">Edit</a>
+            <button class="btn-item btn-delete">Delete</button>
+          </div>
+        </div>
+        <div class="birthday-item">
+          <div>
+            <div class="birthday-name">Aunt Mary</div>
+            <div class="birthday-date">January 22</div>
+          </div>
+          <div class="birthday-actions">
+            <a href="#" class="btn-item btn-edit">Edit</a>
+            <button class="btn-item btn-delete">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section month-section collapsed">
+      <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+        <i class="bi bi-chevron-down section-chevron"></i>
+        <span class="section-title">March</span>
+        <span class="section-count">1</span>
+      </div>
+      <div class="section-content">
+        <div class="birthday-item">
+          <div>
+            <div class="birthday-name">Dad</div>
+            <div class="birthday-date">March 15 (turning 65)</div>
+            <div class="birthday-notes">Golf stuff, books</div>
+          </div>
+          <div class="birthday-actions">
+            <a href="#" class="btn-item btn-edit">Edit</a>
+            <button class="btn-item btn-delete">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section month-section collapsed">
+      <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+        <i class="bi bi-chevron-down section-chevron"></i>
+        <span class="section-title">May</span>
+        <span class="section-count">2</span>
+      </div>
+      <div class="section-content">
+        <div class="birthday-item">
+          <div>
+            <div class="birthday-name">James</div>
+            <div class="birthday-date">May 20 (turning 5)</div>
+          </div>
+          <div class="birthday-actions">
+            <a href="#" class="btn-item btn-edit">Edit</a>
+            <button class="btn-item btn-delete">Delete</button>
+          </div>
+        </div>
+        <div class="birthday-item">
+          <div>
+            <div class="birthday-name">Sarah</div>
+            <div class="birthday-date">May 23 (turning 32)</div>
+          </div>
+          <div class="birthday-actions">
+            <a href="#" class="btn-item btn-edit">Edit</a>
+            <button class="btn-item btn-delete">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section month-section collapsed">
+      <div class="section-header" onclick="this.parentElement.classList.toggle('collapsed')">
+        <i class="bi bi-chevron-down section-chevron"></i>
+        <span class="section-title">June</span>
+        <span class="section-count">1</span>
+      </div>
+      <div class="section-content">
+        <div class="birthday-item">
+          <div>
+            <div class="birthday-name">Mom</div>
+            <div class="birthday-date">June 1</div>
+            <div class="birthday-notes">Likes gardening stuff</div>
+          </div>
+          <div class="birthday-actions">
+            <a href="#" class="btn-item btn-edit">Edit</a>
+            <button class="btn-item btn-delete">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

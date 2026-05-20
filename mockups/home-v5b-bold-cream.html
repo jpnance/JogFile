@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JogFile — v5b: Bold Blocks, Cream BG</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #faf8f5;
+      
+      --pinned: #7c3aed;
+      --today: #0284c7;
+      --coming: #6366f1;
+      --lists: #16a34a;
+      --notes: #ea580c;
+      --done: #71717a;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      background: var(--bg);
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+      font-size: 14px;
+      line-height: 1.3;
+      padding: 16px;
+      min-height: 100vh;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .header h1 {
+      font-size: 32px;
+      font-weight: 800;
+      color: #1c1917;
+      letter-spacing: -0.02em;
+    }
+
+    .header .date {
+      font-size: 15px;
+      color: #78716c;
+    }
+
+    .btn-add {
+      background: var(--today);
+      color: white;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 14px;
+      font-weight: 800;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    /* THE BIG BOLD BLOCK */
+    .block {
+      border-radius: 20px;
+      padding: 20px;
+      color: white;
+    }
+
+    .block-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+    }
+
+    .block-head h2 {
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      opacity: 0.85;
+    }
+
+    .block-head .num {
+      font-size: 32px;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    /* Pinned */
+    .block-pinned { background: var(--pinned); }
+
+    .pinned-item {
+      background: rgba(255,255,255,0.18);
+      backdrop-filter: blur(4px);
+      padding: 14px 18px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    /* Today */
+    .block-today { background: var(--today); }
+
+    .task {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: rgba(255,255,255,0.15);
+      padding: 16px 18px;
+      border-radius: 14px;
+      margin-bottom: 10px;
+    }
+
+    .task-check {
+      width: 28px;
+      height: 28px;
+      border: 3px solid rgba(255,255,255,0.5);
+      border-radius: 8px;
+    }
+
+    .task-text {
+      flex: 1;
+      font-size: 17px;
+      font-weight: 600;
+    }
+
+    .task-time {
+      background: rgba(0,0,0,0.25);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    /* Coming */
+    .block-coming { background: var(--coming); }
+
+    .coming-row {
+      display: flex;
+      gap: 16px;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .coming-row:last-child { border-bottom: none; }
+
+    .coming-label {
+      width: 70px;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      opacity: 0.7;
+    }
+
+    .coming-content {
+      flex: 1;
+      font-size: 15px;
+    }
+
+    .coming-content .time {
+      font-weight: 800;
+    }
+
+    /* Lists */
+    .block-lists { background: var(--lists); }
+
+    .lists-row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .list-tile {
+      background: rgba(255,255,255,0.15);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .list-tile-head {
+      background: rgba(0,0,0,0.15);
+      padding: 10px 14px;
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .list-tile-body {
+      padding: 12px 14px;
+    }
+
+    .list-tile-item {
+      font-size: 14px;
+      padding: 4px 0;
+    }
+
+    .list-tile-item::before {
+      content: "• ";
+      opacity: 0.5;
+    }
+
+    .list-tile-add {
+      opacity: 0.4;
+      font-size: 13px;
+      padding-top: 8px;
+    }
+
+    /* Notes */
+    .block-notes { background: var(--notes); }
+
+    .notes-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .note-pill {
+      background: rgba(255,255,255,0.2);
+      padding: 14px 20px;
+      border-radius: 14px;
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    .note-add {
+      background: transparent;
+      border: 2px dashed rgba(255,255,255,0.35);
+      opacity: 0.8;
+    }
+
+    /* Done */
+    .block-done { background: var(--done); }
+
+    .done-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .done-pill {
+      background: rgba(255,255,255,0.12);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      text-decoration: line-through;
+      opacity: 0.65;
+    }
+
+    /* Later */
+    .later-block {
+      background: #e7e5e4;
+      border-radius: 16px;
+      padding: 18px;
+      text-align: center;
+      color: #57534e;
+      font-weight: 600;
+    }
+
+    .later-block strong {
+      font-size: 22px;
+      color: #1c1917;
+    }
+
+    /* Responsive */
+    @media (min-width: 640px) {
+      .grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .block-lists,
+      .block-done,
+      .later-block {
+        grid-column: span 2;
+      }
+      
+      .lists-row {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    @media (min-width: 1000px) {
+      body { padding: 24px; }
+      
+      .grid {
+        grid-template-columns: repeat(12, 1fr);
+        gap: 16px;
+      }
+      
+      .block-pinned { grid-column: span 4; }
+      .block-today { grid-column: span 5; }
+      .block-coming { grid-column: span 3; }
+      .block-lists { grid-column: span 7; }
+      .block-notes { grid-column: span 5; }
+      .block-done { grid-column: span 12; }
+      .later-block { grid-column: span 12; }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div>
+      <h1>Tuesday</h1>
+      <div class="date">May 19, 2026</div>
+    </div>
+    <button class="btn-add">+ Add</button>
+  </header>
+
+  <div class="grid">
+    <div class="block block-pinned">
+      <div class="block-head">
+        <h2>Pinned</h2>
+        <span class="num">1</span>
+      </div>
+      <div class="pinned-item">Buy a DVD/Blu-Ray player</div>
+    </div>
+
+    <div class="block block-today">
+      <div class="block-head">
+        <h2>Today</h2>
+        <span class="num">1</span>
+      </div>
+      <div class="task">
+        <div class="task-check"></div>
+        <span class="task-text">Pick up prescriptions</span>
+      </div>
+    </div>
+
+    <div class="block block-coming">
+      <div class="block-head">
+        <h2>Coming Up</h2>
+        <span class="num">3</span>
+      </div>
+      <div class="coming-row">
+        <div class="coming-label">Wed 20</div>
+        <div class="coming-content"><span class="time">3p</span> Counseling</div>
+      </div>
+      <div class="coming-row">
+        <div class="coming-label">Thu 28</div>
+        <div class="coming-content">Schedule Jack's appt</div>
+      </div>
+      <div class="coming-row">
+        <div class="coming-label">Fri 29</div>
+        <div class="coming-content"><span class="time">8:30a</span> Dentist</div>
+      </div>
+    </div>
+
+    <div class="block block-lists">
+      <div class="block-head">
+        <h2>Quick Lists</h2>
+        <span class="num">4</span>
+      </div>
+      <div class="lists-row">
+        <div class="list-tile">
+          <div class="list-tile-head">Costco</div>
+          <div class="list-tile-body">
+            <div class="list-tile-item">Gauze</div>
+            <div class="list-tile-add">+ add</div>
+          </div>
+        </div>
+        <div class="list-tile">
+          <div class="list-tile-head">Target</div>
+          <div class="list-tile-body">
+            <div class="list-tile-item">Use gift card</div>
+            <div class="list-tile-add">+ add</div>
+          </div>
+        </div>
+        <div class="list-tile">
+          <div class="list-tile-head">Grocery</div>
+          <div class="list-tile-body">
+            <div class="list-tile-item">Oregano</div>
+            <div class="list-tile-item">Peppercorns</div>
+            <div class="list-tile-add">+ add</div>
+          </div>
+        </div>
+        <div class="list-tile">
+          <div class="list-tile-head">Hardware</div>
+          <div class="list-tile-body">
+            <div class="list-tile-add">+ add</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="block block-notes">
+      <div class="block-head">
+        <h2>Notes</h2>
+        <span class="num">1</span>
+      </div>
+      <div class="notes-wrap">
+        <div class="note-pill">Pasta salad with avocado and mango</div>
+        <div class="note-pill note-add">+ add</div>
+      </div>
+    </div>
+
+    <div class="block block-done">
+      <div class="block-head">
+        <h2>Completed</h2>
+        <span class="num">10</span>
+      </div>
+      <div class="done-wrap">
+        <div class="done-pill">Leave at 3pm</div>
+        <div class="done-pill">Post DLHM sign-up</div>
+        <div class="done-pill">James medical</div>
+        <div class="done-pill">Car payment</div>
+        <div class="done-pill">GET unit</div>
+        <div class="done-pill">Cancel Lyft Pink</div>
+        <div class="done-pill">Grocery store</div>
+        <div class="done-pill">Credit card</div>
+        <div class="done-pill">Golf picks</div>
+      </div>
+    </div>
+
+    <div class="later-block">
+      <strong>32</strong> items scheduled later →
+    </div>
+  </div>
+</body>
+</html>

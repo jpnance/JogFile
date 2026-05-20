@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JogFile — Mockup 3: Columns</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f0f0f;
+      --col-bg: #1a1a1a;
+      --col-header: #262626;
+      --text: #e5e5e5;
+      --text-muted: #737373;
+      --border: #333;
+      
+      --pinned: #a855f7;
+      --tasks: #06b6d4;
+      --lists: #22c55e;
+      --notes: #f97316;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 13px;
+      line-height: 1.4;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .header {
+      background: var(--col-bg);
+      padding: 10px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header h1 {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .header h1 span {
+      color: var(--text-muted);
+      font-weight: 400;
+      margin-left: 8px;
+    }
+
+    .btn-add {
+      background: var(--tasks);
+      color: black;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-weight: 700;
+      font-size: 11px;
+      cursor: pointer;
+    }
+
+    /* Main Layout */
+    .main {
+      display: flex;
+      height: calc(100vh - 45px);
+      overflow-x: auto;
+      padding: 12px;
+      gap: 12px;
+    }
+
+    /* Column */
+    .column {
+      flex-shrink: 0;
+      width: 280px;
+      background: var(--col-bg);
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .column.narrow {
+      width: 200px;
+    }
+
+    .column-header {
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .column-header .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .column-header h2 {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .column-header .count {
+      margin-left: auto;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .column-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--col-header);
+      border-radius: 6px;
+      padding: 10px;
+      margin-bottom: 6px;
+      border-left: 3px solid transparent;
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    .card-meta {
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .card-meta i {
+      font-size: 10px;
+    }
+
+    /* Pinned column */
+    .column.pinned .dot { background: var(--pinned); }
+    .column.pinned .card { border-color: var(--pinned); }
+
+    /* Tasks column */
+    .column.tasks .dot { background: var(--tasks); }
+    .column.tasks .card { border-color: var(--tasks); }
+
+    .task-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .task-checkbox {
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--tasks);
+      border-radius: 4px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .task-content {
+      flex: 1;
+    }
+
+    .time-badge {
+      background: var(--tasks);
+      color: black;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 3px;
+    }
+
+    /* Lists column */
+    .column.lists .dot { background: var(--lists); }
+
+    .list-section {
+      margin-bottom: 12px;
+    }
+
+    .list-section-header {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--lists);
+      text-transform: uppercase;
+      padding: 4px 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 6px;
+    }
+
+    .list-item {
+      font-size: 12px;
+      padding: 4px 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .list-item::before {
+      content: "•";
+      color: var(--lists);
+    }
+
+    .list-add {
+      font-size: 11px;
+      color: var(--lists);
+      opacity: 0.6;
+      padding: 4px 0;
+    }
+
+    /* Notes column */
+    .column.notes .dot { background: var(--notes); }
+    .column.notes .card { border-color: var(--notes); }
+
+    .note-card {
+      background: rgba(249, 115, 22, 0.1);
+      border-color: var(--notes);
+    }
+
+    .note-text {
+      font-size: 12px;
+    }
+
+    .add-note-card {
+      border: 1px dashed var(--notes);
+      background: transparent;
+      color: var(--notes);
+      text-align: center;
+      font-size: 11px;
+      opacity: 0.6;
+    }
+
+    /* Coming Up section at bottom of tasks */
+    .coming-up-mini {
+      margin-top: auto;
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
+    }
+
+    .coming-up-mini h3 {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .coming-day {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 4px;
+    }
+
+    .coming-day-label {
+      width: 40px;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .coming-day-items {
+      flex: 1;
+      font-size: 11px;
+    }
+
+    .coming-day-items .item {
+      padding: 2px 0;
+    }
+
+    .coming-day-items .item-time {
+      color: var(--tasks);
+      font-weight: 700;
+    }
+
+    /* Archive column */
+    .column.archive {
+      opacity: 0.5;
+    }
+
+    .column.archive .dot { background: #525252; }
+
+    .archive-item {
+      font-size: 11px;
+      color: var(--text-muted);
+      padding: 4px 0;
+      text-decoration: line-through;
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>JogFile<span>Tuesday, May 19</span></h1>
+    <button class="btn-add">+ ADD TASK</button>
+  </header>
+
+  <main class="main">
+    <!-- Pinned Column -->
+    <div class="column pinned narrow">
+      <div class="column-header">
+        <div class="dot"></div>
+        <h2>Pinned</h2>
+        <span class="count">1</span>
+      </div>
+      <div class="column-body">
+        <div class="card">
+          <div class="card-title">Buy a DVD/Blu-Ray player</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tasks Column -->
+    <div class="column tasks">
+      <div class="column-header">
+        <div class="dot"></div>
+        <h2>Today</h2>
+        <span class="count">1</span>
+      </div>
+      <div class="column-body">
+        <div class="card task-card">
+          <div class="task-checkbox"></div>
+          <div class="task-content">
+            <div class="card-title">Pick up prescriptions</div>
+          </div>
+        </div>
+
+        <div class="coming-up-mini">
+          <h3>Coming Up</h3>
+          <div class="coming-day">
+            <div class="coming-day-label">WED</div>
+            <div class="coming-day-items">
+              <div class="item"><span class="item-time">3p</span> Counseling</div>
+            </div>
+          </div>
+          <div class="coming-day">
+            <div class="coming-day-label">THU</div>
+            <div class="coming-day-items">
+              <div class="item" style="color: var(--text-muted);">—</div>
+            </div>
+          </div>
+          <div class="coming-day">
+            <div class="coming-day-label">THU 28</div>
+            <div class="coming-day-items">
+              <div class="item">Schedule Jack's one year...</div>
+            </div>
+          </div>
+          <div class="coming-day">
+            <div class="coming-day-label">FRI 29</div>
+            <div class="coming-day-items">
+              <div class="item"><span class="item-time">8:30a</span> Dentist for James...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lists Column -->
+    <div class="column lists">
+      <div class="column-header">
+        <div class="dot"></div>
+        <h2>Lists</h2>
+        <span class="count">4</span>
+      </div>
+      <div class="column-body">
+        <div class="list-section">
+          <div class="list-section-header">Costco</div>
+          <div class="list-item">Gauze</div>
+          <div class="list-add">+ add</div>
+        </div>
+
+        <div class="list-section">
+          <div class="list-section-header">Target</div>
+          <div class="list-item">Use gift card</div>
+          <div class="list-add">+ add</div>
+        </div>
+
+        <div class="list-section">
+          <div class="list-section-header">Grocery</div>
+          <div class="list-item">Oregano</div>
+          <div class="list-item">Peppercorns</div>
+          <div class="list-add">+ add</div>
+        </div>
+
+        <div class="list-section">
+          <div class="list-section-header">Hardware</div>
+          <div class="list-add">+ add</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notes Column -->
+    <div class="column notes narrow">
+      <div class="column-header">
+        <div class="dot"></div>
+        <h2>Notes</h2>
+        <span class="count">1</span>
+      </div>
+      <div class="column-body">
+        <div class="card note-card">
+          <div class="note-text">Pasta salad with avocado and mango</div>
+        </div>
+        <div class="card add-note-card">+ add note</div>
+      </div>
+    </div>
+
+    <!-- Archive Column -->
+    <div class="column archive narrow">
+      <div class="column-header">
+        <div class="dot"></div>
+        <h2>Done</h2>
+        <span class="count">10</span>
+      </div>
+      <div class="column-body">
+        <div class="archive-item">Leave at 3pm to go see houses</div>
+        <div class="archive-item">Post DLHM sign-up onto Facebook</div>
+        <div class="archive-item">James medical appointment</div>
+        <div class="archive-item">Car payment</div>
+        <div class="archive-item">GET unit for James</div>
+        <div class="archive-item">Cancel Lyft Pink before May 27</div>
+        <div class="archive-item">Grocery store</div>
+        <div class="archive-item">Leave at 3pm to look at houses</div>
+        <div class="archive-item">Pay credit card</div>
+        <div class="archive-item">Do golf picks</div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

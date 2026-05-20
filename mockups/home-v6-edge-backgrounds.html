@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JogFile — v6 Edge: Background Colors</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root {
+      --pinned: #7c3aed;
+      --birthday: #db2777;
+      --today: #0891b2;
+      --coming: #4f46e5;
+      --lists: #059669;
+      --notes: #ea580c;
+      --done: #6b7280;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      background: #f0f9ff;
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+      font-size: 14px;
+      line-height: 1.35;
+    }
+
+
+    /* Header */
+    .header {
+      background: white;
+      padding: 14px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #e5e7eb;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .logo-icon {
+      height: 24px;
+      width: auto;
+    }
+
+    .logo-text {
+      font-size: 22px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+
+    .btn-add {
+      background: var(--today);
+      color: white;
+      border: none;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      font-size: 24px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Bands - edge to edge on mobile */
+    .bands {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .right-column {
+      display: contents;
+    }
+
+    .band {
+      color: white;
+      padding: 20px;
+    }
+
+    .band-head {
+      display: none;
+    }
+
+    .band-title {
+      font-size: 16px;
+      font-weight: 600;
+      opacity: 0.9;
+    }
+
+    /* Pinned */
+    .band-pinned { background: var(--pinned); }
+
+    .pin-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .pin-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.22);
+      padding: 14px 20px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 500;
+    }
+    
+    .pin-chip i {
+      opacity: 0.7;
+    }
+
+    /* Birthdays */
+    .band-birthday {
+      background: var(--birthday);
+      padding: 16px 20px;
+      order: -1;
+    }
+
+    .birthday-flex {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .birthday-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.2);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .birthday-pill-icon {
+      font-size: 0.9rem;
+      opacity: 0.85;
+    }
+
+    .birthday-pill-age {
+      opacity: 0.75;
+      font-size: 13px;
+    }
+
+    /* Today */
+    .band-today { background: var(--today); }
+
+    .task {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: rgba(255,255,255,0.18);
+      padding: 18px 20px;
+      border-radius: 14px;
+      margin-bottom: 10px;
+    }
+
+    .task:last-child { margin-bottom: 0; }
+
+    .task-check {
+      width: 24px;
+      height: 24px;
+      border: 2px solid rgba(255,255,255,0.5);
+      border-radius: 6px;
+    }
+
+    .task-label {
+      flex: 1;
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    .task-time {
+      background: rgba(0,0,0,0.2);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    /* Coming */
+    .band-coming { background: var(--coming); }
+
+    .coming-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .coming-day-card {
+      background: rgba(255,255,255,0.15);
+      border-radius: 12px;
+      padding: 12px 14px;
+    }
+
+    .coming-day-header {
+      font-size: 12px;
+      font-weight: 600;
+      opacity: 0.75;
+      margin-bottom: 8px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid rgba(255,255,255,0.15);
+    }
+
+    .coming-item {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      padding: 3px 0;
+    }
+
+    .coming-item-icon {
+      flex-shrink: 0;
+      width: 1rem;
+      text-align: center;
+      font-size: 0.75rem;
+      opacity: 0.7;
+    }
+
+    .coming-item-title {
+      font-size: 13px;
+      line-height: 1.35;
+      flex: 1;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .coming-item-time {
+      font-size: 12px;
+      font-weight: 500;
+      opacity: 0.75;
+      flex-shrink: 0;
+    }
+
+    .coming-empty {
+      font-size: 13px;
+      opacity: 0.5;
+      font-style: italic;
+    }
+
+    /* Lists */
+    .band-lists { background: var(--lists); }
+
+    .lists-scroll {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      margin: 0 -20px;
+      padding: 0 20px 8px;
+    }
+
+    .list-card {
+      flex-shrink: 0;
+      width: 160px;
+      background: rgba(255,255,255,0.18);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .list-card-head {
+      background: rgba(0,0,0,0.15);
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .list-card-body {
+      padding: 12px 14px;
+    }
+
+    .list-card-item {
+      font-size: 14px;
+      padding: 4px 0;
+    }
+
+    .list-card-item::before {
+      content: "• ";
+      opacity: 0.5;
+    }
+
+    .list-card-add {
+      font-size: 13px;
+      color: inherit;
+      background: transparent;
+      border: 2px dashed rgba(255,255,255,0.4);
+      border-radius: 8px;
+      padding: 6px 10px;
+      margin-top: 4px;
+      margin-top: 8px;
+    }
+
+    /* Notes */
+    .band-notes { background: var(--notes); }
+
+    .notes-flex {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .note-pill {
+      background: rgba(255,255,255,0.22);
+      padding: 14px 20px;
+      border-radius: 12px;
+      font-size: 15px;
+    }
+
+    .note-add {
+      background: transparent;
+      border: 2px dashed rgba(255,255,255,0.4);
+    }
+
+    /* Done */
+    .band-done {
+      background: var(--done);
+      padding: 16px 20px;
+    }
+
+    .done-flex {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .done-pill {
+      background: rgba(255,255,255,0.15);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      text-decoration: line-through;
+      opacity: 0.65;
+    }
+
+    /* Later */
+    .later-link {
+      display: block;
+      padding: 20px;
+      text-align: center;
+      color: #64748b;
+      font-weight: 600;
+      font-size: 14px;
+      text-decoration: none;
+      background: rgba(0,0,0,0.04);
+    }
+
+    .later-link strong {
+      color: #0f172a;
+    }
+
+
+    /* Desktop: gaps and rounded corners */
+    @media (min-width: 700px) {
+      body {
+        padding: 20px;
+      }
+      
+      .header {
+        max-width: 1100px;
+        margin: 0 auto 16px;
+        border-radius: 16px;
+        border: none;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      }
+      
+      .btn-add {
+        width: auto;
+        height: auto;
+        border-radius: 12px;
+        padding: 12px 24px;
+        font-size: 15px;
+      }
+      
+      .btn-add::after {
+        content: " Add";
+      }
+      
+      .bands {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        grid-template-rows: auto auto auto auto;
+        gap: 16px;
+        max-width: 1100px;
+        margin: 0 auto;
+      }
+      
+      .band {
+        border-radius: 18px;
+      }
+      
+      .right-column {
+        grid-column: 2;
+        grid-row: 1 / 5;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+      
+      .band-today { grid-column: 1; grid-row: 1; }
+      .band-lists { grid-column: 1; grid-row: 2; }
+      .band-notes { grid-column: 1; grid-row: 3; }
+      .band-done { grid-column: 1; grid-row: 4; }
+      
+      .band-birthday { flex: 0 0 auto; order: 0; }
+      .band-pinned { flex: 0 0 auto; order: 0; }
+      .band-coming { flex: 1 1 auto; }
+      
+      .band-today .tasks-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      
+      .band-today .task {
+        flex: 0 0 calc(50% - 5px);
+        margin-bottom: 0;
+      }
+      
+      
+      .lists-scroll {
+        flex-wrap: wrap;
+        overflow: visible;
+        margin: 0;
+        padding: 0;
+      }
+      
+      .list-card {
+        flex: 0 0 calc(25% - 9px);
+      }
+      
+      .later-link {
+        max-width: 1100px;
+        margin: 16px auto 0;
+        border-radius: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="logo">
+      <img class="logo-icon" src="../public/images/shoe.svg" alt="">
+      <span class="logo-text">JogFile</span>
+    </div>
+    <button class="btn-add">+</button>
+  </header>
+
+  <div class="bands">
+    <section class="band band-today">
+      <div class="band-head">
+        <span class="band-title">Today</span>
+      </div>
+      <div class="tasks-grid">
+        <div class="task">
+          <div class="task-check"></div>
+          <span class="task-label">Pick up prescriptions</span>
+        </div>
+        <div class="task">
+          <div class="task-check"></div>
+          <span class="task-label">Call insurance about claim</span>
+        </div>
+        <div class="task">
+          <div class="task-check"></div>
+          <span class="task-label">Schedule vet appointment</span>
+        </div>
+        <div class="task">
+          <div class="task-check"></div>
+          <span class="task-label">Review budget spreadsheet</span>
+        </div>
+        <div class="task">
+          <div class="task-check"></div>
+          <span class="task-label">Reply to Mom's email</span>
+        </div>
+        <div class="task">
+          <div class="task-check"></div>
+          <span class="task-label">Research new laptop options</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="right-column">
+      <section class="band band-birthday">
+        <div class="band-head">
+          <span class="band-title">Birthdays</span>
+        </div>
+        <div class="birthday-flex">
+          <div class="birthday-pill">
+            <span class="birthday-pill-icon"><i class="bi bi-cake2"></i></span>
+            <span>James</span>
+            <span class="birthday-pill-age">· turning 5</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="band band-pinned">
+        <div class="band-head">
+          <span class="band-title">Pinned</span>
+        </div>
+        <div class="pin-items">
+          <div class="pin-chip"><i class="bi bi-pin-angle-fill"></i> Buy a DVD/Blu-Ray player</div>
+        </div>
+      </section>
+
+      <section class="band band-coming">
+        <div class="band-head">
+          <span class="band-title">Coming Up</span>
+        </div>
+        <div class="coming-grid">
+          <div class="coming-day-card">
+            <div class="coming-day-header">Wed 20</div>
+            <div class="coming-item">
+              <span class="coming-item-icon"><i class="bi bi-clock"></i></span>
+              <div class="coming-item-title">Counseling</div>
+              <div class="coming-item-time">3:00 pm</div>
+            </div>
+            <div class="coming-item">
+              <span class="coming-item-icon"><i class="bi bi-calendar3"></i></span>
+              <div class="coming-item-title">Pick up prescriptions</div>
+            </div>
+          </div>
+          <div class="coming-day-card">
+            <div class="coming-day-header">Thu 21</div>
+            <div class="coming-item">
+              <span class="coming-item-icon"><i class="bi bi-calendar3"></i></span>
+              <div class="coming-item-title">Call insurance about claim</div>
+            </div>
+          </div>
+          <div class="coming-day-card">
+            <div class="coming-day-header">Fri 22</div>
+            <div class="coming-empty">Nothing scheduled</div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <section class="band band-lists">
+      <div class="band-head">
+        <span class="band-title">Quick Lists</span>
+      </div>
+      <div class="lists-scroll">
+        <div class="list-card">
+          <div class="list-card-head">Costco</div>
+          <div class="list-card-body">
+            <div class="list-card-item">Gauze</div>
+            <div class="list-card-add">+ Add Item</div>
+          </div>
+        </div>
+        <div class="list-card">
+          <div class="list-card-head">Target</div>
+          <div class="list-card-body">
+            <div class="list-card-item">Use gift card</div>
+            <div class="list-card-add">+ Add Item</div>
+          </div>
+        </div>
+        <div class="list-card">
+          <div class="list-card-head">Grocery</div>
+          <div class="list-card-body">
+            <div class="list-card-item">Oregano</div>
+            <div class="list-card-item">Peppercorns</div>
+            <div class="list-card-add">+ Add Item</div>
+          </div>
+        </div>
+        <div class="list-card">
+          <div class="list-card-head">Hardware</div>
+          <div class="list-card-body">
+            <div class="list-card-add">+ Add Item</div>
+          </div>
+        </div>
+        <div class="list-card">
+          <div class="list-card-head">Pharmacy</div>
+          <div class="list-card-body">
+            <div class="list-card-item">Refill allergy meds</div>
+            <div class="list-card-add">+ Add Item</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="band band-notes">
+      <div class="band-head">
+        <span class="band-title">Notes</span>
+      </div>
+      <div class="notes-flex">
+        <div class="note-pill">Pasta salad with avocado and mango</div>
+        <div class="note-pill note-add">+ Add Note</div>
+      </div>
+    </section>
+
+    <section class="band band-done">
+      <div class="band-head">
+        <span class="band-title">Done</span>
+      </div>
+      <div class="done-flex">
+        <div class="done-pill">Leave at 3pm</div>
+        <div class="done-pill">Post DLHM</div>
+        <div class="done-pill">James medical</div>
+        <div class="done-pill">Car payment</div>
+        <div class="done-pill">GET unit</div>
+        <div class="done-pill">Cancel Lyft</div>
+        <div class="done-pill">Grocery store</div>
+        <div class="done-pill">Credit card</div>
+        <div class="done-pill">Golf picks</div>
+      </div>
+    </section>
+  </div>
+
+  <a href="#" class="later-link"><strong>32</strong> items scheduled later →</a>
+
+</body>
+</html>

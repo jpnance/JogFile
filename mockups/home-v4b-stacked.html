@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JogFile — v4b: Stacked Mobile-First</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #ffffff;
+      --surface: #fafafa;
+      --text: #171717;
+      --text-dim: #737373;
+      --border: #e5e5e5;
+      
+      --pinned: #7c3aed;
+      --today: #0369a1;
+      --coming: #4338ca;
+      --lists: #047857;
+      --notes: #b45309;
+      --done: #a3a3a3;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+      font-size: 15px;
+      line-height: 1.4;
+    }
+
+    /* Header - sticky on mobile */
+    .header {
+      position: sticky;
+      top: 0;
+      background: white;
+      z-index: 100;
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header h1 {
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .header .date {
+      font-size: 14px;
+      color: var(--text-dim);
+      font-weight: 500;
+    }
+
+    .btn-add {
+      background: var(--today);
+      color: white;
+      border: none;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Main content */
+    .main {
+      padding: 12px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Section */
+    .section {
+      margin-bottom: 16px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .section-header {
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: white;
+    }
+
+    .section-header h2 {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      flex: 1;
+    }
+
+    .section-header .count {
+      font-size: 13px;
+      font-weight: 700;
+      opacity: 0.8;
+    }
+
+    .section-body {
+      padding: 12px 14px;
+      background: white;
+    }
+
+    /* Pinned */
+    .section-pinned .section-header { background: var(--pinned); }
+
+    .pinned-chip {
+      display: inline-block;
+      background: #f3e8ff;
+      color: var(--pinned);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      margin-right: 8px;
+      margin-bottom: 8px;
+    }
+
+    /* Today */
+    .section-today .section-header { background: var(--today); }
+
+    .task {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .task:last-child { border-bottom: none; }
+
+    .task-check {
+      width: 24px;
+      height: 24px;
+      border: 2px solid var(--today);
+      border-radius: 6px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .task-content {
+      flex: 1;
+    }
+
+    .task-title {
+      font-weight: 500;
+    }
+
+    .task-meta {
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-top: 2px;
+    }
+
+    .task-time {
+      background: var(--today);
+      color: white;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    /* Coming Up */
+    .section-coming .section-header { background: var(--coming); }
+
+    .coming-row {
+      display: flex;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .coming-row:last-child { border-bottom: none; }
+
+    .coming-date {
+      width: 70px;
+      flex-shrink: 0;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--coming);
+      text-transform: uppercase;
+    }
+
+    .coming-items {
+      flex: 1;
+    }
+
+    .coming-item {
+      font-size: 14px;
+      padding: 2px 0;
+    }
+
+    .coming-item .time {
+      color: var(--coming);
+      font-weight: 600;
+    }
+
+    /* Lists */
+    .section-lists .section-header { background: var(--lists); }
+
+    .lists-row {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      margin: -4px;
+      padding: 4px;
+    }
+
+    .list-card {
+      flex-shrink: 0;
+      width: 140px;
+      background: #ecfdf5;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .list-card-head {
+      background: var(--lists);
+      color: white;
+      padding: 6px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .list-card-body {
+      padding: 8px 10px;
+    }
+
+    .list-item {
+      font-size: 13px;
+      padding: 3px 0;
+    }
+
+    .list-item::before {
+      content: "• ";
+      color: var(--lists);
+    }
+
+    .list-add {
+      color: var(--lists);
+      font-size: 12px;
+      opacity: 0.6;
+      padding-top: 4px;
+    }
+
+    /* Notes */
+    .section-notes .section-header { background: var(--notes); }
+
+    .note-chip {
+      display: inline-block;
+      background: #fef3c7;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 14px;
+      margin-right: 8px;
+      margin-bottom: 8px;
+    }
+
+    .note-add {
+      background: transparent;
+      border: 1px dashed var(--notes);
+      color: var(--notes);
+    }
+
+    /* Done - collapsed by default */
+    .section-done .section-header {
+      background: var(--done);
+      cursor: pointer;
+    }
+
+    .section-done .section-body {
+      display: none;
+    }
+
+    .section-done.open .section-body {
+      display: block;
+    }
+
+    .done-chip {
+      display: inline-block;
+      background: #f5f5f5;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      color: var(--text-dim);
+      text-decoration: line-through;
+      margin-right: 6px;
+      margin-bottom: 6px;
+    }
+
+    /* Later indicator */
+    .later-bar {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      text-align: center;
+      color: var(--text-dim);
+      font-size: 13px;
+    }
+
+    .later-bar strong {
+      color: var(--text);
+    }
+
+    /* Desktop: 2-column layout */
+    @media (min-width: 768px) {
+      .header {
+        padding: 16px 24px;
+      }
+      
+      .header h1 {
+        font-size: 24px;
+      }
+      
+      .btn-add {
+        width: auto;
+        height: auto;
+        border-radius: 8px;
+        padding: 10px 20px;
+        font-size: 14px;
+      }
+      
+      .btn-add::before {
+        content: "+ Add Task";
+      }
+      
+      .btn-add i { display: none; }
+      
+      .main {
+        padding: 20px 24px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        align-items: start;
+      }
+      
+      .section-pinned { grid-column: 1; }
+      .section-today { grid-column: 1; }
+      .section-coming { grid-column: 2; grid-row: 1 / 3; }
+      .section-lists { grid-column: 1 / 3; }
+      .section-notes { grid-column: 1 / 3; }
+      .section-done { grid-column: 1 / 3; }
+      .later-bar { grid-column: 1 / 3; }
+      
+      .lists-row {
+        flex-wrap: wrap;
+      }
+      
+      .list-card {
+        width: calc(25% - 9px);
+        min-width: 140px;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .main {
+        grid-template-columns: 1fr 1fr 1fr;
+      }
+      
+      .section-pinned { grid-column: 1; }
+      .section-today { grid-column: 2; }
+      .section-coming { grid-column: 3; grid-row: 1; }
+      .section-lists { grid-column: 1 / 4; }
+      .section-notes { grid-column: 1 / 2; }
+      .section-done { grid-column: 2 / 4; }
+      .later-bar { grid-column: 1 / 4; }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div>
+      <h1>Tuesday</h1>
+      <div class="date">May 19, 2026</div>
+    </div>
+    <button class="btn-add"><i class="bi bi-plus"></i></button>
+  </header>
+
+  <main class="main">
+    <section class="section section-pinned">
+      <div class="section-header">
+        <h2>Pinned</h2>
+        <span class="count">1</span>
+      </div>
+      <div class="section-body">
+        <span class="pinned-chip">Buy a DVD/Blu-Ray player</span>
+      </div>
+    </section>
+
+    <section class="section section-today">
+      <div class="section-header">
+        <h2>Today</h2>
+        <span class="count">1</span>
+      </div>
+      <div class="section-body">
+        <div class="task">
+          <div class="task-check"></div>
+          <div class="task-content">
+            <div class="task-title">Pick up prescriptions</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-coming">
+      <div class="section-header">
+        <h2>Coming Up</h2>
+        <span class="count">3</span>
+      </div>
+      <div class="section-body">
+        <div class="coming-row">
+          <div class="coming-date">Wed 20</div>
+          <div class="coming-items">
+            <div class="coming-item"><span class="time">3p</span> Counseling</div>
+          </div>
+        </div>
+        <div class="coming-row">
+          <div class="coming-date">Thu 28</div>
+          <div class="coming-items">
+            <div class="coming-item">Schedule Jack's one year appt</div>
+          </div>
+        </div>
+        <div class="coming-row">
+          <div class="coming-date">Fri 29</div>
+          <div class="coming-items">
+            <div class="coming-item"><span class="time">8:30a</span> Dentist for James</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-lists">
+      <div class="section-header">
+        <h2>Quick Lists</h2>
+        <span class="count">4</span>
+      </div>
+      <div class="section-body">
+        <div class="lists-row">
+          <div class="list-card">
+            <div class="list-card-head">Costco</div>
+            <div class="list-card-body">
+              <div class="list-item">Gauze</div>
+              <div class="list-add">+ add</div>
+            </div>
+          </div>
+          <div class="list-card">
+            <div class="list-card-head">Target</div>
+            <div class="list-card-body">
+              <div class="list-item">Use gift card</div>
+              <div class="list-add">+ add</div>
+            </div>
+          </div>
+          <div class="list-card">
+            <div class="list-card-head">Grocery</div>
+            <div class="list-card-body">
+              <div class="list-item">Oregano</div>
+              <div class="list-item">Peppercorns</div>
+              <div class="list-add">+ add</div>
+            </div>
+          </div>
+          <div class="list-card">
+            <div class="list-card-head">Hardware</div>
+            <div class="list-card-body">
+              <div class="list-add">+ add</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-notes">
+      <div class="section-header">
+        <h2>Sticky Notes</h2>
+        <span class="count">1</span>
+      </div>
+      <div class="section-body">
+        <span class="note-chip">Pasta salad with avocado and mango</span>
+        <span class="note-chip note-add">+ add</span>
+      </div>
+    </section>
+
+    <section class="section section-done">
+      <div class="section-header" onclick="this.parentElement.classList.toggle('open')">
+        <h2>Completed</h2>
+        <span class="count">10 ▾</span>
+      </div>
+      <div class="section-body">
+        <span class="done-chip">Leave at 3pm</span>
+        <span class="done-chip">Post DLHM sign-up</span>
+        <span class="done-chip">James medical</span>
+        <span class="done-chip">Car payment</span>
+        <span class="done-chip">GET unit</span>
+        <span class="done-chip">Cancel Lyft Pink</span>
+        <span class="done-chip">Grocery store</span>
+        <span class="done-chip">Credit card</span>
+        <span class="done-chip">Golf picks</span>
+      </div>
+    </section>
+
+    <div class="later-bar">
+      <strong>32</strong> items scheduled for later →
+    </div>
+  </main>
+</body>
+</html>

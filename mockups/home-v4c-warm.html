@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JogFile — v4c: Warm Palette</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #fdfcfb;
+      --surface: #ffffff;
+      --text: #292524;
+      --text-dim: #78716c;
+      --border: #e7e5e4;
+      
+      --pinned: #a21caf;
+      --today: #0891b2;
+      --coming: #7c3aed;
+      --lists: #16a34a;
+      --notes: #ea580c;
+      --done: #a8a29e;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+      font-size: 14px;
+      line-height: 1.4;
+      padding: 0;
+    }
+
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, var(--today) 0%, #0e7490 100%);
+      color: white;
+      padding: 20px 16px 24px;
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 4px;
+    }
+
+    .header h1 {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .header .date {
+      font-size: 15px;
+      opacity: 0.85;
+      font-weight: 500;
+    }
+
+    .btn-add {
+      background: rgba(255,255,255,0.2);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      backdrop-filter: blur(4px);
+    }
+
+    /* Main */
+    .main {
+      padding: 16px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    /* Block */
+    .block {
+      background: var(--surface);
+      border-radius: 16px;
+      margin-bottom: 12px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03);
+    }
+
+    .block-bar {
+      height: 6px;
+    }
+
+    .block-header {
+      padding: 14px 16px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .block-header h2 {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .block-header .count {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+
+    .block-body {
+      padding: 0 16px 16px;
+    }
+
+    /* Pinned */
+    .block-pinned .block-bar { background: var(--pinned); }
+    .block-pinned .block-header h2 { color: var(--pinned); }
+    .block-pinned .block-header .count { background: #fae8ff; color: var(--pinned); }
+
+    .pinned-item {
+      background: #fdf4ff;
+      border-left: 4px solid var(--pinned);
+      padding: 12px 14px;
+      border-radius: 8px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    /* Today */
+    .block-today .block-bar { background: var(--today); }
+    .block-today .block-header h2 { color: var(--today); }
+    .block-today .block-header .count { background: #ecfeff; color: var(--today); }
+
+    .task {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .task:last-child { border-bottom: none; }
+
+    .task-check {
+      width: 24px;
+      height: 24px;
+      border: 2.5px solid var(--today);
+      border-radius: 7px;
+      flex-shrink: 0;
+    }
+
+    .task-title {
+      flex: 1;
+      font-weight: 500;
+      font-size: 15px;
+    }
+
+    .task-time {
+      background: var(--today);
+      color: white;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    /* Coming Up */
+    .block-coming .block-bar { background: var(--coming); }
+    .block-coming .block-header h2 { color: var(--coming); }
+    .block-coming .block-header .count { background: #f5f3ff; color: var(--coming); }
+
+    .coming-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .coming-cell {
+      background: #faf5ff;
+      border-radius: 10px;
+      padding: 10px 12px;
+      text-align: center;
+    }
+
+    .coming-cell-date {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--coming);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .coming-cell-item {
+      font-size: 12px;
+      line-height: 1.3;
+    }
+
+    .coming-cell-item .time {
+      display: block;
+      font-weight: 700;
+      color: var(--coming);
+      font-size: 11px;
+    }
+
+    .coming-cell-empty {
+      color: var(--text-dim);
+      font-size: 18px;
+    }
+
+    /* Lists */
+    .block-lists .block-bar { background: var(--lists); }
+    .block-lists .block-header h2 { color: var(--lists); }
+    .block-lists .block-header .count { background: #dcfce7; color: var(--lists); }
+
+    .lists-scroll {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      margin: 0 -16px;
+      padding: 0 16px;
+    }
+
+    .list-card {
+      flex-shrink: 0;
+      width: 130px;
+      background: #f0fdf4;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .list-card-head {
+      background: var(--lists);
+      color: white;
+      padding: 6px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      text-align: center;
+    }
+
+    .list-card-body {
+      padding: 10px;
+    }
+
+    .list-item {
+      font-size: 13px;
+      padding: 3px 0;
+    }
+
+    .list-item::before {
+      content: "→ ";
+      color: var(--lists);
+      font-weight: bold;
+    }
+
+    .list-add {
+      color: var(--lists);
+      font-size: 12px;
+      opacity: 0.6;
+      margin-top: 6px;
+    }
+
+    /* Notes */
+    .block-notes .block-bar { background: var(--notes); }
+    .block-notes .block-header h2 { color: var(--notes); }
+    .block-notes .block-header .count { background: #fff7ed; color: var(--notes); }
+
+    .notes-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .note-chip {
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-size: 14px;
+    }
+
+    .note-add {
+      background: transparent;
+      border: 2px dashed #fdba74;
+      color: var(--notes);
+    }
+
+    /* Done */
+    .block-done {
+      background: #fafaf9;
+    }
+    .block-done .block-bar { background: var(--done); }
+    .block-done .block-header h2 { color: var(--done); }
+    .block-done .block-header .count { background: #f5f5f4; color: var(--done); }
+
+    .done-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .done-chip {
+      background: #f5f5f4;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      color: var(--text-dim);
+      text-decoration: line-through;
+    }
+
+    /* Later */
+    .later-link {
+      display: block;
+      text-align: center;
+      padding: 14px;
+      color: var(--text-dim);
+      font-size: 13px;
+      text-decoration: none;
+    }
+
+    .later-link strong {
+      color: var(--text);
+    }
+
+    /* Responsive */
+    @media (min-width: 600px) {
+      .header {
+        padding: 24px 24px 28px;
+      }
+      
+      .header h1 {
+        font-size: 36px;
+      }
+      
+      .main {
+        padding: 20px 24px;
+      }
+      
+      .two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      
+      .two-col .block {
+        margin-bottom: 0;
+      }
+      
+      .coming-grid {
+        grid-template-columns: 1fr;
+        gap: 6px;
+      }
+      
+      .coming-cell {
+        text-align: left;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      
+      .coming-cell-date {
+        margin-bottom: 0;
+        width: 60px;
+        flex-shrink: 0;
+      }
+    }
+
+    @media (min-width: 900px) {
+      .three-col {
+        display: grid;
+        grid-template-columns: 1fr 1.5fr 1fr;
+        gap: 12px;
+      }
+      
+      .three-col .block {
+        margin-bottom: 0;
+      }
+
+      .lists-scroll {
+        flex-wrap: wrap;
+        overflow-x: visible;
+      }
+      
+      .list-card {
+        width: calc(25% - 8px);
+        min-width: 120px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-top">
+      <div>
+        <h1>Tuesday</h1>
+        <div class="date">May 19, 2026</div>
+      </div>
+      <button class="btn-add">+ Add</button>
+    </div>
+  </header>
+
+  <main class="main">
+    <div class="three-col">
+      <div class="block block-pinned">
+        <div class="block-bar"></div>
+        <div class="block-header">
+          <h2>Pinned</h2>
+          <span class="count">1</span>
+        </div>
+        <div class="block-body">
+          <div class="pinned-item">Buy a DVD/Blu-Ray player</div>
+        </div>
+      </div>
+
+      <div class="block block-today">
+        <div class="block-bar"></div>
+        <div class="block-header">
+          <h2>Today</h2>
+          <span class="count">1</span>
+        </div>
+        <div class="block-body">
+          <div class="task">
+            <div class="task-check"></div>
+            <span class="task-title">Pick up prescriptions</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="block block-coming">
+        <div class="block-bar"></div>
+        <div class="block-header">
+          <h2>Coming Up</h2>
+          <span class="count">3</span>
+        </div>
+        <div class="block-body">
+          <div class="coming-grid">
+            <div class="coming-cell">
+              <div class="coming-cell-date">Wed 20</div>
+              <div class="coming-cell-item"><span class="time">3p</span> Counseling</div>
+            </div>
+            <div class="coming-cell">
+              <div class="coming-cell-date">Thu 28</div>
+              <div class="coming-cell-item">Schedule Jack's appt</div>
+            </div>
+            <div class="coming-cell">
+              <div class="coming-cell-date">Fri 29</div>
+              <div class="coming-cell-item"><span class="time">8:30a</span> Dentist</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="block block-lists">
+      <div class="block-bar"></div>
+      <div class="block-header">
+        <h2>Quick Lists</h2>
+        <span class="count">4</span>
+      </div>
+      <div class="block-body">
+        <div class="lists-scroll">
+          <div class="list-card">
+            <div class="list-card-head">Costco</div>
+            <div class="list-card-body">
+              <div class="list-item">Gauze</div>
+              <div class="list-add">+ add</div>
+            </div>
+          </div>
+          <div class="list-card">
+            <div class="list-card-head">Target</div>
+            <div class="list-card-body">
+              <div class="list-item">Use gift card</div>
+              <div class="list-add">+ add</div>
+            </div>
+          </div>
+          <div class="list-card">
+            <div class="list-card-head">Grocery</div>
+            <div class="list-card-body">
+              <div class="list-item">Oregano</div>
+              <div class="list-item">Peppercorns</div>
+              <div class="list-add">+ add</div>
+            </div>
+          </div>
+          <div class="list-card">
+            <div class="list-card-head">Hardware</div>
+            <div class="list-card-body">
+              <div class="list-add">+ add</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="block block-notes">
+        <div class="block-bar"></div>
+        <div class="block-header">
+          <h2>Sticky Notes</h2>
+          <span class="count">1</span>
+        </div>
+        <div class="block-body">
+          <div class="notes-wrap">
+            <span class="note-chip">Pasta salad with avocado and mango</span>
+            <span class="note-chip note-add">+ add</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="block block-done">
+        <div class="block-bar"></div>
+        <div class="block-header">
+          <h2>Completed</h2>
+          <span class="count">10</span>
+        </div>
+        <div class="block-body">
+          <div class="done-wrap">
+            <span class="done-chip">Leave at 3pm</span>
+            <span class="done-chip">Post DLHM</span>
+            <span class="done-chip">James medical</span>
+            <span class="done-chip">Car payment</span>
+            <span class="done-chip">GET unit</span>
+            <span class="done-chip">Cancel Lyft</span>
+            <span class="done-chip">Grocery store</span>
+            <span class="done-chip">Credit card</span>
+            <span class="done-chip">Golf picks</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <a href="#" class="later-link"><strong>32</strong> items scheduled for later →</a>
+  </main>
+</body>
+</html>

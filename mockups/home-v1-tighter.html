@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JogFile — Mockup 1: Tighter</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f8f9fa;
+      --surface: #ffffff;
+      --text: #1a1a2e;
+      --text-muted: #6b7280;
+      --border: #d1d5db;
+      --pinned: #7c3aed;
+      --pinned-bg: #ede9fe;
+      --pinned-border: #c4b5fd;
+      --task: #0369a1;
+      --task-bg: #e0f2fe;
+      --task-border: #7dd3fc;
+      --quicklist: #059669;
+      --quicklist-bg: #d1fae5;
+      --quicklist-border: #6ee7b7;
+      --sticky: #d97706;
+      --sticky-bg: #fef3c7;
+      --sticky-border: #fcd34d;
+      --completed: #6b7280;
+      --completed-bg: #f3f4f6;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 14px;
+      line-height: 1.4;
+      padding: 16px;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .header h1 {
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .header h1 span {
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .btn-add {
+      background: var(--task);
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    /* Section labels */
+    .section-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    /* Pinned Section */
+    .pinned-section {
+      margin-bottom: 16px;
+    }
+
+    .pinned-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .pinned-tile {
+      background: var(--pinned-bg);
+      border: 2px solid var(--pinned-border);
+      border-left: 4px solid var(--pinned);
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--pinned);
+    }
+
+    /* Tasks Section */
+    .tasks-section {
+      margin-bottom: 16px;
+    }
+
+    .task-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .task-row {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--task);
+      border-radius: 4px;
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .task-row.has-time {
+      border-left-color: #0ea5e9;
+    }
+
+    .task-checkbox {
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--border);
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+
+    .task-title {
+      flex: 1;
+      font-size: 13px;
+    }
+
+    .task-time {
+      font-size: 11px;
+      font-weight: 600;
+      color: #0ea5e9;
+      background: #e0f2fe;
+      padding: 2px 6px;
+      border-radius: 3px;
+    }
+
+    .task-date {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* Coming Up Grid */
+    .coming-up-section {
+      margin-bottom: 16px;
+    }
+
+    .coming-up-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .day-cell {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .day-cell-header {
+      background: #e5e7eb;
+      padding: 4px 8px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .day-cell-body {
+      padding: 6px 8px;
+      font-size: 12px;
+    }
+
+    .day-cell-body ul {
+      list-style: none;
+    }
+
+    .day-cell-body li {
+      padding: 2px 0;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .day-cell-body li i {
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    .day-cell-body .appt-time {
+      font-size: 10px;
+      color: #0ea5e9;
+      font-weight: 600;
+    }
+
+    /* Quick Lists */
+    .quicklists-section {
+      margin-bottom: 16px;
+    }
+
+    .quicklist-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .quicklist-card {
+      background: var(--quicklist-bg);
+      border: 2px solid var(--quicklist-border);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .quicklist-header {
+      background: var(--quicklist);
+      color: white;
+      padding: 4px 8px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .quicklist-body {
+      padding: 6px 8px;
+      font-size: 12px;
+    }
+
+    .quicklist-body ul {
+      list-style: none;
+    }
+
+    .quicklist-body li {
+      padding: 2px 0;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .quicklist-body li::before {
+      content: "•";
+      color: var(--quicklist);
+      font-weight: bold;
+    }
+
+    .quicklist-add {
+      color: var(--quicklist);
+      font-size: 11px;
+      opacity: 0.7;
+      margin-top: 4px;
+    }
+
+    /* Sticky Notes */
+    .sticky-section {
+      margin-bottom: 16px;
+    }
+
+    .sticky-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .sticky-tile {
+      background: var(--sticky-bg);
+      border: 2px solid var(--sticky-border);
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 12px;
+      color: var(--sticky);
+      font-weight: 500;
+    }
+
+    .sticky-add {
+      background: #fffbeb;
+      border: 2px dashed var(--sticky-border);
+      color: var(--sticky);
+      opacity: 0.6;
+    }
+
+    /* Collapsible sections */
+    .collapsible-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 0;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .collapsible-header .chevron {
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    .collapsible-header .title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .collapsible-header .count {
+      font-size: 11px;
+      color: var(--text-muted);
+      background: var(--completed-bg);
+      padding: 1px 6px;
+      border-radius: 10px;
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 12px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1>Tuesday <span>May 19</span></h1>
+      <button class="btn-add"><i class="bi bi-plus"></i> Add</button>
+    </header>
+
+    <!-- Pinned -->
+    <section class="pinned-section">
+      <div class="section-label">Pinned</div>
+      <div class="pinned-grid">
+        <div class="pinned-tile">Buy a DVD/Blu-Ray player</div>
+      </div>
+    </section>
+
+    <!-- Today's Tasks -->
+    <section class="tasks-section">
+      <div class="section-label">Today</div>
+      <div class="task-list">
+        <div class="task-row">
+          <div class="task-checkbox"></div>
+          <span class="task-title">Pick up prescriptions</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Coming Up -->
+    <section class="coming-up-section">
+      <div class="section-label">Coming Up</div>
+      <div class="coming-up-grid">
+        <div class="day-cell">
+          <div class="day-cell-header">Wed</div>
+          <div class="day-cell-body">
+            <ul>
+              <li><i class="bi bi-clock"></i> <span class="appt-time">3:00p</span> Counseling</li>
+            </ul>
+          </div>
+        </div>
+        <div class="day-cell">
+          <div class="day-cell-header">Thu</div>
+          <div class="day-cell-body">
+            <ul>
+              <li style="color: var(--text-muted); font-style: italic;">—</li>
+            </ul>
+          </div>
+        </div>
+        <div class="day-cell">
+          <div class="day-cell-header">Fri</div>
+          <div class="day-cell-body">
+            <ul>
+              <li style="color: var(--text-muted); font-style: italic;">—</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quick Lists -->
+    <section class="quicklists-section">
+      <div class="section-label">Quick Lists</div>
+      <div class="quicklist-grid">
+        <div class="quicklist-card">
+          <div class="quicklist-header">Costco</div>
+          <div class="quicklist-body">
+            <ul>
+              <li>Gauze</li>
+            </ul>
+            <div class="quicklist-add">+ Add</div>
+          </div>
+        </div>
+        <div class="quicklist-card">
+          <div class="quicklist-header">Target</div>
+          <div class="quicklist-body">
+            <ul>
+              <li>Use gift card</li>
+            </ul>
+            <div class="quicklist-add">+ Add</div>
+          </div>
+        </div>
+        <div class="quicklist-card">
+          <div class="quicklist-header">Grocery</div>
+          <div class="quicklist-body">
+            <ul>
+              <li>Oregano</li>
+              <li>Peppercorns</li>
+            </ul>
+            <div class="quicklist-add">+ Add</div>
+          </div>
+        </div>
+        <div class="quicklist-card">
+          <div class="quicklist-header">Hardware</div>
+          <div class="quicklist-body">
+            <div class="quicklist-add">+ Add</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sticky Notes -->
+    <section class="sticky-section">
+      <div class="section-label">Sticky Notes</div>
+      <div class="sticky-grid">
+        <div class="sticky-tile">Pasta salad with avocado and mango</div>
+        <div class="sticky-tile sticky-add">+ Add note</div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- Collapsed sections -->
+    <div class="collapsible-header">
+      <span class="chevron">▶</span>
+      <span class="title">Later</span>
+      <span class="count">32</span>
+    </div>
+
+    <div class="collapsible-header">
+      <span class="chevron">▶</span>
+      <span class="title">Completed</span>
+      <span class="count">10</span>
+    </div>
+  </div>
+</body>
+</html>

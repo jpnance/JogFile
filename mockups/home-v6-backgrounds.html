@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JogFile — v6: Background Colors</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root {
+      --pinned: #7c3aed;
+      --today: #0891b2;
+      --coming: #4f46e5;
+      --lists: #059669;
+      --notes: #ea580c;
+      --done: #71717a;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+      font-size: 14px;
+      line-height: 1.3;
+      padding: 16px;
+      min-height: 100vh;
+      transition: background-color 0.3s;
+    }
+
+    /* Background switcher */
+    .bg-switcher {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: white;
+      border-radius: 12px;
+      padding: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      z-index: 1000;
+    }
+
+    .bg-switcher-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #666;
+      margin-bottom: 8px;
+    }
+
+    .bg-options {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      max-width: 200px;
+    }
+
+    .bg-opt {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: transform 0.15s;
+    }
+
+    .bg-opt:hover {
+      transform: scale(1.1);
+    }
+
+    .bg-opt.active {
+      border-color: #000;
+    }
+
+    /* Backgrounds */
+    .bg-cream { background: #faf8f5; }
+    .bg-slate { background: #e2e8f0; }
+    .bg-warmgray { background: #f5f5f4; }
+    .bg-coolgray { background: #f1f5f9; }
+    .bg-blush { background: #fdf2f8; }
+    .bg-mint { background: #ecfdf5; }
+    .bg-lavender { background: #f5f3ff; }
+    .bg-peach { background: #fff7ed; }
+    .bg-sky { background: #f0f9ff; }
+    .bg-sand { background: #fefce8; }
+    .bg-white { background: #ffffff; }
+    .bg-charcoal { background: #1c1917; }
+
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 24px;
+    }
+
+    .logo-icon svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .logo-text {
+      font-size: 24px;
+      font-weight: 800;
+      color: #1c1917;
+      letter-spacing: -0.02em;
+    }
+
+    .btn-add {
+      background: var(--today);
+      color: white;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 14px;
+      font-weight: 800;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    /* Block */
+    .block {
+      border-radius: 20px;
+      padding: 20px;
+      color: white;
+    }
+
+    .block-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+    }
+
+    .block-head h2 {
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      opacity: 0.85;
+    }
+
+    .block-head .num {
+      font-size: 32px;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    /* Pinned */
+    .block-pinned { background: var(--pinned); }
+
+    .pinned-item {
+      background: rgba(255,255,255,0.18);
+      padding: 14px 18px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    /* Today */
+    .block-today { background: var(--today); }
+
+    .task {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: rgba(255,255,255,0.15);
+      padding: 16px 18px;
+      border-radius: 14px;
+      margin-bottom: 10px;
+    }
+
+    .task-check {
+      width: 28px;
+      height: 28px;
+      border: 3px solid rgba(255,255,255,0.5);
+      border-radius: 8px;
+    }
+
+    .task-text {
+      flex: 1;
+      font-size: 17px;
+      font-weight: 600;
+    }
+
+    /* Coming */
+    .block-coming { background: var(--coming); }
+
+    .coming-row {
+      display: flex;
+      gap: 16px;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .coming-row:last-child { border-bottom: none; }
+
+    .coming-label {
+      width: 70px;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      opacity: 0.7;
+    }
+
+    .coming-content {
+      flex: 1;
+      font-size: 15px;
+    }
+
+    .coming-content .time {
+      font-weight: 800;
+    }
+
+    /* Lists */
+    .block-lists { background: var(--lists); }
+
+    .lists-row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .list-tile {
+      background: rgba(255,255,255,0.15);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .list-tile-head {
+      background: rgba(0,0,0,0.15);
+      padding: 10px 14px;
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .list-tile-body {
+      padding: 12px 14px;
+    }
+
+    .list-tile-item {
+      font-size: 14px;
+      padding: 4px 0;
+    }
+
+    .list-tile-item::before {
+      content: "• ";
+      opacity: 0.5;
+    }
+
+    .list-tile-add {
+      opacity: 0.4;
+      font-size: 13px;
+      padding-top: 8px;
+    }
+
+    /* Notes */
+    .block-notes { background: var(--notes); }
+
+    .notes-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .note-pill {
+      background: rgba(255,255,255,0.2);
+      padding: 14px 20px;
+      border-radius: 14px;
+      font-size: 15px;
+    }
+
+    .note-add {
+      background: transparent;
+      border: 2px dashed rgba(255,255,255,0.35);
+    }
+
+    /* Done */
+    .block-done { background: var(--done); }
+
+    .done-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .done-pill {
+      background: rgba(255,255,255,0.12);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      text-decoration: line-through;
+      opacity: 0.65;
+    }
+
+    /* Later */
+    .later-block {
+      background: rgba(0,0,0,0.06);
+      border-radius: 16px;
+      padding: 18px;
+      text-align: center;
+      color: #57534e;
+      font-weight: 600;
+    }
+
+    .later-block strong {
+      font-size: 22px;
+      color: #1c1917;
+    }
+
+    /* Dark mode adjustments */
+    body.bg-charcoal .logo-text { color: #fafaf9; }
+    body.bg-charcoal .later-block { background: rgba(255,255,255,0.08); color: #a8a29e; }
+    body.bg-charcoal .later-block strong { color: #fafaf9; }
+
+    /* Responsive */
+    @media (min-width: 640px) {
+      .grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .block-lists,
+      .block-done,
+      .later-block {
+        grid-column: span 2;
+      }
+      
+      .lists-row {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    @media (min-width: 1000px) {
+      body { padding: 24px; }
+      
+      .grid {
+        grid-template-columns: repeat(12, 1fr);
+        gap: 16px;
+        max-width: 1100px;
+        margin: 0 auto;
+      }
+      
+      .header {
+        max-width: 1100px;
+        margin: 0 auto 20px;
+      }
+      
+      .block-pinned { grid-column: span 4; }
+      .block-today { grid-column: span 5; }
+      .block-coming { grid-column: span 3; }
+      .block-lists { grid-column: span 7; }
+      .block-notes { grid-column: span 5; }
+      .block-done { grid-column: span 12; }
+      .later-block { grid-column: span 12; }
+    }
+  </style>
+</head>
+<body class="bg-cream">
+  <header class="header">
+    <div class="logo">
+      <span class="logo-icon">
+        <svg viewBox="0 25 285 210" xmlns="http://www.w3.org/2000/svg">
+          <path d="m 259.58,104.469 c -9.3,9.796 -11.044,15.206 -15.02,19.756 -3.595,4.113 -3.323,12.497 -18.395,20.686 -6.12,3.686 -28.07,7.952 -41.097,18.333 -26.623,21.216 -76.936,46.2 -93.387,42.991 -35.45,1.444 -61.273,3.193 -64.036,1.886 -2.12,0.637 -6.604,-0.818 -16.668,-1.757 l 13.361,15.445 34.85,6.51 h 57.446 l 31.787,-9.574 27.191,-15.702 27.574,-14.936 32.553,-13.404 23.36,-16.085 18,-22.978 -2.121,-19.854 z" fill="#ffffff" transform="matrix(-1,0,0,1,285.417,0)"/>
+          <path d="m189.73 50.904 3.775.952c3.613.91 12.94 5.195 15.117 6.946.78.627-.129 2.215-3.663 6.407-7.166 8.502-18.316 23.581-22.896 30.966-10.327 16.65-14.29 27.465-16.547 45.156l-1.497 11.731-7.6 8.265c-5.35 5.817-9.554 9.468-14.19 12.325-7.792 4.804-23.2 11.282-36.651 15.41-5.31 1.63-9.944 2.98-10.297 3.003-.354.021-2.68-1.112-5.17-2.518-6.59-3.719-8.8-4.205-22.735-4.998-13.905-.792-20.147-2.345-28.538-7.102l-4.824-2.734 9.442-3.985c8.563-3.614 20.517-8.01 21.781-8.01.277 0 .962 2.883 1.523 6.409 1.086 6.826 2.033 8.703 4.395 8.703 2.747 0 3.52-1.974 2.445-6.244-.54-2.142-.836-4.038-.662-4.212.175-.174 2.584 1.408 5.355 3.513 6.769 5.144 12.82 7.943 14.837 6.864 2.007-1.074 1.97-3.869-.06-4.513-2.036-.646-10.561-6.315-14.25-9.476l-2.83-2.425 5.026.362c6.882.498 13.018-1.45 20.664-6.564 15.392-10.295 29.723-31.744 31.301-46.846 1.255-12.003-7.02-25.764-17.849-29.68-1.56-.564-2.837-1.334-2.837-1.712 0-1.154 3.875-6.838 5.998-8.8 4.945-4.569 11.862-5.36 30.75-3.516 16.648 1.626 28.541-1.531 36.77-9.76z" fill="#16acf4" transform="matrix(-1 0 0 1 285.417 0)"/>
+          <path d="m214.944 62.863 3.639 2.614 3.638 2.612-1.7 2.386c-2.742 3.85-7.268 14.238-9.318 21.387-2.673 9.322-2.71 28.36-.072 36.272l1.767 5.296-1.817.689c-1 .379-7.861 2.619-15.25 4.976-7.386 2.357-15.696 5.396-18.468 6.753h-.002c-6.036 2.957-6.298 3.004-6.293 1.127.006-2.86 2.575-17.486 3.87-22.039 3.722-13.086 17.082-34.548 34.61-55.593zM110.763 83.109c1.842-.029 6.984 3.056 9.627 5.864 6.804 7.226 8.586 16.506 5.097 26.538-4.94 14.204-19.455 31.412-31.565 37.417-4.94 2.45-7.168 3.072-10.965 3.072-2.62 0-5.412-.474-6.206-1.054-1.331-.974-1.257-1.277.978-3.954l2.421-2.9 2.705 2.276c3.093 2.603 5.548 2.883 7.755.885 2.514-2.275 1.903-5.245-1.779-8.645l-3.316-3.06 1.845-2.242 1.848-2.24 4.68 2.946c3.995 2.514 5.01 2.822 6.904 2.101 2.348-.892 3.609-3.878 2.763-6.542-.272-.86-2.552-2.81-5.065-4.332l-4.57-2.77 1.318-2.762 1.319-2.763 5.058 2.055c5.786 2.35 8.597 2.062 10.004-1.025 1.544-3.39-.152-5.738-5.754-7.964-2.697-1.072-4.986-2-5.087-2.061s.232-1.46.739-3.111l.921-3.002 4.299 1.145c2.364.63 5.121 1.15 6.127 1.155 2.541.014 4.468-2.173 4.468-5.07 0-2.94-2.034-4.404-8.046-5.79l-4.268-.985 2.266-6.419c1.246-3.53 2.666-6.552 3.155-6.715q.14-.045.324-.048z" fill="#16acf4" transform="matrix(-1 0 0 1 285.417 0)"/>
+          <path d="m212.99 133.555 2.546 5.441c1.4 2.992 2.546 5.737 2.546 6.102 0 .364-1.04 1.05-2.31 1.521-23.13 8.592-37.045 14.867-41.579 18.749-1.49 1.275-2.992 2.332-3.338 2.352-.733.04-.839-14.635-.125-17.296.67-2.5 9.027-6.193 27.277-12.055zm-49.062 19.608.576 10.386.577 10.385-3.841 3.417c-13.166 11.715-31.2 20.383-48.106 23.12-3.463.56-6.864 1.13-7.556 1.265-4.356.853-5.684.414-6.784-2.242-.611-1.475-2.213-3.936-3.558-5.467-1.344-1.532-1.903-2.578-1.241-2.324 1.715.658 19.43-4.862 31.444-9.798 1.214-.499 2.295-.976 3.409-1.457l9.233-3.064 5.745-4.845c4.454-3.037 8.275-6.509 12.546-11.156z" fill="#16acf4" transform="matrix(-1 0 0 1 285.417 0)"/>
+          <path d="M12.183 199.718c28.443-.328 59.405-.215 75.377-5.025.864.64 1.737 1.234 2.563 2.06 6.31 6.31 6.13 6.402-15.61 7.917-5.771.402-18.428.6-28.125.44-18.372-.302-26.425.67-33.767-2.577-.814-.36.065-2.54-.438-2.815z" fill="#16acf4" transform="matrix(-1 0 0 1 285.417 0)"/>
+          <path d="M28.398 177.83c.376 0 3.066 1.488 5.978 3.306 8.839 5.517 16.822 7.712 30.903 8.498 12.674.707 17.995 1.888 22.28 5.059l-75.376 5.025c-1.693-.928-2.317-1.704-2.317-4.019 0-4.311 3.561-8.543 11.605-13.794 3.434-2.241 6.55-4.075 6.927-4.075zM218.142 130.482c12.103-12.098 21.132-25.335 27.812-38.749 1.48 1.786 3.025 3.635 3.86 4.852 5.148 7.514 5.39 6.027-3.003 18.278-7.106 10.372-16.224 21.834-20.024 25.17-2.941 2.582-3.041 2.606-4.176.986-1.186-1.694-2.907-6.024-4.47-10.537z" fill="#16acf4" transform="matrix(-1 0 0 1 285.417 0)"/>
+          <path d="M226.79 72.041c1.379-.003 12.53 11.686 19.164 19.692l-27.812 38.75c-1.09-3.15-2.186-6.464-2.624-8.72-1.654-8.514-.66-23.528 2.097-31.668 2.68-7.917 7.831-18.052 9.176-18.054z" fill="#16acf4" transform="matrix(-1 0 0 1 285.417 0)"/>
+          <path d="m 143.62,223.641 c 8.036,-3.508 14.56,-7.356 32.246,-19.016 16.595,-10.941 24.97,-15.09 43.054,-21.326 12.302,-4.242 26.46,-10.392 27.685,-12.026 0.242,-0.324 2.708,-2.257 5.478,-4.297 13.373,-9.843 22.931,-20.661 26.365,-29.84 4.788,-12.796 -0.237,-24.132 -14.481,-32.669 -3.556,-2.13 -6.021,-4.517 -8.945,-8.657 -9.47,-13.408 -22.204,-26.154 -35.682,-35.713 -7.443,-5.279 -20.732,-11.448 -28.452,-13.209 -3.15,-0.718 -3.42,-0.598 -7.612,3.366 -8.85,8.37 -17.887,10.686 -35.658,9.135 -21.064,-1.838 -27.926,-0.3 -34.887,7.822 -5.018,5.854 -12.349,23.69 -11.088,26.975 2.65909,3.055476 2.953,1.3 4.685,-4.3 2.491,-8.058 2.601,-8.177 6.45,-6.906 4.48,1.478 10.737,7.615 12.905,12.655 3.714,8.631 3,15.925 -2.657,27.16 -11.174,22.19 -32.247,37.604 -45.452,33.246 -3.624,-1.196 -3.73,-1.792 -0.96,-5.422 2.517,-3.301 2.545,-3.555 0.509,-4.644 -1.37,-0.734 -2.16,-0.07 -5.724,4.814 l -4.133,5.666 -10.019,3.649 c -22.18,8.078 -38.237,16.506 -46.13,24.212 -7.12,6.952 -7.647,11.92 -2.371,22.331 5.40757,11.15798 15.980264,16.59191 27.395002,19.37745 35.066001,6.35458 72.913948,6.88611 107.478998,-2.38345 z" fill="#16acf4" transform="matrix(-1,0,0,1,285.417,0)"/>
+          <path d="M190.996 48.716c-3.122-7.913.488-12.205 8.142-14.32" fill="#16acf4" stroke="#16acf4" stroke-width="7.21" stroke-linecap="round" transform="matrix(-1 0 0 1 285.417 0)"/>
+        </svg>
+      </span>
+      <span class="logo-text">JogFile</span>
+    </div>
+    <button class="btn-add">+ Add</button>
+  </header>
+
+  <div class="grid">
+    <div class="block block-pinned">
+      <div class="block-head">
+        <h2>Pinned</h2>
+        <span class="num">1</span>
+      </div>
+      <div class="pinned-item">Buy a DVD/Blu-Ray player</div>
+    </div>
+
+    <div class="block block-today">
+      <div class="block-head">
+        <h2>Today</h2>
+        <span class="num">1</span>
+      </div>
+      <div class="task">
+        <div class="task-check"></div>
+        <span class="task-text">Pick up prescriptions</span>
+      </div>
+    </div>
+
+    <div class="block block-coming">
+      <div class="block-head">
+        <h2>Coming Up</h2>
+        <span class="num">3</span>
+      </div>
+      <div class="coming-row">
+        <div class="coming-label">Wed 20</div>
+        <div class="coming-content"><span class="time">3p</span> Counseling</div>
+      </div>
+      <div class="coming-row">
+        <div class="coming-label">Thu 28</div>
+        <div class="coming-content">Schedule Jack's appt</div>
+      </div>
+      <div class="coming-row">
+        <div class="coming-label">Fri 29</div>
+        <div class="coming-content"><span class="time">8:30a</span> Dentist</div>
+      </div>
+    </div>
+
+    <div class="block block-lists">
+      <div class="block-head">
+        <h2>Quick Lists</h2>
+        <span class="num">4</span>
+      </div>
+      <div class="lists-row">
+        <div class="list-tile">
+          <div class="list-tile-head">Costco</div>
+          <div class="list-tile-body">
+            <div class="list-tile-item">Gauze</div>
+            <div class="list-tile-add">+ add</div>
+          </div>
+        </div>
+        <div class="list-tile">
+          <div class="list-tile-head">Target</div>
+          <div class="list-tile-body">
+            <div class="list-tile-item">Use gift card</div>
+            <div class="list-tile-add">+ add</div>
+          </div>
+        </div>
+        <div class="list-tile">
+          <div class="list-tile-head">Grocery</div>
+          <div class="list-tile-body">
+            <div class="list-tile-item">Oregano</div>
+            <div class="list-tile-item">Peppercorns</div>
+            <div class="list-tile-add">+ add</div>
+          </div>
+        </div>
+        <div class="list-tile">
+          <div class="list-tile-head">Hardware</div>
+          <div class="list-tile-body">
+            <div class="list-tile-add">+ add</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="block block-notes">
+      <div class="block-head">
+        <h2>Notes</h2>
+        <span class="num">1</span>
+      </div>
+      <div class="notes-wrap">
+        <div class="note-pill">Pasta salad with avocado and mango</div>
+        <div class="note-pill note-add">+ add</div>
+      </div>
+    </div>
+
+    <div class="block block-done">
+      <div class="block-head">
+        <h2>Completed</h2>
+        <span class="num">10</span>
+      </div>
+      <div class="done-wrap">
+        <div class="done-pill">Leave at 3pm</div>
+        <div class="done-pill">Post DLHM sign-up</div>
+        <div class="done-pill">James medical</div>
+        <div class="done-pill">Car payment</div>
+        <div class="done-pill">GET unit</div>
+        <div class="done-pill">Cancel Lyft Pink</div>
+        <div class="done-pill">Grocery store</div>
+        <div class="done-pill">Credit card</div>
+        <div class="done-pill">Golf picks</div>
+      </div>
+    </div>
+
+    <div class="later-block">
+      <strong>32</strong> items scheduled later →
+    </div>
+  </div>
+
+  <!-- Background Switcher -->
+  <div class="bg-switcher">
+    <div class="bg-switcher-label">Background (by day?)</div>
+    <div class="bg-options">
+      <div class="bg-opt active" style="background: #faf8f5" data-bg="bg-cream" title="Cream (Sun)"></div>
+      <div class="bg-opt" style="background: #f0f9ff" data-bg="bg-sky" title="Sky (Mon)"></div>
+      <div class="bg-opt" style="background: #ecfdf5" data-bg="bg-mint" title="Mint (Tue)"></div>
+      <div class="bg-opt" style="background: #f5f3ff" data-bg="bg-lavender" title="Lavender (Wed)"></div>
+      <div class="bg-opt" style="background: #fff7ed" data-bg="bg-peach" title="Peach (Thu)"></div>
+      <div class="bg-opt" style="background: #fdf2f8" data-bg="bg-blush" title="Blush (Fri)"></div>
+      <div class="bg-opt" style="background: #fefce8" data-bg="bg-sand" title="Sand (Sat)"></div>
+      <div class="bg-opt" style="background: #e2e8f0" data-bg="bg-slate" title="Slate"></div>
+      <div class="bg-opt" style="background: #f5f5f4" data-bg="bg-warmgray" title="Warm Gray"></div>
+      <div class="bg-opt" style="background: #f1f5f9" data-bg="bg-coolgray" title="Cool Gray"></div>
+      <div class="bg-opt" style="background: #ffffff" data-bg="bg-white" title="White"></div>
+      <div class="bg-opt" style="background: #1c1917" data-bg="bg-charcoal" title="Charcoal"></div>
+    </div>
+  </div>
+
+  <script>
+    document.querySelectorAll('.bg-opt').forEach(opt => {
+      opt.addEventListener('click', () => {
+        document.querySelectorAll('.bg-opt').forEach(o => o.classList.remove('active'));
+        opt.classList.add('active');
+        document.body.className = opt.dataset.bg;
+      });
+    });
+  </script>
+</body>
+</html>

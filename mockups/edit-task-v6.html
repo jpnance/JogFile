@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JogFile — Edit Task</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root {
+      --today: #0891b2;
+      --danger: #dc2626;
+      --success: #059669;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      background: #f0f9ff;
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+      font-size: 14px;
+      line-height: 1.35;
+      min-height: 100vh;
+    }
+
+    /* Header */
+    .header {
+      background: white;
+      padding: 14px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #e5e7eb;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-back {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--today);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .header-back i {
+      font-size: 18px;
+    }
+
+    .header-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #0f172a;
+    }
+
+    .header-spacer {
+      width: 80px;
+    }
+
+    /* Main content */
+    .main {
+      padding: 0;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* Form card */
+    .form-card {
+      background: var(--today);
+      padding: 24px 20px;
+      color: white;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      opacity: 0.85;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 14px 16px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      background: rgba(255,255,255,0.2);
+      color: white;
+    }
+
+    .form-input::placeholder {
+      color: rgba(255,255,255,0.5);
+    }
+
+    .form-input:focus {
+      outline: none;
+      background: rgba(255,255,255,0.28);
+    }
+
+    .form-input-short {
+      width: auto;
+      min-width: 180px;
+    }
+
+    .form-hint {
+      font-size: 12px;
+      opacity: 0.7;
+      margin-top: 6px;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 16px;
+    }
+
+    .form-row .form-group {
+      flex: 1;
+    }
+
+    /* Checkbox */
+    .form-check {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .form-check-input {
+      width: 22px;
+      height: 22px;
+      margin-top: 2px;
+      accent-color: white;
+    }
+
+    .form-check-label {
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    .form-check-hint {
+      font-size: 12px;
+      opacity: 0.7;
+      margin-top: 4px;
+    }
+
+    /* Generated from badge */
+    .generated-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.2);
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      margin-bottom: 20px;
+    }
+
+    .generated-badge a {
+      color: white;
+      font-weight: 500;
+    }
+
+    /* Action buttons */
+    .actions {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .actions-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn {
+      padding: 14px 24px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+    }
+
+    .btn-primary {
+      background: var(--today);
+      color: white;
+    }
+
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #374151;
+    }
+
+    .btn-success {
+      background: var(--success);
+      color: white;
+    }
+
+    .btn-danger {
+      background: transparent;
+      color: var(--danger);
+      border: 2px solid var(--danger);
+    }
+
+    /* Desktop */
+    @media (min-width: 600px) {
+      .main {
+        padding: 32px 20px;
+      }
+
+      .form-card {
+        border-radius: 16px;
+        padding: 32px;
+      }
+
+      .actions {
+        padding: 20px 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <a href="#" class="header-back">
+      <i class="bi bi-arrow-left"></i>
+      <span>Back</span>
+    </a>
+    <span class="header-title">Edit Task</span>
+    <div class="header-spacer"></div>
+  </header>
+
+  <main class="main">
+    <div class="form-card">
+      <div class="generated-badge">
+        <i class="bi bi-arrow-repeat"></i>
+        Generated from <a href="#">Weekly Review</a>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Title</label>
+        <input type="text" class="form-input" value="Pick up prescriptions">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <input type="text" class="form-input" placeholder="Optional notes...">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Quick Action URL</label>
+        <input type="url" class="form-input" placeholder="https://...">
+        <div class="form-hint">Clicking the task will open this URL</div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Scheduled For</label>
+          <input type="date" class="form-input" value="2026-05-20">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Time (optional)</label>
+          <input type="time" class="form-input" value="15:00">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="form-check">
+          <input type="checkbox" class="form-check-input" id="pinned">
+          <div>
+            <label class="form-check-label" for="pinned">Pinned</label>
+            <div class="form-check-hint">Pinned tasks stay at the top of the home screen</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <div class="actions-row">
+        <button class="btn btn-primary">Save Changes</button>
+        <a href="#" class="btn btn-secondary">Cancel</a>
+      </div>
+      <div class="actions-row">
+        <button class="btn btn-success">Mark Complete</button>
+        <button class="btn btn-danger">Archive</button>
+      </div>
+    </div>
+  </main>
+</body>
+</html>
