@@ -445,7 +445,7 @@ body {
 
 .list-card {
 	flex-shrink: 0;
-	width: 160px;
+	width: 66.666%;
 	background: rgba(255,255,255,0.18);
 	border-radius: var(--jf-radius-sm);
 	overflow: hidden;
@@ -510,7 +510,7 @@ body {
 	}
 	
 	.list-card {
-		flex: 0 0 calc(25% - 9px);
+		flex: 0 0 calc(33.333% - 8px);
 	}
 }
 
