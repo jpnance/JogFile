@@ -1,74 +1,50 @@
 extends layout
 
 block content
-	main.container.py-4
-		.row.justify-content-center
-			.col-12.col-lg-10.col-xl-8
-				a.nav-link-secondary.mb-3(href="/birthdays")
-					i.bi.bi-arrow-left.me-1
-					| Back to Birthdays
+	.form-page
+		header.form-header
+			a.form-header-back(href="/birthdays")
+				i.bi.bi-arrow-left
+				span Back
+			span.form-header-title= person ? 'Edit Birthday' : 'Add Birthday'
+			.form-header-spacer
 
-				.page-header
-					if person
-						h1 Edit Birthday
-					else
-						h1 Add Birthday
+		main.form-main
+			.form-card(style="background: var(--jf-birthday)")
+				form#editForm(method="POST" action=person ? `/birthdays/${person._id}/edit` : '/birthdays')
+					.form-group
+						label.form-label Name
+						input.form-input(type="text" name="name" value=(person ? person.name : '') placeholder="e.g., Mom, David, Jane" required autofocus)
 
-				.card
-					.card-body
-						form(method="POST" action=person ? `/birthdays/${person._id}/edit` : '/birthdays')
-							.mb-3
-								label.form-label(for="name") Name
-								input.form-control#name(
-									type="text"
-									name="name"
-									value=(person ? person.name : '')
-									placeholder="e.g., Mom, David, Jane"
-									required
-									autofocus
-								)
+					.form-row
+						.form-group
+							label.form-label Month
+							select.form-input(name="birthMonth" required)
+								option(value="" disabled selected=!person) Select month
+								- var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+								each month, i in months
+									option(value=i+1 selected=(person && person.birthMonth === i+1))= month
+						.form-group
+							label.form-label Day
+							select.form-input(name="birthDay" required)
+								option(value="" disabled selected=!person) Day
+								- for (var d = 1; d <= 31; d++)
+									option(value=d selected=(person && person.birthDay === d))= d
 
-							.row.mb-3
-								.col-6
-									label.form-label(for="birthMonth") Month
-									select.form-select#birthMonth(name="birthMonth" required)
-										option(value="" disabled selected=!person) Select month
-										- var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-										each month, i in months
-											option(value=i+1 selected=(person && person.birthMonth === i+1))= month
+					.form-group
+						label.form-label Year (optional)
+						input.form-input(type="number" name="birthYear" value=(person && person.birthYear ? person.birthYear : '') placeholder="e.g., 1985" min="1900" max="2030" style="width: 140px")
+						.form-hint If you add a year, we'll show their age.
 
-								.col-6
-									label.form-label(for="birthDay") Day
-									select.form-select#birthDay(name="birthDay" required)
-										option(value="" disabled selected=!person) Day
-										- for (var d = 1; d <= 31; d++)
-											option(value=d selected=(person && person.birthDay === d))= d
+					.form-group
+						label.form-label Notes (optional)
+						textarea.form-input(name="notes" rows="2" placeholder="Gift ideas, etc." style="resize: vertical")= person ? person.notes : ''
 
-							.mb-3
-								label.form-label(for="birthYear") Year (optional)
-								input.form-control#birthYear(
-									type="number"
-									name="birthYear"
-									value=(person && person.birthYear ? person.birthYear : '')
-									placeholder="e.g., 1985"
-									min="1900"
-									max="2030"
-									style="width: 8rem"
-								)
-								.form-text If you add a year, we'll show their age.
-
-							.mb-3
-								label.form-label(for="notes") Notes (optional)
-								textarea.form-control#notes(
-									name="notes"
-									rows="2"
-									placeholder="Gift ideas, etc."
-								)= person ? person.notes : ''
-
-							.d-flex.gap-2
-								button.btn.btn-birthday(type="submit")
-									if person
-										| Save Changes
-									else
-										| Add Birthday
-								a.btn.btn-outline-secondary(href="/birthdays") Cancel
+			.form-actions
+				.form-actions-row
+					button.btn(type="submit" form="editForm" style="background: var(--jf-birthday); color: white")= person ? 'Save Changes' : 'Add Birthday'
+					a.btn.btn-secondary(href="/birthdays") Cancel
+				if person
+					.form-actions-row
+						form(method="POST" action=`/birthdays/${person._id}/delete` onsubmit="return confirm('Remove this birthday?')" style="flex: 1; display: flex")
+							button.btn.btn-danger(type="submit") Delete

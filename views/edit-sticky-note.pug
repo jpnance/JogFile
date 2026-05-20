@@ -1,33 +1,25 @@
 extends layout
 
 block content
-	main.container.py-4
-		.row.justify-content-center
-			.col-12.col-lg-10.col-xl-8
-				a.nav-link-secondary.mb-3(href="/")
-					i.bi.bi-arrow-left.me-1
-					| Back to Today
+	.form-page
+		header.form-header
+			a.form-header-back(href="/")
+				i.bi.bi-arrow-left
+				span Back
+			span.form-header-title Edit Sticky Note
+			.form-header-spacer
 
-				.card
-					.card-body
-						h4.mb-4 Edit Sticky Note
+		main.form-main
+			.form-card(style="background: var(--jf-notes)")
+				form#editForm(method="POST" action=`/sticky-notes/${stickyNote._id}/edit`)
+					.form-group
+						label.form-label Note
+						input.form-input(type="text" name="text" value=stickyNote.text required autofocus)
 
-						form(method="POST" action=`/sticky-notes/${stickyNote._id}/edit`)
-							.mb-3
-								label.form-label(for="text") Note
-								input.form-control#text(
-									type="text"
-									name="text"
-									value=stickyNote.text
-									required
-									autofocus
-								)
-
-							.d-flex.gap-2
-								button.btn.btn-warning(type="submit") Save
-								a.btn.btn-outline-secondary(href="/") Cancel
-
-				.card.mt-3
-					.card-body
-						form(method="POST" action=`/sticky-notes/${stickyNote._id}/delete` onsubmit="return confirm('Delete this sticky note?')")
-							button.btn.btn-outline-danger(type="submit") Delete Note
+			.form-actions
+				.form-actions-row
+					button.btn(type="submit" form="editForm" style="background: var(--jf-notes); color: white") Save
+					a.btn.btn-secondary(href="/") Cancel
+				.form-actions-row
+					form(method="POST" action=`/sticky-notes/${stickyNote._id}/delete` onsubmit="return confirm('Delete this sticky note?')" style="flex: 1; display: flex")
+						button.btn.btn-danger(type="submit") Delete

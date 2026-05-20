@@ -107,6 +107,81 @@ app.post('/logout', (req, res) => {
 	res.redirect('/login');
 });
 
+// Later page - shows items scheduled beyond the 7-day horizon
+app.get('/later', requireLogin, async (req, res) => {
+	const { start: todayStart } = getTodayRange();
+	const logicalTodayDate = new Date(getLogicalToday() + 'T12:00:00');
+	
+	const laterDaysStart = new Date(todayStart);
+	laterDaysStart.setDate(laterDaysStart.getDate() + 7);
+	
+	const laterTasks = await Task.find({
+		scheduledFor: { $gte: laterDaysStart },
+		status: 'pending'
+	}).sort({ scheduledFor: 1, position: 1 });
+	
+	const laterTasksByYmd = new Map();
+	for (const t of laterTasks) {
+		const ymd = getPacificYmd(t.scheduledFor);
+		if (!laterTasksByYmd.has(ymd)) laterTasksByYmd.set(ymd, []);
+		laterTasksByYmd.get(ymd).push(t);
+	}
+	
+	const allPeople = await Person.find();
+	const allHolidays = await Holiday.find();
+	
+	const laterDays = [];
+	const laterHorizon = 60;
+	for (let offset = 7; offset <= laterHorizon; offset++) {
+		const dayDate = new Date(todayStart);
+		dayDate.setDate(dayDate.getDate() + offset);
+		const dayYmd = getPacificYmd(dayDate);
+		
+		const items = [];
+		
+		for (const person of allPeople) {
+			const nextBirthday = person.getNextBirthday();
+			const diffTime = nextBirthday.getTime() - logicalTodayDate.getTime();
+			const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+			if (diffDays !== offset) continue;
+			const hasNotes = Boolean(person.notes && String(person.notes).trim() !== '');
+			items.push({
+				kind: 'birthday',
+				person,
+				hasNotes,
+				turningAge: person.getTurningAge(nextBirthday)
+			});
+		}
+		
+		for (const holiday of allHolidays) {
+			const nextOcc = holiday.getNextOccurrence();
+			const diffTime = nextOcc.getTime() - logicalTodayDate.getTime();
+			const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+			if (diffDays !== offset) continue;
+			const hasNotes = Boolean(holiday.notes && String(holiday.notes).trim() !== '');
+			items.push({ kind: 'holiday', holiday, hasNotes });
+		}
+		
+		const dayTasks = laterTasksByYmd.get(dayYmd) || [];
+		for (const task of dayTasks) {
+			items.push({ kind: 'task', task });
+		}
+		
+		if (items.length > 0) {
+			laterDays.push({
+				offset,
+				label: formatComingUpDayLabel(offset, dayDate),
+				items
+			});
+		}
+	}
+	
+	res.render('later', {
+		laterDays,
+		formatTaskTimeDisplay
+	});
+});
+
 // Advancement routes (birthdays and recurring only - tasks auto-roll to today)
 app.get('/advance', requireLogin, async (req, res) => {
 	const recurringPrompts = await getTodaysRecurringPrompts();
@@ -314,9 +389,9 @@ app.get('/', requireLogin, async (req, res) => {
 		});
 	}
 
-	// Later days (day 4+ onward) — same structure as comingUpDays but collapsed
+	// Later days (day 7+ onward) — same structure as comingUpDays but collapsed
 	const laterDaysStart = new Date(todayStart);
-	laterDaysStart.setDate(laterDaysStart.getDate() + 4);
+	laterDaysStart.setDate(laterDaysStart.getDate() + 7);
 
 	const laterTasks = await Task.find({
 		scheduledFor: { $gte: laterDaysStart },
@@ -390,9 +465,9 @@ app.get('/', requireLogin, async (req, res) => {
 	}
 	todayHolidays.sort((a, b) => String(a.holiday.name).localeCompare(String(b.holiday.name)));
 
-	/** Next 3 days (tomorrow through day after tomorrow): birthdays + holidays + dated tasks in the grid. */
+	/** Next 6 days (tomorrow through day 6): birthdays + holidays + dated tasks in the grid. */
 	const comingUpDays = [];
-	for (let offset = 1; offset < 4; offset++) {
+	for (let offset = 1; offset < 7; offset++) {
 		const dayDate = new Date(todayStart);
 		dayDate.setDate(dayDate.getDate() + offset);
 		const dayYmd = getPacificYmd(dayDate);
@@ -464,10 +539,10 @@ app.get('/', requireLogin, async (req, res) => {
 		});
 	}
 
-	/** Later days (offset 4+): same structure as comingUpDays, collapsed by default. */
+	/** Later days (offset 7+): same structure as comingUpDays, collapsed by default. */
 	const laterDays = [];
 	const laterHorizon = 60;
-	for (let offset = 4; offset <= laterHorizon; offset++) {
+	for (let offset = 7; offset <= laterHorizon; offset++) {
 		const dayDate = new Date(todayStart);
 		dayDate.setDate(dayDate.getDate() + offset);
 		const dayYmd = getPacificYmd(dayDate);

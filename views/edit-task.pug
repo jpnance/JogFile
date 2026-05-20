@@ -1,74 +1,72 @@
 extends layout
 
 block content
-	main.container.py-4
-		.row.justify-content-center
-			.col-12.col-lg-10.col-xl-8
-				a.nav-link-secondary.mb-3(href="/")
-					i.bi.bi-arrow-left.me-1
-					| Back to Today
+	.form-page
+		header.form-header
+			a.form-header-back(href="/")
+				i.bi.bi-arrow-left
+				span Back
+			span.form-header-title Edit Task
+			.form-header-spacer
 
-				.card
-					.card-body
-						h4.mb-4 Edit Task
+		main.form-main
+			.form-card.form-card-today
+				if task.generatedFrom
+					div(style="display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.2); padding: 10px 14px; border-radius: 10px; font-size: 13px; margin-bottom: 20px")
+						i.bi.bi-arrow-repeat
+						| Generated from 
+						a(href=`/recurring/${task.generatedFrom._id}/edit` style="color: white; font-weight: 500")= task.generatedFrom.title
 
-						if task.generatedFrom
-							.alert.alert-light.mb-4
-								i.bi.bi-arrow-repeat.me-2
-								| Generated from 
-								a(href=`/recurring/${task.generatedFrom._id}/edit`)= task.generatedFrom.title
+				form#editForm(method="POST" action=`/tasks/${task._id}/edit`)
+					.form-group
+						label.form-label Title
+						input.form-input(type="text" name="title" value=task.title required)
 
-						form(method="POST" action=`/tasks/${task._id}/edit`)
-							.mb-3
-								label.form-label(for="title") Title
-								input.form-control#title(type="text" name="title" value=task.title required)
+					.form-group
+						label.form-label Description
+						input.form-input(type="text" name="description" value=task.description placeholder="Optional notes...")
 
-							.mb-3
-								label.form-label(for="description") Description
-								input.form-control#description(type="text" name="description" value=task.description placeholder="Optional notes...")
+					.form-group
+						label.form-label Quick Action URL
+						input.form-input(type="url" name="url" value=task.url placeholder="https://...")
+						.form-hint Clicking the task will open this URL
 
-							.mb-3
-								label.form-label(for="url") Quick Action URL
-								input.form-control#url(type="url" name="url" value=task.url placeholder="https://...")
-								.form-text Clicking the task will open this URL
+					.form-row
+						.form-group
+							label.form-label Scheduled For
+							- var dateValue = task.scheduledFor ? task.scheduledFor.toLocaleDateString('en-CA', { timeZone: 'America/Los_Angeles' }) : ''
+							input.form-input(type="date" name="scheduledFor" value=dateValue required)
+						.form-group#editTimeWrap(class=!task.scheduledFor ? 'd-none' : '')
+							label.form-label Time (optional)
+							input.form-input(type="time" name="timeOfDay" value=(task.timeOfDay || ''))
 
-							.mb-3
-								label.form-label(for="scheduledFor") Scheduled For
-								- var dateValue = task.scheduledFor ? task.scheduledFor.toLocaleDateString('en-CA', { timeZone: 'America/Los_Angeles' }) : ''
-								input.form-control.w-auto#scheduledFor(type="date" name="scheduledFor" value=dateValue required)
-
-							.mb-4#editTimeWrap(class=!task.scheduledFor ? 'd-none' : '')
-								label.form-label(for="timeOfDay") Time (optional)
-								input.form-control.w-auto#timeOfDay(type="time" name="timeOfDay" value=(task.timeOfDay || ''))
-								.form-text Appointment or reminder time for that day. Cleared when there is no date.
-
-							.mb-4.form-check
-								input.form-check-input#pinned(type="checkbox" name="pinned" checked=task.pinned)
+					.form-group
+						.form-check
+							input.form-check-input(type="checkbox" name="pinned" id="pinned" checked=task.pinned)
+							div
 								label.form-check-label(for="pinned") Pinned
-								.form-text.mt-1 Pinned tasks stay at the top of the home screen.
+								.form-check-hint Pinned tasks stay at the top of the home screen
 
-							.d-flex.gap-2
-								button.btn.btn-primary(type="submit") Save Changes
-								a.btn.btn-outline-secondary(href="/") Cancel
+			.form-actions
+				.form-actions-row
+					button.btn.btn-primary(type="submit" form="editForm") Save Changes
+					a.btn.btn-secondary(href="/") Cancel
+				.form-actions-row
+					form(method="POST" action=`/tasks/${task._id}/complete` style="flex: 1; display: flex")
+						button.btn.btn-success(type="submit") Mark Complete
+					form(method="POST" action=`/tasks/${task._id}/archive` onsubmit="return confirm('Archive this task? Archived tasks cannot be recovered.')" style="flex: 0 0 auto; display: flex")
+						button.btn.btn-danger(type="submit") Archive
 
-				script.
-					(function () {
-						const dateInput = document.getElementById('scheduledFor');
-						const timeWrap = document.getElementById('editTimeWrap');
-						if (!dateInput || !timeWrap) return;
-						function sync() {
-							const hasDate = dateInput.value && String(dateInput.value).trim() !== '';
-							timeWrap.classList.toggle('d-none', !hasDate);
-						}
-						dateInput.addEventListener('change', sync);
-						dateInput.addEventListener('input', sync);
-						sync();
-					})();
-
-				.card.mt-3
-					.card-body
-						.d-flex.gap-2.justify-content-between
-							form(method="POST" action=`/tasks/${task._id}/complete`)
-								button.btn.btn-success(type="submit") Mark Complete
-							form(method="POST" action=`/tasks/${task._id}/archive` onsubmit="return confirm('Archive this task? Archived tasks cannot be recovered.')")
-								button.btn.btn-outline-danger(type="submit") Archive
+	script.
+		(function () {
+			const dateInput = document.querySelector('input[name="scheduledFor"]');
+			const timeWrap = document.getElementById('editTimeWrap');
+			if (!dateInput || !timeWrap) return;
+			function sync() {
+				const hasDate = dateInput.value && String(dateInput.value).trim() !== '';
+				timeWrap.classList.toggle('d-none', !hasDate);
+			}
+			dateInput.addEventListener('change', sync);
+			dateInput.addEventListener('input', sync);
+			sync();
+		})();

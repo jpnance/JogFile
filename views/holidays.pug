@@ -1,67 +1,69 @@
 extends layout
 
-mixin holidayItem(holiday, options)
-	- var daysUntil = options && options.daysUntil
-	- var isToday = options && options.isToday
-	.holiday-item
-		.holiday-item-content
-			.holiday-name= holiday.name
-			.holiday-date
-				if isToday
-					span.text-holiday-today Today!
-				else if daysUntil === 1
-					| Tomorrow
-				else if daysUntil !== undefined
-					| in #{daysUntil} days
-				if daysUntil !== undefined
-					|  · 
-				= holiday.getHolidayString()
-			if holiday.notes
-				.text-muted.small.mt-1= holiday.notes
-		.holiday-item-actions
-			a.btn.btn-sm.btn-outline-secondary(href=`/holidays/${holiday._id}/edit`) Edit
-			form(method="POST" action=`/holidays/${holiday._id}/delete` onsubmit="return confirm('Remove this holiday?')")
-				button.btn.btn-sm.btn-outline-danger(type="submit") Delete
-
 block content
-	main.container.py-4
-		.row.justify-content-center
-			.col-12.col-lg-10.col-xl-8
-				a.nav-link-secondary.mb-3(href="/")
-					i.bi.bi-arrow-left.me-1
-					| Back to Today
+	.list-page
+		header.list-header
+			a.list-header-back(href="/")
+				i.bi.bi-arrow-left
+				span Back
+			span.list-header-title Holidays
+			a.btn.btn-sm(href="/holidays/new" style="background: var(--jf-holiday); color: white")
+				i.bi.bi-plus
+				|  New
 
-				.page-header
-					h1 Holidays
-					a.btn.btn-holiday.btn-sm(href="/holidays/new") + New
+		main.list-main
+			if totalCount === 0
+				.empty-state(style="color: var(--jf-text-secondary)")
+					.empty-state-icon
+						i.bi.bi-stars
+					.empty-state-text No holidays yet
+					a.btn.btn-primary(href="/holidays/new" style="margin-top: 16px; flex: none; background: var(--jf-holiday)") Add your first
 
-				if totalCount === 0
-					.empty-state
-						.empty-state-icon
-							i.bi.bi-stars
-						p No holidays yet
-						a.btn.btn-holiday(href="/holidays/new") Add your first
-				else
-					if upcoming && upcoming.length > 0
-						.mb-4
-							.section-header.holiday-section-header(data-bs-toggle="collapse" data-bs-target="#holiday-coming-up" aria-expanded="true")
-								span.chevron ▶
-								span.section-title Coming Up
-								span.section-count= upcoming.length
-							.collapse.show(id="holiday-coming-up")
-								.pt-2
-									each item in upcoming
-										+holidayItem(item.holiday, { daysUntil: item.daysUntil, isToday: item.isToday })
+			else
+				//- Coming Up section
+				if upcoming && upcoming.length > 0
+					.list-section(style="background: var(--jf-holiday)")
+						.list-section-header(onclick="this.parentElement.classList.toggle('collapsed')")
+							i.bi.bi-chevron-down.list-section-chevron
+							span.list-section-title Coming Up
+							span.list-section-count= upcoming.length
+						.list-section-content
+							each item in upcoming
+								.list-item
+									.list-item-content
+										.list-item-name= item.holiday.name
+										.list-item-meta
+											if item.isToday
+												span(style="color: #fbbf24; font-weight: 600") Today! 
+												| · 
+											else if item.daysUntil === 1
+												| Tomorrow · 
+											else if item.daysUntil
+												| in #{item.daysUntil} days · 
+											= item.holiday.getHolidayString()
+										if item.holiday.notes
+											div(style="font-size: 12px; opacity: 0.7; margin-top: 4px")= item.holiday.notes
+									.list-item-actions
+										a.list-item-btn.list-item-btn-edit(href=`/holidays/${item.holiday._id}/edit`) Edit
+										form(method="POST" action=`/holidays/${item.holiday._id}/delete` onsubmit="return confirm('Remove this holiday?')" style="display: inline")
+											button.list-item-btn.list-item-btn-delete(type="submit") Delete
 
-					.section-divider
-
-					each group in byMonth
-						.mb-3
-							.section-header.holiday-section-header(data-bs-toggle="collapse" data-bs-target=`#holiday-month-${group.month}` aria-expanded="false")
-								span.chevron ▶
-								span.section-title= group.name
-								span.section-count= group.holidays.length
-							.collapse(id=`holiday-month-${group.month}`)
-								.pt-2
-									each holiday in group.holidays
-										+holidayItem(holiday)
+				//- All Holidays by month
+				each group in byMonth
+					.list-section.list-section-neutral.collapsed
+						.list-section-header(onclick="this.parentElement.classList.toggle('collapsed')")
+							i.bi.bi-chevron-down.list-section-chevron
+							span.list-section-title= group.name
+							span.list-section-count= group.holidays.length
+						.list-section-content
+							each holiday in group.holidays
+								.list-item
+									.list-item-content
+										.list-item-name= holiday.name
+										.list-item-meta= holiday.getHolidayString()
+										if holiday.notes
+											div(style="font-size: 12px; opacity: 0.7; margin-top: 4px")= holiday.notes
+									.list-item-actions
+										a.list-item-btn.list-item-btn-edit(href=`/holidays/${holiday._id}/edit`) Edit
+										form(method="POST" action=`/holidays/${holiday._id}/delete` onsubmit="return confirm('Remove this holiday?')" style="display: inline")
+											button.list-item-btn.list-item-btn-delete(type="submit") Delete

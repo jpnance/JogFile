@@ -1,81 +1,71 @@
 extends layout
 
-mixin scheduleSection(deferAction)
-	.advance-schedule-section
-		.advance-schedule-toggle(onclick="this.nextElementSibling.classList.toggle('show')")
-			i.bi.bi-calendar-plus
-			span Schedule for later
-			i.bi.bi-chevron-down
-		.advance-schedule-content
-			.advance-quick-dates
-				span.advance-quick-date(onclick="setNextMonday(this)") Next Week
-				span.advance-quick-date(onclick="setNextFirstOfMonth(this)") Next Month
-			form.advance-schedule-form(method="POST" action=deferAction)
-				input.form-control(type="date" name="date" required)
-				button.btn.btn-outline-primary(type="submit") Schedule
-
 block content
-	main.container.advance-container
-		- const birthdayCount = todaysBirthdays ? todaysBirthdays.length : 0
-		- const totalItems = recurringPrompts.length + birthdayCount
+	- const birthdayCount = todaysBirthdays ? todaysBirthdays.length : 0
+	- const totalItems = recurringPrompts.length + birthdayCount
+	- const isRecurring = recurringPrompts.length > 0
+	- const isBirthday = !isRecurring && birthdayCount > 0
 
+	main.advance-page(class=isRecurring ? 'advance-page-recurring' : (isBirthday ? 'advance-page-birthday' : ''))
 		if totalItems === 0
-			.advance-card.card
-				.card-body.text-center.py-5
-					.empty-state-icon.mb-3
-						i.bi.bi-stars
-					h4 All caught up!
-					p.text-muted.mb-4 No items to process
-					a.btn.btn-primary(href="/") Go to Today
-		else
-			//- Process recurring prompts first
-			if recurringPrompts.length > 0
-				- const recurring = recurringPrompts[0]
-				.advance-card.card
-					.card-header.advance-header-recurring
-						span Recurring
-					.card-body
-						h4.mb-2= recurring.title
-						if recurring.description
-							p.text-muted.mb-2= recurring.description
-						.mb-3
-							small.text-muted= recurring.getPatternDescription()
+			.advance-empty
+				.advance-empty-icon
+					i.bi.bi-stars
+				.advance-empty-title All caught up!
+				.advance-empty-subtitle No items to process
+				a.btn.btn-primary(href="/") Go to Today
 
-						.advance-primary-actions
-							form(method="POST" action=`/advance/recurring/${recurring._id}/today`)
-								button.btn.btn-primary(type="submit")
-									i.bi.bi-plus-lg
-									|  Today
+		else if isRecurring
+			- const recurring = recurringPrompts[0]
+			.advance-card.advance-card-recurring
+				.advance-body
+					.advance-icon
+						i.bi.bi-arrow-repeat
+					.advance-title= recurring.title
+					if recurring.description
+						.advance-subtitle= recurring.description
+					.advance-pattern= recurring.getPatternDescription()
 
-							form(method="POST" action=`/advance/recurring/${recurring._id}/defer`)
-								input(type="hidden" name="date" value=tomorrowDateStr)
-								button.btn.btn-outline-secondary(type="submit") Tomorrow
+					.advance-actions
+						form(method="POST" action=`/advance/recurring/${recurring._id}/skip`)
+							button.btn.btn-ghost(type="submit") Skip
+						form(method="POST" action=`/advance/recurring/${recurring._id}/today`)
+							button.btn.btn-solid-white(type="submit")
+								i.bi.bi-plus-lg
+								|  Today
+						form(method="POST" action=`/advance/recurring/${recurring._id}/defer`)
+							input(type="hidden" name="date" value=tomorrowDateStr)
+							button.btn.btn-ghost(type="submit") Tomorrow
 
-							form(method="POST" action=`/advance/recurring/${recurring._id}/skip`)
-								button.btn.btn-outline-secondary(type="submit")
-									i.bi.bi-skip-forward
-									|  Skip
+				.advance-schedule
+					.advance-schedule-toggle(onclick="this.nextElementSibling.classList.toggle('show')")
+						i.bi.bi-calendar-plus
+						span Schedule for later
+						i.bi.bi-chevron-down
+					.advance-schedule-content
+						.advance-quick-dates
+							button.advance-quick-date(type="button" onclick="setNextMonday(this)") Next Week
+							button.advance-quick-date(type="button" onclick="setNextFirstOfMonth(this)") Next Month
+						form.advance-schedule-row(method="POST" action=`/advance/recurring/${recurring._id}/defer`)
+							input.advance-schedule-input(type="date" name="date" required)
+							button.advance-schedule-btn(type="submit") Schedule
 
-						+scheduleSection(`/advance/recurring/${recurring._id}/defer`)
+		else if isBirthday
+			- const person = todaysBirthdays[0]
+			- const turningAge = person.getTurningAge(new Date())
+			.advance-card.advance-card-birthday
+				.advance-body
+					.advance-icon
+						i.bi.bi-cake2
+					.advance-title #{person.name}'s Birthday!
+					if turningAge
+						.advance-subtitle Turning #{turningAge} today
+					if person.notes
+						.advance-pattern= person.notes
 
-			//- Then process today's birthdays
-			else if birthdayCount > 0
-				- const person = todaysBirthdays[0]
-				- const turningAge = person.getTurningAge(new Date())
-				.advance-card.card
-					.card-header.advance-header-birthday
-						span Birthday
-					.card-body.text-center
-						.birthday-emoji.mb-3
-							i.bi.bi-cake2
-						h3.mb-2 #{person.name}'s Birthday!
-						if turningAge
-							p.lead.mb-2 Turning #{turningAge} today
-						if person.notes
-							p.text-muted= person.notes
-						.mt-4
-							form(method="POST" action=`/advance/birthday/${person._id}/acknowledge`)
-								button.btn.btn-birthday(type="submit") Got It
+					.advance-actions
+						form(method="POST" action=`/advance/birthday/${person._id}/acknowledge`)
+							button.btn.btn-solid-white(type="submit") Got It
 
 block scripts
 	script.
@@ -85,7 +75,7 @@ block scripts
 			const daysUntilMonday = (8 - dayOfWeek) % 7 || 7;
 			date.setDate(date.getDate() + daysUntilMonday);
 			const dateStr = date.toISOString().split('T')[0];
-			const form = element.closest('.advance-schedule-content').querySelector('.advance-schedule-form');
+			const form = element.closest('.advance-schedule-content').querySelector('form');
 			form.querySelector('input[type="date"]').value = dateStr;
 		}
 
@@ -93,7 +83,6 @@ block scripts
 			const date = new Date();
 			date.setMonth(date.getMonth() + 1, 1);
 			const dateStr = date.toISOString().split('T')[0];
-			const form = element.closest('.advance-schedule-content').querySelector('.advance-schedule-form');
+			const form = element.closest('.advance-schedule-content').querySelector('form');
 			form.querySelector('input[type="date"]').value = dateStr;
 		}
-

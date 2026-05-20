@@ -1,37 +1,26 @@
 extends layout
 
 block content
-	main.container.py-4
-		.row.justify-content-center
-			.col-12.col-lg-10.col-xl-8
-				a.nav-link-secondary.mb-3(href="/")
-					i.bi.bi-arrow-left.me-1
-					| Back to Today
+	.form-page
+		header.form-header
+			a.form-header-back(href="/")
+				i.bi.bi-arrow-left
+				span Back
+			span.form-header-title= quickList ? 'Edit Quick List' : 'New Quick List'
+			.form-header-spacer
 
-				.page-header
-					if quickList
-						h1 Edit Quick List
-					else
-						h1 New Quick List
+		main.form-main
+			.form-card(style="background: var(--jf-lists)")
+				form#editForm(method="POST" action=quickList ? `/quick-lists/${quickList._id}/edit` : '/quick-lists')
+					.form-group
+						label.form-label Name
+						input.form-input(type="text" name="name" value=(quickList ? quickList.name : '') placeholder="e.g., Groceries, Ideas, To call" required autofocus)
 
-				.card
-					.card-body
-						form(method="POST" action=quickList ? `/quick-lists/${quickList._id}/edit` : '/quick-lists')
-							.mb-3
-								label.form-label(for="name") Name
-								input.form-control#name(
-									type="text"
-									name="name"
-									value=(quickList ? quickList.name : '')
-									placeholder="e.g., Groceries, Ideas, To call"
-									required
-									autofocus
-								)
-
-							.d-flex.gap-2
-								button.btn.btn-quick-list(type="submit")
-									if quickList
-										| Save Changes
-									else
-										| Create List
-								a.btn.btn-outline-secondary(href="/") Cancel
+			.form-actions
+				.form-actions-row
+					button.btn(type="submit" form="editForm" style="background: var(--jf-lists); color: white")= quickList ? 'Save Changes' : 'Create List'
+					a.btn.btn-secondary(href="/") Cancel
+				if quickList
+					.form-actions-row
+						form(method="POST" action=`/quick-lists/${quickList._id}/delete` onsubmit="return confirm('Delete this list and all its items?')" style="flex: 1; display: flex")
+							button.btn.btn-danger(type="submit") Delete

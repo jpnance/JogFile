@@ -1,13 +1,11 @@
 extends layout
 
 block content
-	main.login-container
+	.login-page
 		.login-card
-			h1 JogFile
+			.login-title JogFile
 			if error
-				.alert.alert-danger.py-2= error
+				div(style="background: rgba(220,38,38,0.1); border: 1px solid rgba(220,38,38,0.2); color: var(--jf-danger); padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 14px")= error
 			form(method="POST" action="/login")
-				.mb-4
-					label.form-label(for="password") Password
-					input.form-control#password(type="password" name="password" autofocus placeholder="Enter password")
-				button.btn.btn-primary.w-100(type="submit") Log in
+				input.login-input(type="password" name="password" autofocus placeholder="Enter password")
+				button.login-btn(type="submit") Log in

@@ -1,269 +1,256 @@
 extends layout
 
 block content
-	main.container.py-4
-		.row.justify-content-center
-			.col-12.col-lg-10.col-xl-8
-				//- Page header
-				.page-header
-					.d-flex.align-items-center.gap-2
-						img.shoe-logo(src="/images/shoe.svg" alt="")
-						h1 JogFile
-					.d-flex.align-items-center.gap-2
-						//- Manage dropdown
-						.dropdown
-							button.btn.btn-outline-secondary.btn-sm.dropdown-toggle(type="button" data-bs-toggle="dropdown" aria-expanded="false")
-								i.bi.bi-list
-								span.d-none.d-sm-inline  Manage
-							ul.dropdown-menu.dropdown-menu-end
-								li
-									a.dropdown-item(href="/birthdays")
-										i.bi.bi-cake2.me-2
-										| Birthdays
-								li
-									a.dropdown-item(href="/holidays")
-										i.bi.bi-stars.me-2
-										| Holidays
-								li
-									a.dropdown-item(href="/recurring")
-										i.bi.bi-arrow-repeat.me-2
-										| Recurring
-								li
-									a.dropdown-item(href="/chores")
-										i.bi.bi-wrench.me-2
-										| Chores
-								li
-									a.dropdown-item(href="/quick-lists")
-										i.bi.bi-card-list.me-2
-										| Quick Lists
+	//- Site header
+	header.site-header
+		.site-header-inner
+			a.logo(href="/")
+				img.logo-icon(src="/images/shoe.svg" alt="")
+				span.logo-text JogFile
+			.header-actions
+				//- Manage dropdown
+				.dropdown
+					button.dropdown-toggle(type="button" onclick="this.nextElementSibling.classList.toggle('show')")
+						i.bi.bi-list
+						span.d-none.d-sm-inline  Manage
+					.dropdown-menu
+						a.dropdown-item(href="/birthdays")
+							i.bi.bi-cake2
+							| Birthdays
+						a.dropdown-item(href="/holidays")
+							i.bi.bi-stars
+							| Holidays
+						a.dropdown-item(href="/recurring")
+							i.bi.bi-arrow-repeat
+							| Recurring
+						a.dropdown-item(href="/chores")
+							i.bi.bi-wrench
+							| Chores
+						a.dropdown-item(href="/quick-lists")
+							i.bi.bi-card-list
+							| Quick Lists
+				//- Add button
+				button.btn-add-task(type="button")
+					span +
+					span.btn-add-task-text  Add
 
-						//- Add button
-						button.btn.btn-primary.btn-sm(type="button" data-bs-toggle="collapse" data-bs-target="#addTaskForm" aria-expanded="false" aria-controls="addTaskForm")
-							span +
-							span.d-none.d-sm-inline  Add
+	//- Add task form (collapsible, hidden by default)
+	#addTaskForm(style="display: none")
+		.form-card.form-card-today
+			form(method="POST" action="/tasks")
+				.form-group
+					input.form-input(type="text" name="title" placeholder="What needs to be done?" required autocomplete="off")
+				.form-row
+					label.form-check
+						input(type="radio" name="destination" value="today" checked)
+						span  Today
+					label.form-check
+						input(type="radio" name="destination" value="tomorrow")
+						span  Tomorrow
+					label.form-check
+						input#destDate(type="radio" name="destination" value="date")
+						span  Schedule
+				#scheduleDateWrap.d-none
+					.form-row(style="margin-top: 12px")
+						.form-group
+							label.form-label Date
+							input#scheduledForDate.form-input(type="date" name="scheduledFor")
+						.form-group
+							label.form-label Time (optional)
+							input#timeOfDayAdd.form-input(type="time" name="timeOfDay")
+				button.btn.btn-solid-white(type="submit" style="margin-top: 16px; flex: none; padding: 12px 24px;") Add Task
 
-				//- Add task form (collapsible)
-				#addTaskForm.collapse.mb-4
-					.add-task-card
-						form(method="POST" action="/tasks")
-							.d-flex.gap-2
-								input#addTaskInput.form-control.flex-grow-1(type="text" name="title" placeholder="What needs to be done?" required autocomplete="off")
-								button.btn.btn-primary(type="submit") Add
-							.destination-selector
-								label.destination-option
-									input(type="radio" name="destination" value="today" checked)
-									span Today
-								label.destination-option
-									input(type="radio" name="destination" value="tomorrow")
-									span Tomorrow
-								label.destination-option
-									input#destDate(type="radio" name="destination" value="date")
-									span Schedule
-							#scheduleDateWrap.schedule-date-wrap.d-none.mt-2
-								.d-flex.gap-3.align-items-end
-									div
-										label.small.text-muted.mb-1.d-block(for="scheduledForDate") Date
-										input#scheduledForDate.form-control.form-control-sm(type="date" name="scheduledFor" style="max-width: 10rem")
-									div
-										label.small.text-muted.mb-1.d-block(for="timeOfDayAdd") Time (optional)
-										input#timeOfDayAdd.form-control.form-control-sm(type="time" name="timeOfDay" style="max-width: 8rem")
+			if chores && chores.length > 0
+				div(style="margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.2); display: flex; flex-wrap: wrap; gap: 8px")
+					each chore in chores
+						form(method="POST" action=`/chores/${chore._id}/create-task` style="display: inline")
+							input(type="hidden" name="destination" value="today")
+							button.btn.btn-ghost.btn-sm(type="submit")= chore.title
 
-						if chores && chores.length > 0
-							.chore-quick-add
-								.chore-quick-add-label From a chore:
-								.chore-quick-add-list
-									each chore in chores
-										form.d-inline(method="POST" action=`/chores/${chore._id}/create-task`)
-											input(type="hidden" name="destination" value="today")
-											button.btn.btn-sm.btn-outline-chore(type="submit")= chore.title
+	script.
+		// Toggle add form
+		const addBtn = document.querySelector('.btn-add-task');
+		const addTaskForm = document.getElementById('addTaskForm');
+		const addTaskInput = addTaskForm ? addTaskForm.querySelector('input[name="title"]') : null;
+		if (addBtn && addTaskForm) {
+			addBtn.addEventListener('click', function() {
+				const isHidden = addTaskForm.style.display === 'none';
+				addTaskForm.style.display = isHidden ? 'block' : 'none';
+				if (isHidden && addTaskInput) addTaskInput.focus();
+			});
+		}
+		// Schedule date visibility
+		const scheduleDateWrap = document.getElementById('scheduleDateWrap');
+		const dateRadio = document.getElementById('destDate');
+		const destinationRadios = document.querySelectorAll('input[name="destination"]');
+		function updateScheduleDateVisibility() {
+			if (dateRadio && scheduleDateWrap) {
+				scheduleDateWrap.classList.toggle('d-none', !dateRadio.checked);
+			}
+		}
+		destinationRadios.forEach(radio => radio.addEventListener('change', updateScheduleDateVisibility));
+		updateScheduleDateVisibility();
 
-				script.
-					// Show/hide date input when Schedule is selected
-					const scheduleDateWrap = document.getElementById('scheduleDateWrap');
-					const dateRadio = document.getElementById('destDate');
-					const destinationRadios = document.querySelectorAll('input[name="destination"]');
-					function updateScheduleDateVisibility() {
-						if (dateRadio && scheduleDateWrap) {
-							scheduleDateWrap.classList.toggle('d-none', !dateRadio.checked);
-						}
-					}
-					destinationRadios.forEach(radio => radio.addEventListener('change', updateScheduleDateVisibility));
-					updateScheduleDateVisibility();
-					// Focus the title input when the form is shown
-					const addTaskForm = document.getElementById('addTaskForm');
-					const addTaskInput = document.getElementById('addTaskInput');
-					if (addTaskForm && addTaskInput) {
-						addTaskForm.addEventListener('shown.bs.collapse', () => addTaskInput.focus());
-					}
-
-				//- Pinned tasks — always at the top as tiles
-				if pinnedTasks && pinnedTasks.length > 0
-					section.pinned-grid.mb-4(aria-label="Pinned tasks")
-						each task in pinnedTasks
-							a.pinned-tile(href=`/tasks/${task._id}/edit`)
-								span.pinned-tile-title= task.title
-								if task.scheduledFor && task.scheduledFor >= todayEnd
-									span.pinned-tile-date= formatDate(task.scheduledFor)
-
-				//- Today's birthdays (task-like rows; not in Coming up grid)
-				if todayBirthdays && todayBirthdays.length > 0
-					section.today-birthday-strip.mb-4(aria-label="Birthdays today")
+	//- Main content bands
+	.bands
+		//- Today section
+		section.band.band-today
+			- var hasTasks = tasks && tasks.length > 0
+			- var hasTodayBirthdays = todayBirthdays && todayBirthdays.length > 0
+			- var hasTodayHolidays = todayHolidays && todayHolidays.length > 0
+			if !hasTasks && !hasTodayBirthdays && !hasTodayHolidays
+				.empty-state
+					.empty-state-icon
+						i.bi.bi-check-lg
+					.empty-state-text All clear for today
+			else
+				.tasks-grid
+					//- Today's birthdays as task-like rows
+					if hasTodayBirthdays
 						each b in todayBirthdays
-							.today-birthday-item.d-flex.align-items-center(class=b.hasNotes ? 'today-birthday-item-notes' : '')
-								span.today-birthday-leading.me-3(aria-hidden="true")
-									i.bi.bi-cake2
-								.today-birthday-body.flex-grow-1
-									a.today-birthday-name(href=`/birthdays/${b.person._id}/edit`)= b.person.name
-									if b.turningAge
-										span.today-birthday-meta  · turning #{b.turningAge}
-
-				if todayHolidays && todayHolidays.length > 0
-					section.today-holiday-strip.mb-4(aria-label="Holidays today")
+							.task
+								.task-check(style="border-color: rgba(255,255,255,0.3); pointer-events: none")
+									i.bi.bi-cake2(style="font-size: 12px; opacity: 0.7")
+								.task-content
+									.task-title
+										a(href=`/birthdays/${b.person._id}/edit`)= b.person.name
+										if b.turningAge
+											span(style="opacity: 0.8")  · turning #{b.turningAge}
+					//- Today's holidays
+					if hasTodayHolidays
 						each h in todayHolidays
-							.today-holiday-item.d-flex.align-items-center(class=h.hasNotes ? 'today-holiday-item-notes' : '')
-								span.today-holiday-leading.me-3(aria-hidden="true")
-									i.bi.bi-stars
-								.today-holiday-body.flex-grow-1
-									a.today-holiday-name(href=`/holidays/${h.holiday._id}/edit`)= h.holiday.name
-
-				//- Today's tasks
-				- var hasTodayBirthdays = todayBirthdays && todayBirthdays.length > 0
-				- var hasTodayHolidays = todayHolidays && todayHolidays.length > 0
-				if tasks.length === 0 && !hasTodayBirthdays && !hasTodayHolidays
-					.empty-state
-						.empty-state-icon
-							i.bi.bi-check-lg
-						p All clear for today
-				else if tasks.length > 0
-					.task-list.mb-4
+							.task
+								.task-check(style="border-color: rgba(255,255,255,0.3); pointer-events: none")
+									i.bi.bi-stars(style="font-size: 12px; opacity: 0.7")
+								.task-content
+									.task-title
+										a(href=`/holidays/${h.holiday._id}/edit`)= h.holiday.name
+					//- Tasks
+					if hasTasks
 						each task in tasks
-							include task
+							.task
+								form(method="POST" action=`/tasks/${task._id}/complete` style="display: contents")
+									button.task-check(type="submit" title="Complete")
+								.task-content
+									.task-title
+										if task.url
+											a(href=task.url target="_blank" rel="noopener")= task.title
+										else
+											a(href=`/tasks/${task._id}/edit`)= task.title
+										if task.generatedFrom
+											i.bi.bi-arrow-repeat(style="margin-left: 6px; opacity: 0.6")
+										if task.url
+											i.bi.bi-link-45deg(style="margin-left: 4px; opacity: 0.5")
+									if task.timeOfDay
+										.task-meta
+											span.task-time= formatTaskTimeDisplay(task.timeOfDay)
+								.task-actions
+									a(href=`/tasks/${task._id}/edit`) •••
 
+		//- Quick Lists section
+		if quickLists && quickLists.length
+			section.band.band-lists
+				.lists-scroll
+					each ql in quickLists
+						.list-card
+							.list-card-head
+								a(href=`/quick-lists/${ql._id}/edit`)= ql.name
+							.list-card-body
+								each item in ql.items
+									.list-card-item
+										span.list-card-item-text= item.text
+										form(method="POST" action=`/quick-lists/${ql._id}/items/${item._id}/delete` style="display: inline")
+											button(type="submit" title="Remove" style="background: none; border: none; color: rgba(255,255,255,0.5); cursor: pointer; padding: 0; font-size: 12px")
+												i.bi.bi-x
+								form(method="POST" action=`/quick-lists/${ql._id}/items`)
+									input.list-card-add(type="text" name="text" placeholder="+ Add Item" autocomplete="off" style="width: 100%; cursor: text")
 
-				//- Next 3 days: birthdays + dated tasks — today’s birthdays are above the task list (cells always shown; may be empty)
-				if comingUpDays && comingUpDays.length
-					section.cu-grid.mb-4(aria-label="Tomorrow and the next two days")
+		//- Sticky Notes section
+		section.band.band-notes
+			.notes-flex
+				if stickyNotes && stickyNotes.length
+					each note in stickyNotes
+						.note-pill
+							a(href=`/sticky-notes/${note._id}/edit`)= note.text
+							form(method="POST" action=`/sticky-notes/${note._id}/delete` style="display: inline; margin-left: 8px")
+								button(type="submit" title="Remove" style="background: none; border: none; color: rgba(255,255,255,0.5); cursor: pointer; padding: 0")
+									i.bi.bi-x
+				form(method="POST" action="/sticky-notes" style="display: inline")
+					input.note-pill.note-add(type="text" name="text" placeholder="+ Add Note" autocomplete="off" style="border: 2px dashed rgba(255,255,255,0.4); background: transparent; color: white; cursor: text")
+
+		//- Done section
+		section.band.band-done
+			if completedTasks && completedTasks.length
+				.done-flex
+					each task in completedTasks
+						.done-pill
+							span= task.title
+							form(method="POST" action=`/tasks/${task._id}/restore` style="display: inline; margin-left: 8px")
+								button(type="submit" title="Restore" style="background: none; border: none; color: rgba(255,255,255,0.6); cursor: pointer; padding: 0; font-size: 11px")
+									i.bi.bi-arrow-counterclockwise
+			else
+				.empty-state(style="padding: 16px")
+					.empty-state-text(style="font-size: 13px; opacity: 0.7") Nothing completed recently
+
+		//- Right column (Birthday, Pinned, Coming Up)
+		.right-column
+			//- Birthdays today
+			if todayBirthdays && todayBirthdays.length > 0
+				section.band.band-birthday
+					.birthday-flex
+						each b in todayBirthdays
+							.birthday-pill
+								span.birthday-pill-icon
+									i.bi.bi-cake2
+								span= b.person.name
+								if b.turningAge
+									span.birthday-pill-age · turning #{b.turningAge}
+
+			//- Pinned tasks
+			if pinnedTasks && pinnedTasks.length > 0
+				section.band.band-pinned
+					.pin-items
+						each task in pinnedTasks
+							a.pin-chip(href=`/tasks/${task._id}/edit`)
+								i.bi.bi-pin-angle-fill
+								span= task.title
+
+			//- Coming Up (next 3 days)
+			if comingUpDays && comingUpDays.length
+				section.band.band-coming
+					.coming-grid
 						each day in comingUpDays
-							.cu-grid-cell(class=day.offset === 1 ? 'cu-grid-cell-tomorrow' : '')
-								.cu-grid-cell-head= day.label
-								.cu-grid-cell-body
-									if !day.items || !day.items.length
-										p.cu-grid-empty.text-muted.small.mb-0 Nothing scheduled
-									else
-										ul.cu-grid-list
-											each row in day.items
-												if row.kind === 'birthday'
-													li.cu-grid-line.cu-grid-birthday(class=row.hasNotes ? 'cu-grid-birthday-notes' : '')
-														span.cu-grid-bullet(aria-hidden="true")
-															i.bi.bi-cake2
-														span.cu-grid-line-main
-															a(href=`/birthdays/${row.person._id}/edit`)= row.person.name
-															if row.turningAge
-																span.cu-grid-meta  · #{row.turningAge}
-												else if row.kind === 'holiday'
-													li.cu-grid-line.cu-grid-holiday(class=row.hasNotes ? 'cu-grid-holiday-notes' : '')
-														span.cu-grid-bullet(aria-hidden="true")
-															i.bi.bi-stars
-														span.cu-grid-line-main
-															a(href=`/holidays/${row.holiday._id}/edit`)= row.holiday.name
-												else if row.kind === 'task'
-													- var isAppt = row.task.timeOfDay
-													li.cu-grid-line.cu-grid-task(class=isAppt ? 'cu-grid-task-appt' : 'cu-grid-task-plain')
-														span.cu-grid-bullet(aria-hidden="true")
-															i.bi(class=isAppt ? 'bi-clock' : 'bi-calendar3')
-														span.cu-grid-line-main
-															a(href=`/tasks/${row.task._id}/edit`)= row.task.title
-															if row.task.timeOfDay
-																span.cu-grid-task-time= formatTaskTimeDisplay(row.task.timeOfDay)
+							.coming-day-card
+								.coming-day-header= day.label
+								if !day.items || !day.items.length
+									.coming-empty Nothing scheduled
+								else
+									each row in day.items
+										.coming-item
+											if row.kind === 'birthday'
+												span.coming-item-icon
+													i.bi.bi-cake2
+												.coming-item-title
+													a(href=`/birthdays/${row.person._id}/edit`)= row.person.name
+												if row.turningAge
+													.coming-item-time · #{row.turningAge}
+											else if row.kind === 'holiday'
+												span.coming-item-icon
+													i.bi.bi-stars
+												.coming-item-title
+													a(href=`/holidays/${row.holiday._id}/edit`)= row.holiday.name
+											else if row.kind === 'task'
+												span.coming-item-icon
+													i.bi(class=row.task.timeOfDay ? 'bi-clock' : 'bi-calendar3')
+												.coming-item-title
+													a(href=`/tasks/${row.task._id}/edit`)= row.task.title
+												if row.task.timeOfDay
+													.coming-item-time= formatTaskTimeDisplay(row.task.timeOfDay)
 
-				//- Quick Lists
-				if quickLists && quickLists.length
-					section.ql-grid.mb-4(aria-label="Quick lists")
-						each ql in quickLists
-							.ql-card
-								.ql-card-head
-									a.ql-card-title(href=`/quick-lists/${ql._id}/edit`)= ql.name
-								.ql-card-body
-									ul.ql-items
-										each item in ql.items
-											li.ql-item
-												span.ql-item-text= item.text
-												form.ql-item-delete(method="POST" action=`/quick-lists/${ql._id}/items/${item._id}/delete`)
-													button.ql-item-delete-btn(type="submit" title="Remove")
-														i.bi.bi-x
-										li.ql-item.ql-item-add
-											form.ql-add-form(method="POST" action=`/quick-lists/${ql._id}/items`)
-												input.ql-add-input(type="text" name="text" placeholder="Add…" autocomplete="off")
-
-				//- Sticky Notes — always visible
-				section.sticky-notes-section(aria-label="Sticky notes")
-					.sticky-notes-grid
-						if stickyNotes && stickyNotes.length
-							each note in stickyNotes
-								.sticky-note-tile
-									a.sticky-note-text(href=`/sticky-notes/${note._id}/edit`)= note.text
-									form.sticky-note-delete(method="POST" action=`/sticky-notes/${note._id}/delete`)
-										button.sticky-note-delete-btn(type="submit" title="Remove")
-											i.bi.bi-x
-						.sticky-note-tile.sticky-note-add
-							form.sticky-note-add-form(method="POST" action="/sticky-notes")
-								input.sticky-note-input(type="text" name="text" placeholder="Add note..." autocomplete="off")
-
-				.section-divider
-
-				//- Later section (day 4+, same card style as Coming Up)
-				if laterDays && laterDays.length
-					.mb-2
-						.section-header(data-bs-toggle="collapse" data-bs-target="#laterSection" aria-expanded="false")
-							span.chevron ▶
-							span.section-title Later
-							span.section-count= laterDays.length
-						#laterSection.collapse
-							.py-2
-								section.cu-grid.cu-grid-later(aria-label="Later days")
-									each day in laterDays
-										.cu-grid-cell
-											.cu-grid-cell-head= day.label
-											.cu-grid-cell-body
-												ul.cu-grid-list
-													each row in day.items
-														if row.kind === 'birthday'
-															li.cu-grid-line.cu-grid-birthday(class=row.hasNotes ? 'cu-grid-birthday-notes' : '')
-																span.cu-grid-bullet(aria-hidden="true")
-																	i.bi.bi-cake2
-																span.cu-grid-line-main
-																	a(href=`/birthdays/${row.person._id}/edit`)= row.person.name
-																	if row.turningAge
-																		span.cu-grid-meta  · #{row.turningAge}
-														else if row.kind === 'holiday'
-															li.cu-grid-line.cu-grid-holiday(class=row.hasNotes ? 'cu-grid-holiday-notes' : '')
-																span.cu-grid-bullet(aria-hidden="true")
-																	i.bi.bi-stars
-																span.cu-grid-line-main
-																	a(href=`/holidays/${row.holiday._id}/edit`)= row.holiday.name
-														else if row.kind === 'task'
-															- var isAppt = row.task.timeOfDay
-															li.cu-grid-line.cu-grid-task(class=isAppt ? 'cu-grid-task-appt' : 'cu-grid-task-plain')
-																span.cu-grid-bullet(aria-hidden="true")
-																	i.bi(class=isAppt ? 'bi-clock' : 'bi-calendar3')
-																span.cu-grid-line-main
-																	a(href=`/tasks/${row.task._id}/edit`)= row.task.title
-																	if row.task.timeOfDay
-																		span.cu-grid-task-time= formatTaskTimeDisplay(row.task.timeOfDay)
-
-				//- Completed section
-				.mb-2
-					.section-header(data-bs-toggle="collapse" data-bs-target="#completedSection" aria-expanded="false")
-						span.chevron ▶
-						span.section-title Completed
-						span.section-count= completedTasks.length
-					#completedSection.collapse
-						.px-4.py-2
-							if completedTasks.length === 0
-								p.text-muted.small.mb-0 Nothing completed recently
-							else
-								each task in completedTasks
-									.task-preview.d-flex.align-items-center.justify-content-between
-										span.text-muted= task.title
-										form(method="POST" action=`/tasks/${task._id}/restore` style="margin: 0")
-											button.btn.btn-sm.btn-outline-secondary(type="submit") Restore
+	//- Later link (outside bands)
+	if laterDays && laterDays.length
+		- var laterCount = laterDays.reduce((sum, d) => sum + d.items.length, 0)
+		if laterCount > 0
+			a.later-link(href="/later")
+				strong= laterCount
+				|  items scheduled later →

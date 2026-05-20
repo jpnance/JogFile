@@ -1,77 +1,74 @@
 extends layout
 
-mixin birthdayItem(person, options)
-	- var daysUntil = options && options.daysUntil
-	- var isToday = options && options.isToday
-	- var turningAge = options && options.turningAge
-	.birthday-item
-		.birthday-item-content
-			.birthday-name= person.name
-			.birthday-date
-				if isToday
-					span.text-birthday Today!
-				else if daysUntil === 1
-					| Tomorrow
-				else if daysUntil !== undefined
-					| in #{daysUntil} days
-				if daysUntil !== undefined
-					|  · 
-				= person.getBirthdayString()
-				if turningAge
-					span.birthday-age  (turning #{turningAge})
-				else if person.birthYear && daysUntil === undefined
-					- var nextBday = person.getNextBirthday()
-					- var age = person.getTurningAge(nextBday)
-					if age
-						span.birthday-age  (turning #{age})
-			if person.notes
-				.text-muted.small.mt-1= person.notes
-		.birthday-item-actions
-			a.btn.btn-sm.btn-outline-secondary(href=`/birthdays/${person._id}/edit`) Edit
-			form(method="POST" action=`/birthdays/${person._id}/delete` onsubmit="return confirm('Remove this birthday?')")
-				button.btn.btn-sm.btn-outline-danger(type="submit") Delete
-
 block content
-	main.container.py-4
-		.row.justify-content-center
-			.col-12.col-lg-10.col-xl-8
-				a.nav-link-secondary.mb-3(href="/")
-					i.bi.bi-arrow-left.me-1
-					| Back to Today
+	.list-page
+		header.list-header
+			a.list-header-back(href="/")
+				i.bi.bi-arrow-left
+				span Back
+			span.list-header-title Birthdays
+			a.btn.btn-sm(href="/birthdays/new" style="background: var(--jf-birthday); color: white")
+				i.bi.bi-plus
+				|  New
 
-				.page-header
-					h1 Birthdays
-					a.btn.btn-birthday.btn-sm(href="/birthdays/new") + New
+		main.list-main
+			if totalCount === 0
+				.empty-state(style="color: var(--jf-text-secondary)")
+					.empty-state-icon
+						i.bi.bi-cake2
+					.empty-state-text No birthdays yet
+					a.btn.btn-primary(href="/birthdays/new" style="margin-top: 16px; flex: none; background: var(--jf-birthday)") Add your first
 
-				if totalCount === 0
-					.empty-state
-						.empty-state-icon
-							i.bi.bi-cake2
-						p No birthdays yet
-						a.btn.btn-birthday(href="/birthdays/new") Add your first
-				else
-					//- Coming Up section
-					if upcoming && upcoming.length > 0
-						.mb-4
-							.section-header.birthday-section-header(data-bs-toggle="collapse" data-bs-target="#coming-up" aria-expanded="true")
-								span.chevron ▶
-								span.section-title Coming Up
-								span.section-count= upcoming.length
-							.collapse.show(id="coming-up")
-								.pt-2
-									each item in upcoming
-										+birthdayItem(item.person, { daysUntil: item.daysUntil, isToday: item.isToday, turningAge: item.turningAge })
+			else
+				//- Coming Up section
+				if upcoming && upcoming.length > 0
+					.list-section.list-section-birthday
+						.list-section-header(onclick="this.parentElement.classList.toggle('collapsed')")
+							i.bi.bi-chevron-down.list-section-chevron
+							span.list-section-title Coming Up
+							span.list-section-count= upcoming.length
+						.list-section-content
+							each item in upcoming
+								.list-item
+									.list-item-content
+										.list-item-name= item.person.name
+										.list-item-meta
+											if item.isToday
+												span(style="color: #fbbf24; font-weight: 600") Today! 
+												| · 
+											else if item.daysUntil === 1
+												| Tomorrow · 
+											else if item.daysUntil
+												| in #{item.daysUntil} days · 
+											= item.person.getBirthdayString()
+											if item.turningAge
+												span  (turning #{item.turningAge})
+									.list-item-actions
+										a.list-item-btn.list-item-btn-edit(href=`/birthdays/${item.person._id}/edit`) Edit
+										form(method="POST" action=`/birthdays/${item.person._id}/delete` onsubmit="return confirm('Remove this birthday?')" style="display: inline")
+											button.list-item-btn.list-item-btn-delete(type="submit") Delete
 
-					.section-divider
-
-					//- All Birthdays by month
-					each group in byMonth
-						.mb-3
-							.section-header.birthday-section-header(data-bs-toggle="collapse" data-bs-target=`#month-${group.month}` aria-expanded="false")
-								span.chevron ▶
-								span.section-title= group.name
-								span.section-count= group.people.length
-							.collapse(id=`month-${group.month}`)
-								.pt-2
-									each person in group.people
-										+birthdayItem(person)
+				//- All Birthdays by month
+				each group in byMonth
+					.list-section.list-section-neutral.collapsed
+						.list-section-header(onclick="this.parentElement.classList.toggle('collapsed')")
+							i.bi.bi-chevron-down.list-section-chevron
+							span.list-section-title= group.name
+							span.list-section-count= group.people.length
+						.list-section-content
+							each person in group.people
+								.list-item
+									.list-item-content
+										.list-item-name= person.name
+										.list-item-meta
+											= person.getBirthdayString()
+											- var nextBday = person.getNextBirthday()
+											- var age = person.getTurningAge(nextBday)
+											if age
+												span  (turning #{age})
+										if person.notes
+											div(style="font-size: 12px; opacity: 0.7; margin-top: 4px")= person.notes
+									.list-item-actions
+										a.list-item-btn.list-item-btn-edit(href=`/birthdays/${person._id}/edit`) Edit
+										form(method="POST" action=`/birthdays/${person._id}/delete` onsubmit="return confirm('Remove this birthday?')" style="display: inline")
+											button.list-item-btn.list-item-btn-delete(type="submit") Delete

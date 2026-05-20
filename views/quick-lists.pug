@@ -1,31 +1,33 @@
 extends layout
 
 block content
-	main.container.py-4
-		.row.justify-content-center
-			.col-12.col-lg-10.col-xl-8
-				a.nav-link-secondary.mb-3(href="/")
-					i.bi.bi-arrow-left.me-1
-					| Back to Today
+	.list-page
+		header.list-header
+			a.list-header-back(href="/")
+				i.bi.bi-arrow-left
+				span Back
+			span.list-header-title Quick Lists
+			a.btn.btn-sm(href="/quick-lists/new" style="background: var(--jf-lists); color: white")
+				i.bi.bi-plus
+				|  New
 
-				.page-header
-					h1 Quick Lists
-					a.btn.btn-quick-list.btn-sm(href="/quick-lists/new") + New
+		main.list-main
+			if quickLists.length === 0
+				.empty-state(style="color: var(--jf-text-secondary)")
+					.empty-state-icon
+						i.bi.bi-card-list
+					.empty-state-text No quick lists yet
+					a.btn.btn-primary(href="/quick-lists/new" style="margin-top: 16px; flex: none; background: var(--jf-lists)") Create your first
 
-				if quickLists.length === 0
-					.empty-state
-						.empty-state-icon
-							i.bi.bi-card-list
-						p No quick lists yet
-						a.btn.btn-quick-list(href="/quick-lists/new") Create your first
-
-				else
-					each ql in quickLists
-						.quick-list-admin-item
-							.quick-list-admin-content
-								.quick-list-admin-name= ql.name
-								.quick-list-admin-count= ql.items.length + ' item' + (ql.items.length === 1 ? '' : 's')
-							.quick-list-admin-actions
-								a.btn.btn-sm.btn-outline-secondary(href=`/quick-lists/${ql._id}/edit`) Edit
-								form(method="POST" action=`/quick-lists/${ql._id}/delete` onsubmit="return confirm('Delete this list and all its items?')")
-									button.btn.btn-sm.btn-outline-danger(type="submit") Delete
+			else
+				.list-section(style="background: var(--jf-lists)")
+					.list-section-content(style="padding-top: 16px")
+						each ql in quickLists
+							.list-item
+								.list-item-content
+									.list-item-name= ql.name
+									.list-item-meta= ql.items.length + ' item' + (ql.items.length === 1 ? '' : 's')
+								.list-item-actions
+									a.list-item-btn.list-item-btn-edit(href=`/quick-lists/${ql._id}/edit`) Edit
+									form(method="POST" action=`/quick-lists/${ql._id}/delete` onsubmit="return confirm('Delete this list and all its items?')" style="display: inline")
+										button.list-item-btn.list-item-btn-delete(type="submit") Delete

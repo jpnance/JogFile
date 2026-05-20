@@ -1,55 +1,35 @@
 extends layout
 
 block content
-	main.container.py-4
-		.row.justify-content-center
-			.col-12.col-lg-10.col-xl-8
-				a.nav-link-secondary.mb-3(href="/chores")
-					i.bi.bi-arrow-left.me-1
-					| Back to Chores
+	.form-page
+		header.form-header
+			a.form-header-back(href="/chores")
+				i.bi.bi-arrow-left
+				span Back
+			span.form-header-title= chore ? 'Edit Chore' : 'Add Chore'
+			.form-header-spacer
 
-				.page-header
-					if chore
-						h1 Edit Chore
-					else
-						h1 Add Chore
+		main.form-main
+			.form-card(style="background: var(--jf-chore)")
+				form#editForm(method="POST" action=chore ? `/chores/${chore._id}/edit` : '/chores')
+					.form-group
+						label.form-label Title
+						input.form-input(type="text" name="title" value=(chore ? chore.title : '') placeholder="e.g., Refill prescription" required autofocus)
 
-				.card
-					.card-body
-						form(method="POST" action=chore ? `/chores/${chore._id}/edit` : '/chores')
-							.mb-3
-								label.form-label(for="title") Title
-								input.form-control#title(
-									type="text"
-									name="title"
-									value=(chore ? chore.title : '')
-									placeholder="e.g., Refill prescription"
-									required
-									autofocus
-								)
+					.form-group
+						label.form-label Notes (optional)
+						textarea.form-input(name="description" rows="3" placeholder="Prescription number, details, etc." style="resize: vertical")= chore ? chore.description : ''
 
-							.mb-3
-								label.form-label(for="description") Notes (optional)
-								textarea.form-control#description(
-									name="description"
-									rows="3"
-									placeholder="Prescription number, details, etc."
-								)= chore ? chore.description : ''
+					.form-group
+						label.form-label URL (optional)
+						input.form-input(type="url" name="url" value=(chore ? chore.url : '') placeholder="https://...")
+						.form-hint A quick-action link for the spawned task.
 
-							.mb-3
-								label.form-label(for="url") URL (optional)
-								input.form-control#url(
-									type="url"
-									name="url"
-									value=(chore ? chore.url : '')
-									placeholder="https://..."
-								)
-								.form-text A quick-action link for the spawned task.
-
-							.d-flex.gap-2
-								button.btn.btn-chore(type="submit")
-									if chore
-										| Save Changes
-									else
-										| Add Chore
-								a.btn.btn-outline-secondary(href="/chores") Cancel
+			.form-actions
+				.form-actions-row
+					button.btn(type="submit" form="editForm" style="background: var(--jf-chore); color: white")= chore ? 'Save Changes' : 'Add Chore'
+					a.btn.btn-secondary(href="/chores") Cancel
+				if chore
+					.form-actions-row
+						form(method="POST" action=`/chores/${chore._id}/delete` onsubmit="return confirm('Delete this chore?')" style="flex: 1; display: flex")
+							button.btn.btn-danger(type="submit") Delete
