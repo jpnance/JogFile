@@ -490,12 +490,15 @@ body {
 
 .list-card-add {
 	font-size: 13px;
-	color: inherit;
+	color: white;
 	background: transparent;
 	border: 2px dashed rgba(255,255,255,0.4);
 	border-radius: var(--jf-radius-xs);
 	padding: 6px 10px;
 	margin-top: 8px;
+}
+.list-card-add::placeholder {
+	color: rgba(255,255,255,0.7);
 }
 
 @media (min-width: 900px) {
@@ -536,6 +539,10 @@ body {
 .note-add {
 	background: transparent;
 	border: 2px dashed rgba(255,255,255,0.4);
+	color: white;
+}
+.note-add::placeholder {
+	color: rgba(255,255,255,0.7);
 }
 
 /* ==================== */
