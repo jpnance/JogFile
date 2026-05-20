@@ -47,7 +47,7 @@ block content
 												div(style="font-size: 12px; opacity: 0.7; margin-top: 4px")= rec.description
 										.list-item-actions
 											form(method="POST" action=`/recurring/${rec._id}/create-task` style="display: inline")
-												button.list-item-btn(type="submit" style="background: rgba(255,255,255,0.3); color: white") → Today
+												button.list-item-btn.list-item-btn-action(type="submit") Today
 											a.list-item-btn.list-item-btn-edit(href=`/recurring/${rec._id}/edit`) Edit
 											form(method="POST" action=`/recurring/${rec._id}/delete` onsubmit="return confirm('Delete this recurring task?')" style="display: inline")
 												button.list-item-btn.list-item-btn-delete(type="submit") Delete

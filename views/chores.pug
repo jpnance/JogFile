@@ -31,7 +31,7 @@ block content
 								.list-item-actions
 									form(method="POST" action=`/chores/${chore._id}/create-task` style="display: inline")
 										input(type="hidden" name="destination" value="today")
-										button.list-item-btn(type="submit" style="background: rgba(255,255,255,0.3); color: white") → Today
+										button.list-item-btn.list-item-btn-action(type="submit") Today
 									a.list-item-btn.list-item-btn-edit(href=`/chores/${chore._id}/edit`) Edit
 									form(method="POST" action=`/chores/${chore._id}/delete` onsubmit="return confirm('Delete this chore?')" style="display: inline")
 										button.list-item-btn.list-item-btn-delete(type="submit") Delete

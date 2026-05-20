@@ -966,6 +966,9 @@ body {
 }
 
 .list-item-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
 	padding: 6px 12px;
 	border-radius: 6px;
 	font-size: 13px;
@@ -973,6 +976,12 @@ body {
 	border: none;
 	cursor: pointer;
 	text-decoration: none;
+	line-height: 1.4;
+}
+
+.list-item-btn-action {
+	background: rgba(255,255,255,0.3);
+	color: white;
 }
 
 .list-item-btn-edit {
@@ -1003,6 +1012,11 @@ body {
 
 .list-section-neutral .list-item-meta {
 	color: var(--jf-text-secondary);
+}
+
+.list-section-neutral .list-item-btn-action {
+	background: var(--jf-today);
+	color: white;
 }
 
 .list-section-neutral .list-item-btn-edit {
@@ -1228,14 +1242,26 @@ body {
 .dropdown-toggle {
 	background: transparent;
 	border: 1px solid var(--jf-border);
-	border-radius: var(--jf-radius-xs);
-	padding: 8px 12px;
-	font-size: 14px;
+	border-radius: 50%;
+	width: 44px;
+	height: 44px;
+	font-size: 18px;
 	color: var(--jf-text-secondary);
 	cursor: pointer;
 	display: flex;
 	align-items: center;
-	gap: 6px;
+	justify-content: center;
+}
+
+@media (min-width: 600px) {
+	.dropdown-toggle {
+		width: auto;
+		height: auto;
+		padding: 10px 16px;
+		border-radius: var(--jf-radius-xs);
+		font-size: 14px;
+		gap: 6px;
+	}
 }
 
 .dropdown-toggle::after {
