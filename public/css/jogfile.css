@@ -112,6 +112,21 @@ body {
 	color: var(--jf-text);
 }
 
+.page-title {
+	font-size: 24px;
+	font-weight: 600;
+	margin: 0;
+	padding: 20px;
+	color: white;
+}
+
+.page-title-birthday { background: var(--jf-birthday); }
+.page-title-holiday { background: var(--jf-holiday); }
+.page-title-recurring { background: var(--jf-recurring); }
+.page-title-chore { background: var(--jf-chore); }
+.page-title-lists { background: var(--jf-lists); }
+.page-title-coming { background: var(--jf-coming); }
+
 .logo {
 	display: flex;
 	align-items: center;

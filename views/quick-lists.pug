@@ -6,15 +6,16 @@ block content
 	header.site-header
 		.site-header-inner
 			.site-header-left
-				a.header-back(href="/")
-					i.bi.bi-arrow-left
-					span Back
-			.site-header-center Quick Lists
+				a.logo(href="/")
+					img.logo-icon(src="/images/shoe.svg" alt="")
+					span.logo-text JogFile
+			.site-header-center
 			.site-header-right
 				+nav-menu()
 				+add-button("/quick-lists/new", "btn-add-task-lists")
 
 	.list-page
+		h1.page-title.page-title-lists Quick Lists
 
 		main.list-main
 			if quickLists.length === 0

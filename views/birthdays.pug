@@ -6,15 +6,16 @@ block content
 	header.site-header
 		.site-header-inner
 			.site-header-left
-				a.header-back(href="/")
-					i.bi.bi-arrow-left
-					span Back
-			.site-header-center Birthdays
+				a.logo(href="/")
+					img.logo-icon(src="/images/shoe.svg" alt="")
+					span.logo-text JogFile
+			.site-header-center
 			.site-header-right
 				+nav-menu()
 				+add-button("/birthdays/new", "btn-add-task-birthday")
 
 	.list-page
+		h1.page-title.page-title-birthday Birthdays
 
 		main.list-main
 			if totalCount === 0

@@ -5,14 +5,15 @@ block content
 	header.site-header
 		.site-header-inner
 			.site-header-left
-				a.header-back(href="/")
-					i.bi.bi-arrow-left
-					span Back
-			.site-header-center Later
+				a.logo(href="/")
+					img.logo-icon(src="/images/shoe.svg" alt="")
+					span.logo-text JogFile
+			.site-header-center
 			.site-header-right
 				+nav-menu()
-	
+
 	main.later-main
+		h1.page-title.page-title-coming Later
 		if !laterDays || !laterDays.length || laterDays.every(d => !d.items || !d.items.length)
 			.empty-state(style="color: var(--jf-text-secondary)")
 				.empty-state-icon
