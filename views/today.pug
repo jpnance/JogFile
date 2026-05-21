@@ -78,13 +78,12 @@ block content
 			- var hasTasks = tasks && tasks.length > 0
 			- var hasTodayBirthdays = todayBirthdays && todayBirthdays.length > 0
 			- var hasTodayHolidays = todayHolidays && todayHolidays.length > 0
-			if !hasTasks && !hasTodayBirthdays && !hasTodayHolidays
-				.empty-state
-					.empty-state-icon
+			#tasks-grid.tasks-grid
+				if !hasTasks && !hasTodayBirthdays && !hasTodayHolidays
+					.empty-state
 						i.bi.bi-check-lg
-					.empty-state-text All clear for today
-			else
-				#tasks-grid.tasks-grid
+						span All clear for today
+				else
 					//- Today's birthdays as task-like rows
 					if hasTodayBirthdays
 						each b in todayBirthdays

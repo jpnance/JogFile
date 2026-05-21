@@ -1461,18 +1461,11 @@ a.later-item:hover {
 /* ==================== */
 
 .empty-state {
-	text-align: center;
-	padding: 48px 20px;
-	color: rgba(255,255,255,0.8);
-}
-
-.empty-state-icon {
-	font-size: 48px;
-	margin-bottom: 12px;
-	opacity: 0.6;
-}
-
-.empty-state-text {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 14px 16px;
+	color: rgba(255,255,255,0.7);
 	font-size: 15px;
 }
 
