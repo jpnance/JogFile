@@ -12,7 +12,7 @@ block content
 				+nav-menu()
 
 	.form-page
-		h1.page-title.page-title-lists= quickList ? 'Edit Quick List' : 'New Quick List'
+		h1.page-title.page-title-lists= quickList ? 'Edit Quick List' : 'Add Quick List'
 		main.form-main
 			.form-card(style="background: var(--jf-lists)")
 				form#editForm(method="POST" action=quickList ? `/quick-lists/${quickList._id}/edit` : '/quick-lists')
