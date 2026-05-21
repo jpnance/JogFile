@@ -452,8 +452,7 @@ body {
 }
 
 .list-card-head {
-	background: rgba(0,0,0,0.15);
-	padding: 10px 14px;
+	padding: 12px 14px 0;
 	font-size: 13px;
 	font-weight: 600;
 }
@@ -464,7 +463,7 @@ body {
 }
 
 .list-card-body {
-	padding: 12px 14px;
+	padding: 8px 14px 12px;
 }
 
 .list-card-item {
