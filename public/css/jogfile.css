@@ -119,6 +119,16 @@ body {
 .page-title-coming { background: var(--jf-coming); }
 .page-title-notes { background: var(--jf-notes); }
 
+@media (min-width: 768px) {
+	.page-title {
+		max-width: 600px;
+		margin: 0 auto;
+		padding: 20px 32px;
+		background: transparent;
+		color: var(--jf-text);
+	}
+}
+
 .logo {
 	display: flex;
 	align-items: center;
@@ -791,7 +801,6 @@ body {
 	.form-main {
 		max-width: 600px;
 		margin: 0 auto;
-		padding: 32px 20px;
 	}
 	
 	.form-card {
@@ -1073,7 +1082,6 @@ a.later-item:hover {
 .later-main {
 	max-width: 600px;
 	margin: 0 auto;
-	padding: 20px;
 }
 
 .later-item-badge {
@@ -1162,7 +1170,6 @@ a.later-item:hover {
 	.list-main {
 		max-width: 600px;
 		margin: 0 auto;
-		padding: 24px 20px;
 	}
 	
 	.list-section {
