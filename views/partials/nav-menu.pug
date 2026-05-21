@@ -1,0 +1,20 @@
+mixin nav-menu()
+	.dropdown
+		button.dropdown-toggle(type="button" onclick="this.nextElementSibling.classList.toggle('show')")
+			i.bi.bi-list
+		.dropdown-menu
+			a.dropdown-item(href="/birthdays")
+				i.bi.bi-cake2
+				| Birthdays
+			a.dropdown-item(href="/holidays")
+				i.bi.bi-stars
+				| Holidays
+			a.dropdown-item(href="/recurring")
+				i.bi.bi-arrow-repeat
+				| Recurring
+			a.dropdown-item(href="/chores")
+				i.bi.bi-wrench
+				| Chores
+			a.dropdown-item(href="/quick-lists")
+				i.bi.bi-card-list
+				| Quick Lists

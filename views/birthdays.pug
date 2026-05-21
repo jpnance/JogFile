@@ -1,15 +1,20 @@
 extends layout
+include partials/nav-menu
+include partials/add-button
 
 block content
+	header.site-header
+		.site-header-inner
+			.site-header-left
+				a.header-back(href="/")
+					i.bi.bi-arrow-left
+					span Back
+			.site-header-center Birthdays
+			.site-header-right
+				+nav-menu()
+				+add-button("/birthdays/new", "btn-add-task-birthday")
+
 	.list-page
-		header.list-header
-			a.list-header-back(href="/")
-				i.bi.bi-arrow-left
-				span Back
-			span.list-header-title Birthdays
-			a.btn.btn-sm(href="/birthdays/new" style="background: var(--jf-birthday); color: white")
-				i.bi.bi-plus
-				|  New
 
 		main.list-main
 			if totalCount === 0

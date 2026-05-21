@@ -1,42 +1,49 @@
 extends layout
+include partials/nav-menu
 
 block content
-	.list-page
-		header.list-header
-			a.list-header-back(href="/")
-				i.bi.bi-arrow-left
-				span Back
-			span.list-header-title Scheduled Later
-			- var totalCount = laterDays.reduce((sum, d) => sum + d.items.length, 0)
-			span.later-count= totalCount
+	header.site-header
+		.site-header-inner
+			.site-header-left
+				a.header-back(href="/")
+					i.bi.bi-arrow-left
+					span Back
+			.site-header-center Scheduled Later
+			.site-header-right
+				+nav-menu()
+	
+	main.later-main
+		if !laterDays || !laterDays.length || laterDays.every(d => !d.items || !d.items.length)
+			.empty-state(style="color: var(--jf-text-secondary)")
+				.empty-state-icon
+					i.bi.bi-calendar3
+				.empty-state-text Nothing scheduled beyond the next week
 
-		main.list-main
-			if !laterDays || !laterDays.length || laterDays.every(d => !d.items || !d.items.length)
-				.empty-state(style="color: var(--jf-text-secondary)")
-					.empty-state-icon
-						i.bi.bi-calendar3
-					.empty-state-text Nothing scheduled beyond the next week
-
-			else
-				each day in laterDays
-					if day.items && day.items.length
-						.list-section(style="background: var(--jf-coming)")
-							.list-section-header
-								span.list-section-title= day.label
-								span.list-section-count= day.items.length
-							.list-section-content
-								each row in day.items
-									.list-item
-										.list-item-content
-											.list-item-name
-												if row.kind === 'birthday'
-													i.bi.bi-cake2(style="margin-right: 8px; opacity: 0.7")
-													a(href=`/birthdays/${row.person._id}/edit` style="color: inherit; text-decoration: none")= row.person.name
-												else if row.kind === 'holiday'
-													i.bi.bi-stars(style="margin-right: 8px; opacity: 0.7")
-													a(href=`/holidays/${row.holiday._id}/edit` style="color: inherit; text-decoration: none")= row.holiday.name
-												else if row.kind === 'task'
-													i.bi(class=row.task.timeOfDay ? 'bi-clock' : 'bi-calendar3' style="margin-right: 8px; opacity: 0.7")
-													a(href=`/tasks/${row.task._id}/edit` style="color: inherit; text-decoration: none")= row.task.title
-											if row.kind === 'task' && row.task.timeOfDay
-												.list-item-meta= formatTaskTimeDisplay(row.task.timeOfDay)
+		else
+			each day in laterDays
+				if day.items && day.items.length
+					.list-section(style="background: var(--jf-coming)")
+						.list-section-header
+							span.list-section-title= day.label
+						.list-section-content
+							each row in day.items
+								if row.kind === 'birthday'
+									a.later-item(href=`/birthdays/${row.person._id}/edit`)
+										span.later-item-icon
+											i.bi.bi-cake2
+										span.later-item-name
+											| #{row.person.name}
+											if row.turningAge
+												span.later-item-age  turns #{row.turningAge}
+								else if row.kind === 'holiday'
+									a.later-item(href=`/holidays/${row.holiday._id}/edit`)
+										span.later-item-icon
+											i.bi.bi-stars
+										span.later-item-name= row.holiday.name
+								else if row.kind === 'task'
+									a.later-item(href=`/tasks/${row.task._id}/edit`)
+										span.later-item-icon
+											i.bi(class=row.task.timeOfDay ? 'bi-clock' : 'bi-calendar3')
+										span.later-item-name= row.task.title
+										if row.task.timeOfDay
+											span.later-item-badge= formatTaskTimeDisplay(row.task.timeOfDay)

@@ -1,13 +1,16 @@
 extends layout
 
 block content
+	header.site-header
+		.site-header-inner
+			.site-header-left
+				a.header-back(href="/recurring")
+					i.bi.bi-arrow-left
+					span Back
+			.site-header-center= recurring ? 'Edit Recurring' : 'New Recurring'
+			.site-header-right
+
 	.form-page
-		header.form-header
-			a.form-header-back(href="/recurring")
-				i.bi.bi-arrow-left
-				span Back
-			span.form-header-title= recurring ? 'Edit Recurring' : 'New Recurring'
-			.form-header-spacer
 
 		main.form-main
 			.form-card(style="background: var(--jf-recurring)")
