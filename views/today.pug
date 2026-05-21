@@ -37,7 +37,7 @@ block content
 	//- Add task form (collapsible, hidden by default)
 	#addTaskForm(style="display: none")
 		.form-card.form-card-today
-			form(method="POST" action="/tasks")
+			form#taskForm(method="POST" action="/tasks" hx-post="/tasks" hx-target="#tasks-grid" hx-swap="outerHTML" hx-select="#tasks-grid" hx-on::after-request="this.reset(); document.getElementById('scheduleDateWrap').classList.add('d-none'); this.querySelector('input[name=title]').focus()")
 				.form-group
 					input.form-input(type="text" name="title" placeholder="What needs to be done?" required autocomplete="off")
 				.form-row
@@ -104,7 +104,7 @@ block content
 						i.bi.bi-check-lg
 					.empty-state-text All clear for today
 			else
-				.tasks-grid
+				#tasks-grid.tasks-grid
 					//- Today's birthdays as task-like rows
 					if hasTodayBirthdays
 						each b in todayBirthdays
@@ -128,8 +128,8 @@ block content
 					//- Tasks
 					if hasTasks
 						each task in tasks
-							.task
-								form(method="POST" action=`/tasks/${task._id}/complete` style="display: contents")
+							.task(id=`task-${task._id}`)
+								form(method="POST" action=`/tasks/${task._id}/complete` style="display: contents" hx-post=`/tasks/${task._id}/complete` hx-target="#tasks-grid" hx-swap="outerHTML" hx-select="#tasks-grid" hx-select-oob="#done-flex")
 									button.task-check(type="submit" title="Complete")
 								.task-content
 									.task-title
@@ -152,45 +152,42 @@ block content
 			section.band.band-lists
 				.lists-scroll
 					each ql in quickLists
-						.list-card
+						.list-card(id=`ql-card-${ql._id}`)
 							.list-card-head
 								a(href=`/quick-lists/${ql._id}/edit`)= ql.name
 							.list-card-body
 								each item in ql.items
 									.list-card-item
 										span.list-card-item-text= item.text
-										form(method="POST" action=`/quick-lists/${ql._id}/items/${item._id}/delete` style="display: inline")
+										form(method="POST" action=`/quick-lists/${ql._id}/items/${item._id}/delete` style="display: inline" hx-post=`/quick-lists/${ql._id}/items/${item._id}/delete` hx-target=`#ql-card-${ql._id}` hx-swap="outerHTML" hx-select=`#ql-card-${ql._id}`)
 											button(type="submit" title="Remove" style="background: none; border: none; color: rgba(255,255,255,0.5); cursor: pointer; padding: 0; font-size: 12px")
 												i.bi.bi-x
-								form(method="POST" action=`/quick-lists/${ql._id}/items`)
+								form(method="POST" action=`/quick-lists/${ql._id}/items` hx-post=`/quick-lists/${ql._id}/items` hx-target=`#ql-card-${ql._id}` hx-swap="outerHTML" hx-select=`#ql-card-${ql._id}` hx-on::after-request="this.reset()")
 									input.list-card-add(type="text" name="text" placeholder="+ Add Item" autocomplete="off" style="width: 100%; cursor: text")
 
 		//- Sticky Notes section
 		section.band.band-notes
-			.notes-flex
+			#notes-flex.notes-flex
 				if stickyNotes && stickyNotes.length
 					each note in stickyNotes
 						.note-pill
 							a(href=`/sticky-notes/${note._id}/edit`)= note.text
-							form(method="POST" action=`/sticky-notes/${note._id}/delete` style="display: inline; margin-left: 8px")
+							form(method="POST" action=`/sticky-notes/${note._id}/delete` style="display: inline; margin-left: 8px" hx-post=`/sticky-notes/${note._id}/delete` hx-target="#notes-flex" hx-swap="outerHTML" hx-select="#notes-flex")
 								button(type="submit" title="Remove" style="background: none; border: none; color: rgba(255,255,255,0.5); cursor: pointer; padding: 0")
 									i.bi.bi-x
-				form(method="POST" action="/sticky-notes" style="display: inline")
+				form(method="POST" action="/sticky-notes" style="display: inline" hx-post="/sticky-notes" hx-target="#notes-flex" hx-swap="outerHTML" hx-select="#notes-flex" hx-on::after-request="this.reset()")
 					input.note-pill.note-add(type="text" name="text" placeholder="+ Add Note" autocomplete="off" style="border: 2px dashed rgba(255,255,255,0.4); background: transparent; color: white; cursor: text")
 
 		//- Done section
 		section.band.band-done
-			if completedTasks && completedTasks.length
-				.done-flex
+			#done-flex.done-flex
+				if completedTasks && completedTasks.length
 					each task in completedTasks
 						.done-pill
 							span= task.title
-							form(method="POST" action=`/tasks/${task._id}/restore` style="display: inline; margin-left: 8px")
+							form(method="POST" action=`/tasks/${task._id}/restore` style="display: inline; margin-left: 8px" hx-post=`/tasks/${task._id}/restore` hx-target="#done-flex" hx-swap="outerHTML" hx-select="#done-flex" hx-select-oob="#tasks-grid")
 								button(type="submit" title="Restore" style="background: none; border: none; color: rgba(255,255,255,0.6); cursor: pointer; padding: 0; font-size: 11px")
 									i.bi.bi-arrow-counterclockwise
-			else
-				.empty-state(style="padding: 16px")
-					.empty-state-text(style="font-size: 13px; opacity: 0.7") Nothing completed recently
 
 		//- Right column (Birthday, Pinned, Coming Up)
 		.right-column
