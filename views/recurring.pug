@@ -32,7 +32,6 @@ block content
 							.list-section-header(onclick="this.parentElement.classList.toggle('collapsed')")
 								i.bi.bi-chevron-down.list-section-chevron
 								span.list-section-title= group.name
-								span.list-section-count= group.items.length
 							.list-section-content
 								each rec in group.items
 									- var nextOccurrence = rec.getNextOccurrence()

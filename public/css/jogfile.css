@@ -120,12 +120,14 @@ body {
 	color: white;
 }
 
+.page-title-today { background: var(--jf-today); }
 .page-title-birthday { background: var(--jf-birthday); }
 .page-title-holiday { background: var(--jf-holiday); }
 .page-title-recurring { background: var(--jf-recurring); }
 .page-title-chore { background: var(--jf-chore); }
 .page-title-lists { background: var(--jf-lists); }
 .page-title-coming { background: var(--jf-coming); }
+.page-title-notes { background: var(--jf-notes); }
 
 .logo {
 	display: flex;

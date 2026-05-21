@@ -1,17 +1,19 @@
 extends layout
+include partials/nav-menu
 
 block content
 	header.site-header
 		.site-header-inner
 			.site-header-left
-				a.header-back(href="/")
-					i.bi.bi-arrow-left
-					span Back
-			.site-header-center Edit Task
+				a.logo(href="/")
+					img.logo-icon(src="/images/shoe.svg" alt="")
+					span.logo-text JogFile
+			.site-header-center
 			.site-header-right
+				+nav-menu()
 
 	.form-page
-
+		h1.page-title.page-title-today Edit Task
 		main.form-main
 			.form-card.form-card-today
 				if task.generatedFrom
