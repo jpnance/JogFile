@@ -329,16 +329,9 @@ body {
 	text-decoration: none;
 }
 
-.task-meta {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	margin-top: 4px;
-	font-size: 13px;
-	opacity: 0.8;
-}
-
 .task-time {
+	flex-shrink: 0;
+	font-size: 13px;
 	background: rgba(255,255,255,0.2);
 	padding: 2px 8px;
 	border-radius: 4px;
@@ -480,7 +473,9 @@ body {
 .coming-item-time {
 	flex-shrink: 0;
 	font-size: 13px;
-	opacity: 0.75;
+	background: rgba(255,255,255,0.2);
+	padding: 2px 8px;
+	border-radius: 4px;
 }
 
 .coming-empty {
