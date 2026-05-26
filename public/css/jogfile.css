@@ -1266,10 +1266,26 @@ a.later-item:hover {
 	display: flex;
 	gap: 10px;
 	margin-top: 24px;
+	justify-content: center;
+}
+
+.advance-actions form {
+	flex: 1;
+	display: flex;
+	min-width: 0;
+}
+
+.advance-actions form:only-child {
+	flex: 0 1 auto;
 }
 
 .advance-actions .btn {
 	flex: 1;
+	width: 100%;
+}
+
+.advance-actions form:only-child .btn {
+	flex: none;
 }
 
 .advance-schedule {
