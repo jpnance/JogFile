@@ -17,7 +17,7 @@ block content
 	//- Add task form (collapsible, hidden by default)
 	#addTaskForm(style="display: none")
 		.form-card.form-card-today
-			form#taskForm(method="POST" action="/tasks" hx-post="/tasks" hx-target="#tasks-grid" hx-swap="outerHTML" hx-select="#tasks-grid" hx-on::after-request="this.reset(); document.getElementById('scheduleDateWrap').classList.add('d-none'); this.querySelector('input[name=title]').focus()")
+			form#taskForm(method="POST" action="/tasks" hx-post="/tasks" hx-target="#tasks-grid" hx-swap="outerHTML" hx-select="#tasks-grid" hx-select-oob="#coming-up-grid, #later-link" hx-on::after-request="onAddTaskSuccess(event)")
 				.form-group
 					input.form-input(type="text" name="title" placeholder="What needs to be done?" required autocomplete="off")
 				.form-row
@@ -43,15 +43,36 @@ block content
 			if chores && chores.length > 0
 				div(style="margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.2); display: flex; flex-wrap: wrap; gap: 8px")
 					each chore in chores
-						form(method="POST" action=`/chores/${chore._id}/create-task` style="display: inline")
+						form(method="POST" action=`/chores/${chore._id}/create-task` style="display: inline" hx-post=`/chores/${chore._id}/create-task` hx-target="#tasks-grid" hx-swap="outerHTML" hx-select="#tasks-grid" hx-select-oob="#coming-up-grid, #later-link" hx-on::after-request="onAddTaskSuccess(event)")
 							input(type="hidden" name="destination" value="today")
 							button.btn.btn-ghost.btn-sm(type="submit")= chore.title
 
 	script.
-		// Toggle add form
 		const addBtn = document.querySelector('.btn-add-task');
 		const addTaskForm = document.getElementById('addTaskForm');
 		const addTaskInput = addTaskForm ? addTaskForm.querySelector('input[name="title"]') : null;
+		const scheduleDateWrap = document.getElementById('scheduleDateWrap');
+		const dateRadio = document.getElementById('destDate');
+		const destinationRadios = document.querySelectorAll('input[name="destination"]');
+
+		function updateScheduleDateVisibility() {
+			if (dateRadio && scheduleDateWrap) {
+				scheduleDateWrap.classList.toggle('d-none', !dateRadio.checked);
+			}
+		}
+
+		function dismissAddTaskPanel() {
+			const taskForm = document.getElementById('taskForm');
+			if (taskForm) taskForm.reset();
+			if (scheduleDateWrap) scheduleDateWrap.classList.add('d-none');
+			updateScheduleDateVisibility();
+			if (addTaskForm) addTaskForm.style.display = 'none';
+		}
+
+		function onAddTaskSuccess(event) {
+			if (event.detail.successful) dismissAddTaskPanel();
+		}
+
 		if (addBtn && addTaskForm) {
 			addBtn.addEventListener('click', function() {
 				const isHidden = addTaskForm.style.display === 'none';
@@ -59,15 +80,7 @@ block content
 				if (isHidden && addTaskInput) addTaskInput.focus();
 			});
 		}
-		// Schedule date visibility
-		const scheduleDateWrap = document.getElementById('scheduleDateWrap');
-		const dateRadio = document.getElementById('destDate');
-		const destinationRadios = document.querySelectorAll('input[name="destination"]');
-		function updateScheduleDateVisibility() {
-			if (dateRadio && scheduleDateWrap) {
-				scheduleDateWrap.classList.toggle('d-none', !dateRadio.checked);
-			}
-		}
+
 		destinationRadios.forEach(radio => radio.addEventListener('change', updateScheduleDateVisibility));
 		updateScheduleDateVisibility();
 
@@ -193,7 +206,7 @@ block content
 			//- Coming Up (next 3 days)
 			if comingUpDays && comingUpDays.length
 				section.band.band-coming
-					.coming-grid
+					#coming-up-grid.coming-grid
 						each day in comingUpDays
 							.coming-day-card
 								.coming-day-header= day.label
@@ -223,9 +236,10 @@ block content
 													.coming-item-time= formatTaskTimeDisplay(row.task.timeOfDay)
 
 	//- Later link (outside bands)
-	if laterDays && laterDays.length
-		- var laterCount = laterDays.reduce((sum, d) => sum + d.items.length, 0)
-		if laterCount > 0
-			a.later-link(href="/later")
-				strong= laterCount
-				|  items scheduled later →
+	#later-link
+		if laterDays && laterDays.length
+			- var laterCount = laterDays.reduce((sum, d) => sum + d.items.length, 0)
+			if laterCount > 0
+				a.later-link(href="/later")
+					strong= laterCount
+					|  items scheduled later →
