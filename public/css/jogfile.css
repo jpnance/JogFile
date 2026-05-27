@@ -358,20 +358,6 @@ body {
 	text-decoration: none;
 }
 
-/* Two-column tasks on desktop */
-@media (min-width: 900px) {
-	.tasks-grid {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 10px;
-	}
-	
-	.tasks-grid .task {
-		flex: 0 0 calc(50% - 5px);
-		margin-bottom: 0;
-	}
-}
-
 /* ==================== */
 /* PINNED               */
 /* ==================== */

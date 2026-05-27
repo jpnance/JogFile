@@ -1,0 +1,14 @@
+mixin dayOfNoteItem(row)
+	.coming-item
+		if row.kind === 'birthday'
+			span.coming-item-icon
+				i.bi.bi-cake2
+			span.coming-item-title
+				a(href=`/birthdays/${row.person._id}/edit`)= row.person.name
+			if row.turningAge
+				span.coming-item-time · #{row.turningAge}
+		else if row.kind === 'holiday'
+			span.coming-item-icon
+				i.bi.bi-stars
+			span.coming-item-title
+				a(href=`/holidays/${row.holiday._id}/edit`)= row.holiday.name
