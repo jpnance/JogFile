@@ -1,5 +1,6 @@
 extends layout
 include partials/nav-menu
+include partials/day-of-note-item
 
 block content
 	header.site-header
@@ -85,58 +86,37 @@ block content
 		updateScheduleDateVisibility();
 
 	//- Main content bands
+	- var hasTasks = tasks && tasks.length > 0
+	- var hasTodayBirthdays = todayBirthdays && todayBirthdays.length > 0
+	- var hasTodayHolidays = todayHolidays && todayHolidays.length > 0
+	- var hasTodayDaysOfNote = hasTodayBirthdays || hasTodayHolidays
 	.bands
 		//- Today section
 		section.band.band-today
-			- var hasTasks = tasks && tasks.length > 0
-			- var hasTodayBirthdays = todayBirthdays && todayBirthdays.length > 0
-			- var hasTodayHolidays = todayHolidays && todayHolidays.length > 0
 			#tasks-grid.tasks-grid
-				if !hasTasks && !hasTodayBirthdays && !hasTodayHolidays
+				if !hasTasks
 					.empty-state
 						i.bi.bi-check-lg
 						span All clear for today
 				else
-					//- Today's birthdays as task-like rows
-					if hasTodayBirthdays
-						each b in todayBirthdays
-							.task
-								.task-check(style="border-color: rgba(255,255,255,0.3); pointer-events: none")
-									i.bi.bi-cake2(style="font-size: 12px; opacity: 0.7")
-								.task-content
-									.task-title
-										a(href=`/birthdays/${b.person._id}/edit`)= b.person.name
-										if b.turningAge
-											span(style="opacity: 0.8")  · turning #{b.turningAge}
-					//- Today's holidays
-					if hasTodayHolidays
-						each h in todayHolidays
-							.task
-								.task-check(style="border-color: rgba(255,255,255,0.3); pointer-events: none")
-									i.bi.bi-stars(style="font-size: 12px; opacity: 0.7")
-								.task-content
-									.task-title
-										a(href=`/holidays/${h.holiday._id}/edit`)= h.holiday.name
-					//- Tasks
-					if hasTasks
-						each task in tasks
-							.task(id=`task-${task._id}`)
-								form(method="POST" action=`/tasks/${task._id}/complete` style="display: contents" hx-post=`/tasks/${task._id}/complete` hx-target="#tasks-grid" hx-swap="outerHTML" hx-select="#tasks-grid" hx-select-oob="#done-flex")
-									button.task-check(type="submit" title="Complete")
-								.task-content
-									.task-title
-										if task.url
-											a(href=task.url target="_blank" rel="noopener")= task.title
-										else
-											a(href=`/tasks/${task._id}/edit`)= task.title
-										if task.generatedFrom
-											i.bi.bi-arrow-repeat(style="margin-left: 6px; opacity: 0.6")
-										if task.url
-											i.bi.bi-link-45deg(style="margin-left: 4px; opacity: 0.5")
-								if task.timeOfDay
-									span.task-time= formatTaskTimeDisplay(task.timeOfDay)
-								.task-actions
-									a(href=`/tasks/${task._id}/edit`) •••
+					each task in tasks
+						.task(id=`task-${task._id}`)
+							form(method="POST" action=`/tasks/${task._id}/complete` style="display: contents" hx-post=`/tasks/${task._id}/complete` hx-target="#tasks-grid" hx-swap="outerHTML" hx-select="#tasks-grid" hx-select-oob="#done-flex")
+								button.task-check(type="submit" title="Complete")
+							.task-content
+								.task-title
+									if task.url
+										a(href=task.url target="_blank" rel="noopener")= task.title
+									else
+										a(href=`/tasks/${task._id}/edit`)= task.title
+									if task.generatedFrom
+										i.bi.bi-arrow-repeat(style="margin-left: 6px; opacity: 0.6")
+									if task.url
+										i.bi.bi-link-45deg(style="margin-left: 4px; opacity: 0.5")
+							if task.timeOfDay
+								span.task-time= formatTaskTimeDisplay(task.timeOfDay)
+							.task-actions
+								a(href=`/tasks/${task._id}/edit`) •••
 
 		//- Quick Lists section
 		if quickLists && quickLists.length
@@ -182,17 +162,16 @@ block content
 
 		//- Right column (Birthday, Pinned, Coming Up)
 		.right-column
-			//- Birthdays today
-			if todayBirthdays && todayBirthdays.length > 0
+			//- Today's days of note (birthdays, holidays, etc.)
+			if hasTodayDaysOfNote
 				section.band.band-birthday
-					.birthday-flex
-						each b in todayBirthdays
-							.birthday-pill
-								span.birthday-pill-icon
-									i.bi.bi-cake2
-								span= b.person.name
-								if b.turningAge
-									span.birthday-pill-age · turning #{b.turningAge}
+					.coming-day-card
+						if hasTodayBirthdays
+							each b in todayBirthdays
+								+dayOfNoteItem({ kind: 'birthday', person: b.person, turningAge: b.turningAge })
+						if hasTodayHolidays
+							each h in todayHolidays
+								+dayOfNoteItem({ kind: 'holiday', holiday: h.holiday })
 
 			//- Pinned tasks
 			if pinnedTasks && pinnedTasks.length > 0
@@ -214,26 +193,16 @@ block content
 									.coming-empty Nothing scheduled
 								else
 									each row in day.items
-										.coming-item
-											if row.kind === 'birthday'
-												span.coming-item-icon
-													i.bi.bi-cake2
-												.coming-item-title
-													a(href=`/birthdays/${row.person._id}/edit`)= row.person.name
-												if row.turningAge
-													.coming-item-time · #{row.turningAge}
-											else if row.kind === 'holiday'
-												span.coming-item-icon
-													i.bi.bi-stars
-												.coming-item-title
-													a(href=`/holidays/${row.holiday._id}/edit`)= row.holiday.name
-											else if row.kind === 'task'
+										if row.kind === 'birthday' || row.kind === 'holiday'
+											+dayOfNoteItem(row)
+										else if row.kind === 'task'
+											.coming-item
 												span.coming-item-icon
 													i.bi(class=row.task.timeOfDay ? 'bi-clock' : 'bi-calendar3')
-												.coming-item-title
+												span.coming-item-title
 													a(href=`/tasks/${row.task._id}/edit`)= row.task.title
 												if row.task.timeOfDay
-													.coming-item-time= formatTaskTimeDisplay(row.task.timeOfDay)
+													span.coming-item-time= formatTaskTimeDisplay(row.task.timeOfDay)
 
 	//- Later link (outside bands)
 	#later-link
