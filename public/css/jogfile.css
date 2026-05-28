@@ -754,10 +754,34 @@ body {
 }
 
 .form-check-input {
+	appearance: none;
+	-webkit-appearance: none;
 	width: 22px;
 	height: 22px;
 	margin-top: 2px;
-	accent-color: white;
+	border: 2px solid rgba(255,255,255,0.6);
+	border-radius: 4px;
+	background: transparent;
+	cursor: pointer;
+	position: relative;
+	flex-shrink: 0;
+}
+
+.form-check-input:checked {
+	background: white;
+	border-color: white;
+}
+
+.form-check-input:checked::after {
+	content: "";
+	position: absolute;
+	left: 6px;
+	top: 2px;
+	width: 5px;
+	height: 10px;
+	border: solid var(--jf-today);
+	border-width: 0 2px 2px 0;
+	transform: rotate(45deg);
 }
 
 .form-check-label {
