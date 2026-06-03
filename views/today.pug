@@ -113,6 +113,8 @@ block content
 										i.bi.bi-arrow-repeat(style="margin-left: 6px; opacity: 0.6")
 									if task.url
 										i.bi.bi-link-45deg(style="margin-left: 4px; opacity: 0.5")
+								if task.description
+									.task-description= task.description
 							if task.timeOfDay
 								span.task-time= formatTaskTimeDisplay(task.timeOfDay)
 							.task-actions
