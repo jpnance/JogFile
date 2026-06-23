@@ -465,9 +465,9 @@ app.get('/', requireLogin, async (req, res) => {
 	}
 	todayHolidays.sort((a, b) => String(a.holiday.name).localeCompare(String(b.holiday.name)));
 
-	/** Next 6 days (tomorrow through day 6): birthdays + holidays + dated tasks in the grid. */
+	/** Next 13 days (tomorrow through day 13): birthdays + holidays + dated tasks in the grid. */
 	const comingUpDays = [];
-	for (let offset = 1; offset < 7; offset++) {
+	for (let offset = 1; offset < 14; offset++) {
 		const dayDate = new Date(todayStart);
 		dayDate.setDate(dayDate.getDate() + offset);
 		const dayYmd = getPacificYmd(dayDate);
@@ -539,10 +539,10 @@ app.get('/', requireLogin, async (req, res) => {
 		});
 	}
 
-	/** Later days (offset 7+): same structure as comingUpDays, collapsed by default. */
+	/** Later days (offset 14+): same structure as comingUpDays, collapsed by default. */
 	const laterDays = [];
 	const laterHorizon = 60;
-	for (let offset = 7; offset <= laterHorizon; offset++) {
+	for (let offset = 14; offset <= laterHorizon; offset++) {
 		const dayDate = new Date(todayStart);
 		dayDate.setDate(dayDate.getDate() + offset);
 		const dayYmd = getPacificYmd(dayDate);

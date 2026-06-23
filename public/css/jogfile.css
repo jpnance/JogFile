@@ -444,6 +444,13 @@ body {
 	margin-bottom: 8px;
 }
 
+.coming-day-empty {
+	font-size: 13px;
+	font-weight: 600;
+	opacity: 0.45;
+	padding: 2px 14px;
+}
+
 .coming-item {
 	display: flex;
 	align-items: center;
@@ -480,11 +487,6 @@ body {
 	border-radius: 4px;
 }
 
-.coming-empty {
-	font-size: 13px;
-	opacity: 0.6;
-	font-style: italic;
-}
 
 /* ==================== */
 /* QUICK LISTS          */
