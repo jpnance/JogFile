@@ -205,6 +205,11 @@ block content
 													a(href=`/tasks/${row.task._id}/edit`)= row.task.title
 												if row.task.timeOfDay
 													span.coming-item-time= formatTaskTimeDisplay(row.task.timeOfDay)
+										else if row.kind === 'recurring'
+											.coming-item.coming-item-recurring
+												span.coming-item-icon
+													i.bi.bi-arrow-repeat
+												span.coming-item-title= row.recurring.title
 
 	//- Later link (outside bands)
 	#later-link

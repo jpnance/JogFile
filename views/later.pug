@@ -47,3 +47,8 @@ block content
 										span.later-item-name= row.task.title
 										if row.task.timeOfDay
 											span.later-item-badge= formatTaskTimeDisplay(row.task.timeOfDay)
+								else if row.kind === 'recurring'
+									a.later-item(href=`/recurring/${row.recurring._id}/edit`)
+										span.later-item-icon
+											i.bi.bi-arrow-repeat
+										span.later-item-name= row.recurring.title

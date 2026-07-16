@@ -107,13 +107,13 @@ app.post('/logout', (req, res) => {
 	res.redirect('/login');
 });
 
-// Later page - shows items scheduled beyond the 7-day horizon
+// Later page - shows items scheduled beyond the 14-day coming-up horizon
 app.get('/later', requireLogin, async (req, res) => {
 	const { start: todayStart } = getTodayRange();
 	const logicalTodayDate = new Date(getLogicalToday() + 'T12:00:00');
 	
 	const laterDaysStart = new Date(todayStart);
-	laterDaysStart.setDate(laterDaysStart.getDate() + 7);
+	laterDaysStart.setDate(laterDaysStart.getDate() + 14);
 	
 	const laterTasks = await Task.find({
 		scheduledFor: { $gte: laterDaysStart },
@@ -129,10 +129,11 @@ app.get('/later', requireLogin, async (req, res) => {
 	
 	const allPeople = await Person.find();
 	const allHolidays = await Holiday.find();
+	const allRecurring = await Recurring.find({ isActive: true });
 	
 	const laterDays = [];
 	const laterHorizon = 60;
-	for (let offset = 7; offset <= laterHorizon; offset++) {
+	for (let offset = 14; offset <= laterHorizon; offset++) {
 		const dayDate = new Date(todayStart);
 		dayDate.setDate(dayDate.getDate() + offset);
 		const dayYmd = getPacificYmd(dayDate);
@@ -165,6 +166,16 @@ app.get('/later', requireLogin, async (req, res) => {
 		const dayTasks = laterTasksByYmd.get(dayYmd) || [];
 		for (const task of dayTasks) {
 			items.push({ kind: 'task', task });
+		}
+
+		const laterDayRecIds = new Set(
+			dayTasks.filter(t => t.generatedFrom).map(t => String(t.generatedFrom))
+		);
+		for (const rec of allRecurring) {
+			if (laterDayRecIds.has(String(rec._id))) continue;
+			// @ts-ignore - Mongoose method
+			if (!rec.isScheduledFor(dayDate)) continue;
+			items.push({ kind: 'recurring', recurring: rec });
 		}
 		
 		if (items.length > 0) {
@@ -431,8 +442,15 @@ app.get('/', requireLogin, async (req, res) => {
 
 	const allPeople = await Person.find();
 	const allHolidays = await Holiday.find().sort({ month: 1, day: 1, name: 1 });
+	const allRecurring = await Recurring.find({ isActive: true });
 	const logicalTodayStr = getLogicalToday();
 	const logicalTodayDate = new Date(logicalTodayStr + 'T12:00:00');
+
+	const generatedFromIds = new Set(
+		[...tasksInWeek, ...laterTasks]
+			.filter(t => t.generatedFrom)
+			.map(t => String(t.generatedFrom))
+	);
 
 	/** Today’s birthdays — shown above the task list (not in the Coming up grid). */
 	const todayBirthdays = [];
@@ -506,9 +524,20 @@ app.get('/', requireLogin, async (req, res) => {
 			items.push({ kind: 'task', task });
 		}
 
+		const dayTaskRecurringIds = new Set(
+			dayTasks.filter(t => t.generatedFrom).map(t => String(t.generatedFrom))
+		);
+		for (const rec of allRecurring) {
+			if (dayTaskRecurringIds.has(String(rec._id))) continue;
+			if (generatedFromIds.has(String(rec._id)) && dayTasks.some(t => String(t.generatedFrom) === String(rec._id))) continue;
+			// @ts-ignore - Mongoose method
+			if (!rec.isScheduledFor(dayDate)) continue;
+			items.push({ kind: 'recurring', recurring: rec });
+		}
+
 		items.sort((a, b) => {
 			/** @type {Record<string, number>} */
-			const order = { birthday: 0, holiday: 1, task: 2 };
+			const order = { birthday: 0, holiday: 1, task: 2, recurring: 3 };
 			const ao = order[a.kind] ?? 99;
 			const bo = order[b.kind] ?? 99;
 			if (ao !== bo) return ao - bo;
@@ -520,6 +549,10 @@ app.get('/', requireLogin, async (req, res) => {
 				if (ta !== tb) return ta.localeCompare(tb);
 				// @ts-expect-error
 				return ((a.task).position ?? 0) - ((b.task).position ?? 0);
+			}
+			if (a.kind === 'recurring' && b.kind === 'recurring') {
+				// @ts-expect-error recurring on item
+				return String(a.recurring.title).localeCompare(String(b.recurring.title));
 			}
 			if (a.kind === 'birthday' && b.kind === 'birthday') {
 				// @ts-expect-error person on birthday item
@@ -581,11 +614,21 @@ app.get('/', requireLogin, async (req, res) => {
 			items.push({ kind: 'task', task });
 		}
 
+		const laterDayRecurringIds = new Set(
+			dayTasks.filter(t => t.generatedFrom).map(t => String(t.generatedFrom))
+		);
+		for (const rec of allRecurring) {
+			if (laterDayRecurringIds.has(String(rec._id))) continue;
+			// @ts-ignore - Mongoose method
+			if (!rec.isScheduledFor(dayDate)) continue;
+			items.push({ kind: 'recurring', recurring: rec });
+		}
+
 		if (items.length === 0) continue;
 
 		items.sort((a, b) => {
 			/** @type {Record<string, number>} */
-			const order = { birthday: 0, holiday: 1, task: 2 };
+			const order = { birthday: 0, holiday: 1, task: 2, recurring: 3 };
 			const ao = order[a.kind] ?? 99;
 			const bo = order[b.kind] ?? 99;
 			if (ao !== bo) return ao - bo;
@@ -597,6 +640,10 @@ app.get('/', requireLogin, async (req, res) => {
 				if (ta !== tb) return ta.localeCompare(tb);
 				// @ts-expect-error
 				return ((a.task).position ?? 0) - ((b.task).position ?? 0);
+			}
+			if (a.kind === 'recurring' && b.kind === 'recurring') {
+				// @ts-expect-error recurring on item
+				return String(a.recurring.title).localeCompare(String(b.recurring.title));
 			}
 			if (a.kind === 'birthday' && b.kind === 'birthday') {
 				// @ts-expect-error

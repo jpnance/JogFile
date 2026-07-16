@@ -487,6 +487,10 @@ body {
 	border-radius: 4px;
 }
 
+.coming-item-recurring {
+	opacity: 0.55;
+}
+
 
 /* ==================== */
 /* QUICK LISTS          */
