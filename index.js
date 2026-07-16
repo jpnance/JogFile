@@ -337,9 +337,9 @@ app.get('/', requireLogin, async (req, res) => {
 
 	const { start: todayStart, end: todayEnd } = getTodayRange();
 
-	// Window: today through the next 6 days (7 calendar days); exclusive end for queries
+	// Window: today through the next 13 days (14 calendar days) to match comingUpDays range
 	const weekWindowEnd = new Date(todayStart);
-	weekWindowEnd.setDate(weekWindowEnd.getDate() + 7);
+	weekWindowEnd.setDate(weekWindowEnd.getDate() + 14);
 
 	// Today's tasks — includes past-due tasks (auto-rolled to today)
 	// Excludes pinned tasks (they appear in their own section)
@@ -389,9 +389,9 @@ app.get('/', requireLogin, async (req, res) => {
 		});
 	}
 
-	// Later days (day 7+ onward) — same structure as comingUpDays but collapsed
+	// Later days (day 14+ onward) — same structure as comingUpDays but collapsed
 	const laterDaysStart = new Date(todayStart);
-	laterDaysStart.setDate(laterDaysStart.getDate() + 7);
+	laterDaysStart.setDate(laterDaysStart.getDate() + 14);
 
 	const laterTasks = await Task.find({
 		scheduledFor: { $gte: laterDaysStart },
