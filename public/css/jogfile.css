@@ -280,6 +280,7 @@ body {
 		display: flex;
 		flex-direction: column;
 		gap: 16px;
+		min-width: 0;
 	}
 	
 	.band-today { grid-column: 1; grid-row: 1; }
@@ -457,6 +458,7 @@ body {
 	gap: 8px;
 	padding: 6px 0;
 	font-size: 14px;
+	min-width: 0;
 }
 
 .coming-item-icon {
