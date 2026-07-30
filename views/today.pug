@@ -189,10 +189,10 @@ block content
 				section.band.band-coming
 					#coming-up-grid.coming-grid
 						each day in comingUpDays
-							if !day.items || !day.items.length
-								.coming-day-empty= day.label
-							else
-								.coming-day-card
+							.coming-day-card
+								if !day.items || !day.items.length
+									.coming-day-header.coming-day-header-empty= day.label
+								else
 									.coming-day-header= day.label
 									each row in day.items
 										if row.kind === 'birthday' || row.kind === 'holiday'

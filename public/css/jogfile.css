@@ -445,11 +445,9 @@ body {
 	margin-bottom: 8px;
 }
 
-.coming-day-empty {
-	font-size: 13px;
-	font-weight: 600;
+.coming-day-header-empty {
 	opacity: 0.45;
-	padding: 2px 14px;
+	margin-bottom: 0;
 }
 
 .coming-item {
